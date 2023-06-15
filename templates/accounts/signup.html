@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE HTML>
+<html lang="en">
+<!-- Mirrored from wp.alithemes.com/html/evara/evara-backend/page-account-register.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 01 Aug 2021 15:33:33 GMT -->
+<head>
+    <meta charset="utf-8">
+    <title>Evara Dashboard</title>
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta property="og:title" content="">
+    <meta property="og:type" content="">
+    <meta property="og:url" content="">
+    <meta property="og:image" content="">
+    <!-- Favicon -->
+    <link rel="shortcut icon" type="image/x-icon" href="{% static 'ac_counts/imgs/theme/favicon.svg' %}">
+    <!-- Template CSS -->
+    <link href="{% static 'ac_counts/css/main.css' %}" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <main>      
+        <section class="content-main mt-80 mb-80">
+            <div class="card mx-auto card-login">
+                <div class="card-body">
+                    <h4 class="card-title mb-4">Create an Account</h4>
+                    <form action="{% url 'accounts:signup'%}" method="post">
+                        {% csrf_token %} <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <input class="form-control" placeholder="Username" type="text" name="username">
+                    </div> <!-- form-group// -->
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input class="form-control" placeholder="Your email" type="text" name="email">
+                        </div> <!-- form-group// -->
+                        <div class="mb-3">                          
+                            <div class="row gx-2">
+                                <label class="form-label">Phone</label>                               
+                                 <div class="col-3"> <input class="form-control" placeholder="Code" type="text" onkeyup="combinePhone()" value="+91" name="code"> </div>
+                                <div class="col-9"> <input class="form-control" placeholder="Phone" type="text" onkeyup="combinePhone()" name="ph"> </div> 
+                                <input type="hidden" name="phone" id="full_phone">
+                            </div>
+                            <script>
+                                function combinePhone() {
+                                    var code = document.getElementsByName("code")[0].value;
+                                    var phone = document.getElementsByName("ph")[0].value;
+                                    var full_phone = code + phone;
+                                    document.getElementById("full_phone").value = full_phone;
+                                }
+                                </script>
+                        </div> <!-- form-group// -->                    
+                        <div class="mb-3">
+                            <label class="form-label">Create password</label>
+                            <input class="form-control" placeholder="Password" type="password" name="password1">
+                        </div> <!-- form-group// -->
+                         <!-- form-group// -->
+                        <div class="mb-3">
+                            <p class="small text-center text-muted">By signing up, you confirm that you’ve read and accepted our User Notice and Privacy Policy.</p>
+                        </div> <!-- form-group  .// -->
+                        <div class="mb-4">
+                            <button type="submit" class="btn btn-primary w-100"> Login </button>
+                        </div> <!-- form-group// -->
+                    </form> 
+                    <p class="text-center mb-2">Already have an account? <a href="#">Sign in now</a></p>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script src="{% static 'ac_counts/js/vendors/jquery-3.6.0.min.js' %}"></script>
+    <script src="{% static 'ac_counts/js/vendors/bootstrap.bundle.min.js' %}"></script>
+    <script src=" {% static 'ac_counts/js/vendors/jquery.fullscreen.min.js' %}"></script>
+    <!-- Main Script -->
+    <script src="{% static 'ac_counts/js/main.js' %}" type="text/javascript"></script>
+</body>
+<!-- Mirrored from wp.alithemes.com/html/evara/evara-backend/page-account-register.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 01 Aug 2021 15:33:33 GMT -->
+</html>
+
