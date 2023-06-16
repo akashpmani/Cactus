@@ -1,8 +1,9 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
-from accounts.models import AddressBook
+from accounts.models import AddressBook,Country, State
 from products.models import Category, Product_Tags, Products_Table, Product_item, Product_images,P_tags,ProductClassification,classfiedProducts
 from accounts.models import Cart, CartItem
+from accounts.forms import AddressBookForm,CustomerRegisterForm
 # Create your views here.
 
 
@@ -352,26 +353,60 @@ def checkout_manager(request):
         return redirect('store:checkout')
     else:
         return redirect('store:checkout_signup')
+
+def address_components(request):
+        country = Country.objects.all()
+        states = State.objects.all()
+        addressform = AddressBookForm()
+        context = {
+            'states' : states,
+            'country' : country,
+            'addressform' : addressform,    
+        }
+        return context
+    
     
 def checkout(request):
     current_user = request.user
     address = AddressBook.objects.filter(user = current_user)
-    
     context = {
         'address' : address,
     }
     context.update(cart_items(request))
+    context.update(address_components(request))
     return render(request, 'products/checkout.html',context)
 
 def payment(request):
-    current_user = request.user
-    address = AddressBook.objects.filter(user = current_user)
+    if request.method == 'POST':
+        id = request.POST.get('add_id')
+        address =AddressBook.objects.get(id=id) 
+        print(address.first_name)
+        print(address)
+    else:
+        print(address)
+    #     current_user = request.user
+    #     address = AddressBook.objects.filter(user = current_user)
     
-    context = {
-        'address' : address,
-    }
-    context.update(cart_items(request))
-    return render(request, 'products/checkout-payment.html',context)
+    # context = {
+    #     'address' : address,
+    # }
+    # context.update(cart_items(request))
+    # ,context
+    return render(request, 'products/checkout-payment.html')
+
+def payment_with_new_address(request):
+    
+    if request.method == 'POST':
+        print("yep")
+        form = AddressBookForm(request.POST)
+        if form.is_valid():
+            address = form.save(commit=False)
+            address.user = request.user 
+            address.save()
+            print(address.first_name)
+        else:
+            print(form.errors)
+    return render(request, 'products/checkout-payment.html')
 
 
 

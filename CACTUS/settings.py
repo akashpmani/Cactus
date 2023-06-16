@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'accounts',
     'cropperjs',
     "phonenumber_field",
+    'orders',
 ]
 
 MIDDLEWARE = [
