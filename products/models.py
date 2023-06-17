@@ -67,7 +67,7 @@ def generate_upload_path(instance, filename):
 # basic table that describes about product
 class Products_Table(models.Model):
     id = models.AutoField(primary_key=True)
-    slug = models.SlugField(max_length=255, unique=True, null=True)
+    slug = models.SlugField(max_length=255, unique=True, null=False)
     # Using limit_choices_to to filter out parent categories , only categories with is_child=True will be here
     category = models.ForeignKey(Category, null=True, blank=True,
                                  on_delete=models.CASCADE, limit_choices_to={'is_child': True})

@@ -27,5 +27,5 @@ urlpatterns = [
     path('changethumbnail/<int:id>/', views.changethumbnail, name='changethumbnail'),
     path('users', views.users, name='users'),
     path('userdetails/<int:id>/', views.userdetails, name='userdetails'),
-    # path('pro', views.products, name='products'),
+    #path('pro', views.products, name='products'),
 ]

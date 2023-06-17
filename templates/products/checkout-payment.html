@@ -32,6 +32,7 @@
 
  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+ <script src="https://kit.fontawesome.com/0a4a475baf.js" crossorigin="anonymous"></script>
   <!-- Fix for custom scrollbar if JS is disabled-->
   <noscript>
     <style>
@@ -109,13 +110,31 @@
                               <!-- Payment Option-->
                               <div class="col-12">
                                 <div class="form-check form-group form-check-custom form-radio-custom mb-3">
-                                  <input class="form-check-input" type="radio" name="checkoutPaymentMethod" id="checoutPaymentStripe" checked>
-                                  <label class="form-check-label" for="checoutPaymentStripe">
+                                  <input class="form-check-input" type="radio" name="checkoutPaymentMethod" id="checkoutPaymentStripe" checked>
+                                  <label class="form-check-label" for="checkoutPaymentStripe">
                                     <span class="d-flex justify-content-between align-items-start">
                                       <span>
                                         <span class="mb-0 fw-bolder d-block">Credit Card (Stripe)</span>
                                       </span>
                                       <i class="ri-bank-card-line"></i>
+                                    </span>
+                                  </label>
+                                </div>
+                              </div>
+
+                               <!-- Payment Option-->
+                               <div class="col-12">
+                                <div class="form-check form-group form-check-custom form-radio-custom mb-3">
+                                  <input class="form-check-input" type="radio" name="checkoutPaymentMethod" id="checkoutPaymentcod" >
+                                  <label class="form-check-label" for="checkoutPaymentcod">
+                                    <span class="d-flex justify-content-between align-items-start">
+                                      <span>
+                                        <span class="mb-0 fw-bolder d-block">Cash On Delivery</span>
+                                      </span>
+                                      
+                                      <i class="fas fa-dollar-sign"></i>
+
+
                                     </span>
                                   </label>
                                 </div>
@@ -179,6 +198,22 @@
                               </div>
                             </div>
                             <!-- / Payment Details-->
+
+                            <!-- Cash On Delivery Details -->
+                            <div class="cod-details">
+                              <div class="row pt-3">
+                                <div class="col-md-12">
+                                  <div class="form-group">
+                                    <label for="cod-name" class="form-label">Name</label>
+                                    <input type="text" class="form-control" id="cod-name" placeholder="" required="">
+                                  </div>
+                                </div>
+                                <!-- Add more fields specific to Cash On Delivery if needed -->
+                                {% comment %} <div id="my_captcha"></div> {% endcomment %}
+                               
+                              </div>
+                            </div>
+                            <!-- / Cash On Delivery Details -->
                             
                             <!-- Paypal Info-->
                             <div class="paypal-details bg-light p-4 d-none my-3 fw-bolder">
@@ -204,11 +239,11 @@
                 <div class="col-12 col-lg-5 bg-light pt-lg-10 aside-checkout pb-5 pb-lg-0 my-5 my-lg-0">
                     <div class="p-4 py-lg-0 pe-lg-0 ps-lg-5">
                         <div class="pb-3">
-                          {% for data in  product_data%}
-                          <!-- Cart Item-->
-                          <div class="row mx-0 py-4 g-0 border-bottom">
-                              <div class="col-2 position-relative">
-                                      <span class="checkout-item-qty">{{data.quantity}}</span>
+                        
+                        <div class="row mx-0 py-4 g-0 border-bottom">
+                          {% for data in product_data %} 
+                            <div class="col-2 position-relative">
+                              <span class="checkout-item-qty">{{data.quantity}}</span>
                                   <picture class="d-block border">
                                       <img class="img-fluid" src="{{data.image.url}}" alt="HTML Bootstrap Template by Pixel Rocket">
                                   </picture>
@@ -216,16 +251,18 @@
                               <div class="col-9 offset-1">
                                   <div>
                                       <h6 class="justify-content-between d-flex align-items-start mb-2">
-                                          {{data.name}}
+                                        {{data.name}}
                                           <i class="ri-close-line ms-3"></i>
                                       </h6>
                                       <span class="d-block text-muted fw-bolder text-uppercase fs-9">Size: {{data.size}} / Qty: {{data.quantity}}</span>
                                   </div>
-                                  <p class="fw-bolder text-end text-muted m-0">₹{{data.price}} X {{ data.quantity }} = {{ data.total_price }} </p>
+                                  <p class="fw-bolder text-end text-muted m-0">₹{{data.price}} X {{ data.quantity }} = {{ data.total_price }}</p>
                               </div>
-                          </div>  
-                          <!-- / Cart Item-->{% endfor %}
-                        </div>
+                              {% endfor %}
+                          </div>    <!-- / Cart Item-->
+                          
+                        
+                          
                         <div class="py-4 border-bottom">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <p class="m-0 fw-bolder fs-6">Subtotal</p>
@@ -266,6 +303,73 @@
     
     <!-- Theme JS -->
     <script src="./assets/js/theme.bundle.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+      $(document).ready(function() {
+        // Listen for change event on radio buttons
+        $('input[name="checkoutPaymentMethod"]').change(function() {
+          // Get the ID of the selected radio button
+          var selectedMethod = $(this).attr('id');
+          
+          // Show or hide content based on the selected radio button
+          if (selectedMethod === 'checkoutPaymentStripe') {
+            $('.card-details').removeClass('d-none');
+            $('.paypal-details').addClass('d-none');
+            $('.cod-details').addClass('d-none');
+          } else if (selectedMethod === 'checkoutPaymentPaypal') {
+            $('.card-details').addClass('d-none');
+            $('.paypal-details').removeClass('d-none');
+            $('.cod-details').addClass('d-none');
+          } else if (selectedMethod === 'checkoutPaymentcod') {
+            $('.card-details').addClass('d-none');
+            $('.paypal-details').addClass('d-none');
+            $('.cod-details').removeClass('d-none');
+          }
+        });
+      });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/gh/kushalcodes/captcha-gen-js@d606858041d81dfe67fc64d78f35c81cfcc05bcb/min/captcha-gen.min.js"></script>
+    <script>
+      $(document).ready(function() {
+        // Initialize with a specific ID
+        __Captcha.init("#my_captcha");
+    
+        // Listen for the verification event
+        $(document).on('captcha.verification', function(event, data) {
+          if (data.success) {
+            // CAPTCHA verification succeeded
+            console.log('CAPTCHA verification succeeded!');
+            // Show the "Complete Order" button
+            $('#completeOrderBtn').removeClass('d-none');
+          } else {
+            // CAPTCHA verification failed
+            console.log('CAPTCHA verification failed!');
+            // Hide the "Complete Order" button
+            $('#completeOrderBtn').addClass('d-none');
+          }
+        });
+    
+        // Handle the click event on the "Complete Order" button
+        $('#completeOrderBtn').on('click', function(event) {
+          // Prevent the default button click behavior
+          event.preventDefault();
+    
+          // Check if CAPTCHA verification succeeded
+          if (!$('#completeOrderBtn').hasClass('d-none')) {
+            // CAPTCHA verification succeeded, proceed with the order completion
+            console.log('Order completed!');
+          } else {
+            // CAPTCHA verification failed, show an error message
+            console.log('CAPTCHA verification failed! Cannot complete the order.');
+          }
+        });
+      });
+    </script>
+    
 </body>
 
 </html>

@@ -1,6 +1,7 @@
 {% extends 'products/base.html' %}
 {% load static %}
 {% block main %}
+<link rel="stylesheet" href="{% static 'products\assets\css\paginator.css' %}">
     <!-- Main Section-->
     <section class="mt-0 ">
         <!-- Page Content Goes Here -->
@@ -54,7 +55,7 @@
             <!-- Products-->
           
 {% if product %}
-<div class="row g-4">
+<div class=" row g-4"  id="product-list-container">
     {% for item in product %}
     <div class="col-12 col-sm-6 col-lg-4">
         <!-- Card Product-->
@@ -73,7 +74,7 @@
                     </div>
             </div>
             <div class="card-body px-0">
-                <a class="text-decoration-none link-cover" href="{% url 'store:product_detail' item.category item.slug item.id%}">{{item.name}}</a>
+                <a class="text-decoration-none link-cover" href="{% url 'store:product_detail' item.slug %}">{{item.name}}</a>
                 <small class="text-muted d-block">4 colours, 10 sizes</small>
                         <p class="mt-2 mb-0 small"><s class="text-muted">$329.99</s> <span class="text-danger">$198.66</span></p>
             </div>
@@ -82,6 +83,8 @@
         <!--/ Card Product-->
     </div>
     {% endfor %} {% endif %}  
+    <input type="hidden" id="total_pages" value="{{total_pages}}">
+    <input type="hidden" id="curr" value="{{curr}}">
                             
     </div>
    
@@ -90,17 +93,212 @@
             <!-- Pagination-->
             <div class="d-flex flex-column f-w-44 mx-auto my-5 text-center">
                 <small class="text-muted">Showing 9 of 121 products</small>
-                <div class="progress f-h-1 mt-3">
+                {% comment %} <div class="progress f-h-1 mt-3">
                     <div class="progress-bar bg-dark" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
-                <a href="#" class="btn btn-outline-dark btn-sm mt-5 align-self-center py-3 px-4 border-2">Load More</a>
-            </div>            <!-- / Pagination-->
+                </div> {% endcomment %}
+                <br>
+                
         </div>
+        <div id="pagination-2" class="d-flex justify-content-center text-center"></div>
+        
         
         <!-- /Page Content -->
     </section>
     <!-- / Main Section-->
+    <script>
+        class Pagination {
+            constructor(root, options) {
+              this.__root = root;
+              this.__options = options;
+              this.__current = this.__options.curr;
+              this.__items = [];
+              
+              this.init();
+            }
+          
+            init() {
+              this.__root.classList.add('pagination');
+              this.__render();
+            }
+            
+            destroy() {
+              this.__root.classList.remove('pagination');
+              this.__removeItems();
+            }
+            
+            __removeItems() {
+              this.__items.forEach(item => item.remove());
+              this.__items = [];
+            }
+          
+            __render() {
+              this.__removeItems();
+              
+              const isCollapsed = this.__options.slots <= 6;
+              const slots = Math.min(this.__options.slots, this.__options.total);
+              const ellipsisPos = [];
+              let i, showFirst, showLast;
+              
+              // Center active page in middle of pagination
+              let start = this.__current - Math.round(this.__options.slots / 2) + 1;
+              
+              // If pagination values exceed the expected range,
+              // Fix the range on start or end
+              const overflow = (start + slots - 1) - this.__options.total;
+              if (overflow > 0) start -= overflow; 
+              if (start <= 0) start -= start - 1;
+                
+              // Set end slot
+              const end = start + slots - 1;
+              
+              // Check if it should have ellipsis and define sllipsis position
+              const hasEllipsisLeft = start > 1;
+              const hasEllipsisRright = end < this.__options.total;
+              if (hasEllipsisLeft) ellipsisPos.push(isCollapsed ? start : start + 1);
+              if (hasEllipsisRright) ellipsisPos.push(isCollapsed ? end : end - 1);
+              
+              for (i = start; i <= end; i++) {
+                showFirst = !isCollapsed && i == start && hasEllipsisLeft;
+                showLast = !isCollapsed && i == end && hasEllipsisRright;
+                
+                if (showFirst) {
+                  this.__renderElement(1);
+                } else if (ellipsisPos.includes(i)) {
+                  this.__renderElement('...');
+                } else if (showLast) {
+                  this.__renderElement(this.__options.total);
+                } else {
+                  this.__renderElement(i);
+                }
+              }
+            }
+          
+            __renderElement(value) {
+              const isPage = typeof value === 'number';
+              const el = document.createElement(isPage ? 'button' : 'span');
+              el.classList.add('pagination__item');             
+              el.textContent = value;
+              
+              if (isPage) {
+                el.classList.add('pagination__item--button');             
+                el.addEventListener('click', () => {
+                    this.__current = value;
+                    this.__options.onChange(value);
+                    this.__render();
+                });
+                
+                if (value == this.__current) {
+                  el.classList.add('active');   
+                }
+              }
+              
+              return this.__items.push(this.__root.appendChild(el));
+            }
+          }
+          
+
+          (() => {
+            const totalPagesInput = document.getElementById('total_pages');
+            const current = document.getElementById('curr');
+            const totalPages = totalPagesInput.value;
+            const current_page = current.value;
+            console.log(totalPages);
+            pagination = new Pagination(document.querySelector("#pagination-2"), {
+              curr: current_page,
+              slots: 8,
+              total: totalPages,
+              onChange: page => {
+                console.log('Pagination 2 changed to', page);
+              }
+            });
+          
+            pagination.__root.addEventListener('click', event => {
+              if (event.target.classList.contains('pagination__item--button')) {
+                const page = parseInt(event.target.textContent);
+                sendPageNumberToServer(page);
+              }
+            });
+          })();
+
+
+          function updateProductList(products) {
+
+            console.log('products')
+            console.log(products)
+            console.log('products')
+
+            const productContainer = document.getElementById('product-list-container');
+            
+            // Clear the existing product elements
+            productContainer.innerHTML = '';
+            
+            // Loop through the new products and create the updated product elements
+            products.forEach((item) => {
+              const productElement = createProductElement(item);
+              productContainer.insertAdjacentHTML('beforeend', productElement);
+            });
+          }
+          
+          function createProductElement(item) {
+            
+            // Create the product element based on the received data
+            const productDetailURL = `/product/${item.slug}`;
+            
+            return `
+              <div class="col-12 col-sm-6 col-lg-4">
+                  <!-- Card Product-->
+                  <div class="card border border-transparent position-relative overflow-hidden h-100 transparent">
+                      <div class="card-img position-relative">
+                          <span class="position-absolute top-0 end-0 p-2 z-index-20 text-muted"><i class="ri-heart-line"></i></span>
+                          <picture class="position-relative overflow-hidden d-block bg-light">
+                              <img class="w-100 img-fluid position-relative z-index-10" title="" src="/media/${item.image}" alt="" style="width: 375px; height: 275px;">
+                          </picture>
+                          <div class="position-absolute start-0 bottom-0 end-0 z-index-20 p-2">
+                              <button class="btn btn-quick-add"><i class="ri-add-line me-2"></i> Quick Add</button>
+                          </div>
+                      </div>
+                      <div class="card-body px-0">
+                          <a class="text-decoration-none link-cover" href="${productDetailURL}">${item.name}</a>
+                          <small class="text-muted d-block">${item.bio_name}</small>
+                          <p class="mt-2 mb-0 small"><s class="text-muted">${item.originalPrice}</s> <span class="text-danger">${item.salePrice}</span></p>
+                      </div>
+                  </div>
+                  <!--/ Card Product-->
+              </div>
+            `;
+          }
+          
+          function sendPageNumberToServer(page) {
+            console.log(page);
+            console.log('Page number sent to the server successfully');
+            // Make an AJAX request to the server with the selected page number
+            // Replace 'YOUR_SERVER_URL' with the actual URL of your server endpoint
+            // Include any additional data or parameters as needed
+            const productsURL = "{% url 'store:products'%}";
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', productsURL, true);
+            xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+            xhr.setRequestHeader('Content-type', 'application/json');
+            xhr.onreadystatechange = function() {
+              if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                // Request was successful
+                //console.log(xhr.responseText);
+                // Request was successful
+                const response = JSON.parse(xhr.responseText);
+                console.log('Page number sent to the server successfully');
+                updateProductList(response.context.product);  
+                } else {
+                  // Request failed
+                  console.error('Error sending page number to the server');
+                }
+              }
+            };
+            const data = JSON.stringify({ page: page });
+            xhr.send(data);
+          }    
+    </script>
     {% endblock main %}
 
-    <!-- Footer -->
+    <!-- Footer --> 
  

@@ -86,7 +86,7 @@
                               <!-- saved addresses-->
 
                               {% for add in address %}
-                              <form method="post" action="{% url 'store:payment'%}">
+                              <form method="post" action="{% url 'store:payment_with_existing_address'%}">
                                 {% csrf_token %}
                               <div class="form-check form-group form-check-custom form-radio-custom form-radio-highlight mb-3">
                                 <input class="form-check-input"  name="checkoutShippingMethod" id="checkoutShippingMethod{{ forloop.counter }}" {% if forloop.first %}checked{% endif %}>

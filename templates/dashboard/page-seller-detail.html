@@ -18,6 +18,7 @@
     <link rel="shortcut icon" type="image/x-icon" href="assets/imgs/theme/favicon.svg">
     <!-- Template CSS -->
     <link href="{% static 'dash_board/assets/css/main.css ' %}" rel="stylesheet" type="text/css" />
+    
 </head>
 
 <body>
@@ -280,7 +281,13 @@
         <!--  variations// --> 
         <div class="card mb-4">
             <div class="card-body">
-                <h5 class="card-title">Product variations</h5>
+                <div class="d-flex align-items-center justify-content-between">
+                    <h5 class="card-title">Product variations</h5>
+                    <div class="add-variant-button">
+                      <button class="btn btn-primary" data-toggle="modal" data-target="#varientmodel">Add Variant</button>
+                    </div>
+                  </div>
+                  
                 {% for product in variations %}
                           
                 <div class="card-body">
@@ -322,6 +329,27 @@
                
             </div> <!--  card-body.// -->
         </div> <!--  card.// -->
+        <!--  variation model// -->
+        
+        <!-- Modal -->
+<div class="modal fade" id="variantModal" tabindex="-1" aria-labelledby="variantModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="variantModalLabel">Add Variant</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- Add your variant form or content here -->
+          <p>This is the variant modal content.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Save Variant</button>
+        </div>
+      </div>
+    </div>
+  </div>
         <!--  product images// -->
         <style>
             section {
@@ -351,20 +379,20 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="card-title">Product images</h5>
                         <section class="ms-auto">
-                            <form action="{% url 'dashboard:upload_image' product.id  %}" method="post" id="uploadForm" enctype="multipart/form-data">
+                            <form action="{% url 'dashboard:upload_image' product.id  %}" method="post" id="uploadimageForm" enctype="multipart/form-data">
                                 {% csrf_token %}
-                          <input id="upload" type="file" name="image" accept="image/*" />                        
+                          <input id="uploadimage" type="file" name="image" accept="image/*" />                        
                         </form>
                         </section>
                       </div>
                       
             <script>
-                const fileInput = document.getElementById('upload');
-                const uploadForm = document.getElementById('uploadForm');
+                const fileInputt = document.getElementById('uploadimage');
+                const uploadimageForm = document.getElementById('uploadimageForm');
             
-                fileInput.addEventListener('change', function() {
+                fileInputt.addEventListener('change', function() {
                 // Trigger form submission when a file is selected
-                uploadForm.submit();
+                uploadimageForm.submit();
                 });
             </script>
                       
@@ -415,6 +443,7 @@
                     </div>
                 </div>
             </div>
+            
         </footer>
     </main>
   

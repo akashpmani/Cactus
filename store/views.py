@@ -1,9 +1,13 @@
+import json
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from accounts.models import AddressBook,Country, State
 from products.models import Category, Product_Tags, Products_Table, Product_item, Product_images,P_tags,ProductClassification,classfiedProducts
 from accounts.models import Cart, CartItem
 from accounts.forms import AddressBookForm,CustomerRegisterForm
+from django.core.paginator import Paginator
+from django.http import JsonResponse
+from django.core import serializers
 # Create your views here.
 
 
@@ -24,34 +28,89 @@ def home(request):
 
 
 def products(request):
-    product = Products_Table.objects.all()
+    product = Products_Table.objects.order_by('id')
     categories = Category.objects.all()
     tags = Product_Tags.objects.all()
+    paginator = Paginator(product,9)
+    page_number = 1
+    if request.method == 'POST':
+        data = json.loads(request.body)  # Parse the JSON data
+        page_number = data.get('page')
+        productFinal = paginator.get_page(page_number)
+        serialized_product = serializers.serialize('python', productFinal)
+        product_list = [item['fields'] for item in serialized_product]
+        total_pages = paginator.num_pages
+        context = {
+            'product': product_list, 
+            'categories': list(categories.values()),
+            'tags': list(tags.values()),
+            'total_pages': total_pages,
+            'curr': page_number
+        }
+        context.update(cart_items(request))
+        response_data = {
+            "status": "products fetched",
+            "context": context
+        }
+        return JsonResponse(response_data)
 
+    productFinal = paginator.get_page(page_number)
+    total_pages = paginator.num_pages
     context = {
-        'product': product,
+        'product': productFinal, 
         'categories': categories,
         'tags': tags,
+        'total_pages': total_pages,
+        'curr': page_number
     }
+    
+    
     context.update(cart_items(request))
-
-    return render(request, 'products/productlist.html', context)
+    return render(request,'products/productlist.html',context)
 
 
 def allproducts(request):
 
-    product = Products_Table.objects.all()
+    product = Products_Table.objects.order_by('id')
     categories = Category.objects.all()
     tags = Product_Tags.objects.all()
+    paginator = Paginator(product,9)
+    page_number = 1
+    if request.method == 'POST':
+        data = json.loads(request.body)  # Parse the JSON data
+        page_number = data.get('page')
+        productFinal = paginator.get_page(page_number)
+        serialized_product = serializers.serialize('python', productFinal)
+        product_list = [item['fields'] for item in serialized_product]
+        total_pages = paginator.num_pages
+        context = {
+            'product': product_list, 
+            'categories': list(categories.values()),
+            'tags': list(tags.values()),
+            'total_pages': total_pages,
+            'curr': page_number
+        }
+        context.update(cart_items(request))
+        response_data = {
+            "status": "products fetched",
+            "context": context
+        }
+        return JsonResponse(response_data)
 
+    productFinal = paginator.get_page(page_number)
+    total_pages = paginator.num_pages
     context = {
-        'product': product,
+        'product': productFinal, 
         'categories': categories,
         'tags': tags,
+        'total_pages': total_pages,
+        'curr': page_number
     }
+    
+    
     context.update(cart_items(request))
+    return render(request,'products/productlist.html',context)
 
-    return render(request, 'products/productlist.html', context)
 
 def product_by_tags(request,tag_name):
     categories = Category.objects.all()
@@ -74,15 +133,17 @@ def product_by_tags(request,tag_name):
     return render(request, 'products/productlist.html', context)
 
 
-def product_detail(request, category, slug, id):
-    product = Products_Table.objects.get(id=id)
+def product_detail(request, slug):
+    product = Products_Table.objects.get(slug=slug)
+    cat = product.category
+    print(cat)
     categories = Category.objects.all()
     tags = Product_Tags.objects.all()
     varients = Product_item.objects.filter(product=product)
     images = Product_images.objects.filter(product=product)
 
-    related_prod = Products_Table.objects.filter(
-        category__category_name=category)
+    related_prod = Products_Table.objects.filter(category__category_name=cat)
+
 
     context = {
         'data': product,
@@ -363,9 +424,7 @@ def address_components(request):
             'country' : country,
             'addressform' : addressform,    
         }
-        return context
-    
-    
+        return context 
 def checkout(request):
     current_user = request.user
     address = AddressBook.objects.filter(user = current_user)
@@ -376,23 +435,12 @@ def checkout(request):
     context.update(address_components(request))
     return render(request, 'products/checkout.html',context)
 
-def payment(request):
+def payment_with_existing_address(request):
     if request.method == 'POST':
         id = request.POST.get('add_id')
-        address =AddressBook.objects.get(id=id) 
-        print(address.first_name)
-        print(address)
-    else:
-        print(address)
-    #     current_user = request.user
-    #     address = AddressBook.objects.filter(user = current_user)
-    
-    # context = {
-    #     'address' : address,
-    # }
-    # context.update(cart_items(request))
-    # ,context
-    return render(request, 'products/checkout-payment.html')
+        request.session['address_id'] = id 
+
+    return redirect('store:payment')
 
 def payment_with_new_address(request):
     
@@ -403,11 +451,21 @@ def payment_with_new_address(request):
             address = form.save(commit=False)
             address.user = request.user 
             address.save()
-            print(address.first_name)
+            request.session['address_id'] = address.id 
         else:
             print(form.errors)
-    return render(request, 'products/checkout-payment.html')
+        return redirect('store:payment')
+    
 
 
-
+def payment(request):
+    address_id = request.session.get('address_id')
+    address = AddressBook.objects.get(id = address_id)
+    context = {
+        'address' : address,
+        
+    }
+    context.update(cart_items(request))
+    return render(request, 'products/checkout-payment.html',context)
+    
         
