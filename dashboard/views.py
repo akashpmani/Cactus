@@ -8,6 +8,9 @@ from products.models import Category
 from django.db import IntegrityError
 from django.contrib import messages
 from accounts.models import User_Accounts
+from django.http import JsonResponse
+import base64
+from django.core.files.base import ContentFile
 
 # Create your views here.
 
@@ -87,9 +90,6 @@ def addproductitems(request):
         form = ProductItemForm(request.POST)
         
         images = request.FILES.getlist('photo')
-        
-
-        
         # images = request.FILES.getlist('cropped_images')
         if form.is_valid():
             try:
@@ -282,30 +282,52 @@ def deleteimage(request,id,image_id):
     referring_page = request.META.get('HTTP_REFERER')
     return HttpResponseRedirect(referring_page)
 
-from django.http import JsonResponse
-
 
 def upload_image(request,id):
-    if request.method == 'POST' and request.FILES.get('image'):
-        image = request.FILES['image']
+    if request.method == 'POST':
+        image_data = request.POST.get('image')
         product = Products_Table.objects.get(id = id)
-        product_image = Product_images()
-        product_image.product = product
-        product_image.image = image
-        product_image.save()
-    referring_page = request.META.get('HTTP_REFERER')
-    return HttpResponseRedirect(referring_page)
+        format, imgstr = image_data.split(';base64,')
+        ext = format.split('/')[-1]
+        image_file = ContentFile(base64.b64decode(imgstr), name=f'image.{ext}')
 
-
+        try:
+            product_image = Product_images()
+            product_image.product = product
+            product_image.image = image_file
+            product_image.save()
+        except IntegrityError:
+            return JsonResponse({'success': False, 'error': 'Value too long for image field.'})
+        return JsonResponse({'success': True})
+    
+    return JsonResponse({'success': False})
 
 def changethumbnail(request,id):
     if request.method == 'POST':
-        product = Products_Table.objects.get(id = id)
-        new_thumbnail = request.FILES['thumbnail']
-        product.image = new_thumbnail
-        product.save()
-    referring_page = request.META.get('HTTP_REFERER')
-    return HttpResponseRedirect(referring_page)
+        image_data = request.POST.get('image')
+        format, imgstr = image_data.split(';base64,')
+        ext = format.split('/')[-1]
+        image_file = ContentFile(base64.b64decode(imgstr), name=f'image.{ext}')
+
+        try:
+            product = Products_Table.objects.get(id = id)
+            product.image = image_file
+            product.save()
+        except IntegrityError:
+            return JsonResponse({'success': False, 'error': 'Value too long for image field.'})
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False})
+
+
+
+# def changethumbnail(request,id):
+#     if request.method == 'POST':
+#         product = Products_Table.objects.get(id = id)
+#         new_thumbnail = request.FILES['thumbnail']
+#         product.image = new_thumbnail
+#         product.save()
+#     referring_page = request.META.get('HTTP_REFERER')
+#     return HttpResponseRedirect(referring_page)
 
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------

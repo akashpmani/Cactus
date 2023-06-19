@@ -45,7 +45,7 @@
             </nav>            </div>
     </div>
     <!-- / Breadcrumbs-->
-    <style>
+    {% comment %} <style>
         .image-container {
             overflow: hidden;
             position: relative;
@@ -56,62 +56,179 @@
             margin-top: 10px;
             cursor: pointer;
         }
-    </style>
+    </style> {% endcomment %}
 
     <div class="container-fluid mt-5">
         <!-- Product Top Section-->
         <div class="row g-9" data-sticky-container>
-
+        
             <!-- Product Images-->
-            <div class="col-12 col-md-6 col-xl-7">
-                <div class="row g-3" data-aos="fade-right">
-                    <div class="col-12">
-                        <picture>
-                            <img class="img-fluid w-75" data-zoomable src="{{data.image.url}}">
-                        </picture>
-                    </div>
+            <div class="row g-9" data-sticky-container>
+                <style>
+                    .thumb_list {
+                      list-style: none;
+                      display: flex;
+                      justify-content: center;
+                      padding: 0;
+                      flex-wrap: wrap;
+                      margin-top: 20px;
+                    }
                   
-                    {% for image in images %}
-                    <div class="col-12">
-                        {% if forloop.counter <= 2 %}
-                        <picture>
+                    .thumb_list img {
+                      width: 80px;
+                      margin: 10px;
+                      border-radius: 10px;
+                      opacity: 0.8;
+                      cursor: pointer;
+                      transition: transform 0.5s;
+                    }
+                  
+                    .thumb_list img:hover {
+                      opacity: 1;
+                      transform: scale(1.1);
+                    }
+                  
+                    .thumb {
+                      padding: 20px;
+                    }
+                  
+                    .g_wrapper {
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                    }
+                  
+                    .main_img {
+                      overflow: hidden;
+                      display: flex;
+                      justify-content: center;
+                      align-items: center;
+                      height: 600px; /* Set a fixed height for the container */
+                    }
+                  
+                    .main_img img {
+                      border-radius: 5px;
+                      max-width: 100%;
+                      height: auto;
+                      object-fit: fill;
+                    }
+                    
+                    .zoom_image {
+                      overflow: hidden;
+                      margin: 0 auto;
+                      border-radius: 0.5rem;
+                      cursor: zoom-in;
+                    
+                      &.zoom_mode_active {
+                        cursor: zoom-out;
+                      }
+                    
+                      img {
+                        max-width: 100%;
+                        width: 100%;
+                        height: auto;
+                        transition: transform 200ms ease-out;
+                      }
+                    }
+                    
+                    @media (max-width: 767px) {
+                      .main_img {
+                        height: auto;
+                        max-height: 400px; /* Adjust the desired height for phone views */
+                      }
                       
-                            <img class="img-fluid w-75" data-zoomable src="{{image.image.url}}">
-
-         
-                        </picture>
-                        {% else %}
-                        <style>
-                            .extra-images {
-                                display: none;
-                              }
-                        </style>
-                        <div class="col-12 extra-images ">
-                            <picture>
-                                <img class="img-fluid w-75" data-zoomable src="{{image.image.url}}">
-                            </picture>
-                        </div>
-                    {% endif %}
-                 
-                    </div>
-                    {% endfor %}
-                    <button class="btn btn-bg-white border-dark hover-lift-sm hover-boxshadow more-images-button" style="border: 1 black !important;">More Images</button>
+                      .thumb_list {
+                        flex-direction: row;
+                        justify-content: center;
+                        margin-top: 10px;
+                      }
+                      
+                      .thumb_list img {
+                        margin: 5px;
+                      }
+                    }
+                  </style>
                   
+                <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                <script>
+                    $(document).ready(function() {
+                      var isActiveMode = false;
+                      $(".zoom_image")
+                        .on("click", function() {
+                          isActiveMode = !isActiveMode;
+                          if (isActiveMode) {
+                            $(this).addClass("zoom_mode_active");
+                            if ($(window).width() > 767) {
+                              $(this).children("img").css({ transform: "scale(2)" });
+                            } else {
+                              $(this).children("img").css({ transform: "scale(5)" });
+                            }
+                          } else {
+                            $(this).removeClass("zoom_mode_active");
+                            $(this).children("img").css({ transform: "scale(1)" });
+                          }
+                        })
+                        .on("mousemove", function(e) {
+                          $(this)
+                            .children("img")
+                            .css({
+                              "transform-origin":
+                                ((e.pageX - $(this).offset().left) / $(this).width()) * 100 +
+                                "% " +
+                                ((e.pageY - $(this).offset().top) / $(this).height()) * 100 +
+                                "%",
+                            });
+                        });
+                    
+                    $(document).on("click", function(event) {
+                        // Check if the clicked element is not within .zoom_image
+                        if (!$(event.target).closest(".zoom_image").length) {
+                          $(".zoom_image").removeClass("zoom_mode_active");
+                          $(".zoom_image img").css({ transform: "scale(1)" });
+                          isActiveMode = false;
+                        }
+                      });
+                  
+                      // Reset image zoom when changing the image source
+                      function image_gal(img) {
+                        var a = img.src;
+                        $("#large_img").attr("src", a);
+                        $(".zoom_image").removeClass("zoom_mode_active");
+                        $(".zoom_image img").css({ transform: "scale(1)" });
+                        isActiveMode = false;
+                      }
+                    });
+                  </script>
+                  
+
+            
+                <!-- Product Images-->
+                <div class="col-12 col-md-6 col-xl-6 g_wrapper">
+                    <div class="main_img ">
+                        <picture class="">
+                            <div class="zoom_image">
+                            <img class="img-fluid w-100 " id="large_img" src="{{data.image.url}}" loading="lazy">
+                        </div>
+                        </picture>
+                    </div>
+            
+                    <div class="thumb">
+                        <ul class="thumb_list">
+                            <li class="thumb_item "><img onclick="image_gal(this)" src="{{data.image.url}}" alt=""></li>
+                            {% for image in images %}
+                            <li class="thumb_item "><img onclick="image_gal(this)" src="{{image.image.url}}" alt=""></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+            
+                    <script>
+                        function image_gal(img) {
+                            var a = img.src;
+                            document.getElementById("large_img").src = a;
+                        }
+                    </script>
                 </div>
-            </div>
-            <script>
-                const moreImagesButton = document.querySelector(".more-images-button");
-                
-                moreImagesButton.addEventListener("click", function() {
-                  const extraImages = document.querySelectorAll(".extra-images");
-                
-                  for (const extraImage of extraImages) {
-                    extraImage.style.display = "block";
-                  }
-                
-                  this.style.display = "none";
-                });
-                </script>
+            
                 <style>
                 .extra-images {
                   display: none;

@@ -83,22 +83,88 @@
                             <span class="nav-link text-body search-trigger cursor-pointer">Search</span>
     
                             <!-- Search navbar overlay-->
+                            <style>
+                                .search-results li{
+                                    font-size: 13px;
+                                    padding: 10px 10px;
+                                    list-style: none;
+                                    border-top: 1px solid #dddd;
+                                }
+                            
+                               
+                            </style>
+                            
                             <div class="navbar-search d-none">
                                 <div class="input-group mb-3 h-100">
                                     <span class="input-group-text px-4 bg-transparent border-0"><i
                                             class="ri-search-line ri-lg"></i></span>
-                                    <input type="text" class="form-control text-body bg-transparent border-0"
+                                    <input type="text" id="search-input" class="form-control text-body bg-transparent border-0"
                                         placeholder="Enter your search terms...">
                                     <span
                                         class="input-group-text px-4 cursor-pointer disable-child-pointer close-search bg-transparent border-0"><i
-                                            class="ri-close-circle-line ri-lg"></i></span>
+                                            class="ri-close-circle-line ri-lg"></i></span>               
                                 </div>
+                                <div class="resultBox">
+                                    <!-- here list are inserted from javascript -->
+                                  </div>
+                                <div class="search-results"></div>
+                               
                             </div>
-                            <div class="search-overlay"></div>
+                            
+                    
                             <!-- / Search navbar overlay-->
     
                         </li>
                         <!-- /Navbar Search-->
+                        <script>
+                            const searchTrigger = document.querySelector('.search-trigger');
+                            const searchOverlay = document.querySelector('.search-overlay');
+                            const searchInput = document.querySelector('#search-input');
+                            const searchResults = document.querySelector('.search-results');
+                        
+                            searchTrigger.addEventListener('click', () => {
+                                searchOverlay.classList.toggle('active');
+                                searchInput.focus();
+                            });
+                        
+                            searchInput.addEventListener('input', () => {
+                                const query = searchInput.value.trim();
+                                console.log(query);
+                        
+                                if (query !== '') {
+                                    fetch(`/search/?q=${query}`)
+                                        .then(response => response.json())
+                                        .then(data => displaySearchResults(data));
+                                } else {
+                                    clearSearchResults();
+                                }
+                            });
+                        
+                            function displaySearchResults(data) {
+                                // Clear previous search results
+                                clearSearchResults();
+                        
+                                // Display search results
+                                data.forEach(result => {
+                                    const div = document.createElement('div');
+                                    div.classList.add('card-img', 'position-relative');
+                                    
+                                    div.innerHTML = `
+                                
+                                    `;
+                                    
+                                    searchResults.appendChild(div);
+                                  });
+                                  
+                            }
+                        
+                            function clearSearchResults() {
+                                searchResults.innerHTML = '';
+                            }
+                        </script>
+                        
+                            
+                       
     
                         <!-- Navbar Login-->
                         <li class="ms-1 d-none d-lg-inline-block">

@@ -11,6 +11,14 @@ from django.core import serializers
 # Create your views here.
 
 
+
+def search_view(request):
+    query = request.GET.get('q', '')
+    results = Products_Table.objects.filter(name__icontains=query)[:5]
+    search_results = [{'name': product.name, 'image': product.image.url, 'slug': product.slug} for product in results]
+    return JsonResponse(search_results, safe=False)
+
+
 def home(request):
     current_user = request.user
     categories = Category.objects.all()
