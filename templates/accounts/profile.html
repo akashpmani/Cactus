@@ -3,6 +3,8 @@
 
 {% block main %}
 <link rel="preconnect" href="https://fonts.gstatic.com">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.2.1/js.cookie.min.js"></script>
+
 <style>
     @import url('https://fonts.googleapis.com/css2?family=YourFontFamily&display=swap');
     
@@ -32,7 +34,8 @@
         <div class="row">
             <div class="col-xl col-lg flex-grow-0" style="flex-basis:230px">
                 <div class="img-thumbnail shadow w-100 bg-white position-relative text-center" style="height:190px; width:200px; margin-top:-120px">
-                    <img src="assets/imgs/brands/brand-3.jpg" class="center-xy img-fluid" alt="Logo Brand">
+                    <img src="{% static 'ac_counts/gallery.png' %}" class="center-xy img-fluid" alt="">
+                 
                 </div>
             </div>
             <div class="col-xl col-lg">
@@ -107,35 +110,108 @@
                     <button class="btn btn-primary">Cancel</button>
                 </div>
             </div>
-            <div class="tab-pane fade" id="password" role="tabpanel" aria-labelledby="password-tab">
+           
+              <div class="tab-pane fade" id="password" role="tabpanel" aria-labelledby="password-tab">
+       
                 <h3 class="mb-4">Password Settings</h3>
                 <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Old password</label>
-                            <input type="password" class="form-control">
-                        </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label>Old password</label>
+                      <input type="password" class="form-control" id="oldPassword">
                     </div>
+                  </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>New password</label>
-                            <input type="password" class="form-control">
-                        </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label>New password</label>
+                      <input type="password" class="form-control" id="newPassword">
                     </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Confirm new password</label>
-                            <input type="password" class="form-control">
-                        </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label>Confirm new password</label>
+                      <input type="password" class="form-control" id="confirmPassword">
                     </div>
+                  </div>
                 </div>
                 <div>
-                    <button class="btn btn-primary">Update</button>
-                    <button class="btn btn-primary">Cancel</button>
+                  <button class="btn btn-primary" id="updateBtn">Update</button>
+                  <button class="btn btn-primary" id="cancelBtn">Cancel</button>
                 </div>
-            </div>
+       
+              </div>
+              <script>
+                
+                
+            </script>
+            <script>
+              $(document).ready(function() {
+                $('#updateBtn').click(function(e) {
+                  e.preventDefault();
+                  if (validatePasswords()) {
+                    $('#passwordForm').submit();
+                  }
+                });
+            
+                function validatePasswords() {
+                  var oldPassword = $('#oldPassword').val();
+                  var newPassword = $('#newPassword').val();
+                  var confirmPassword = $('#confirmPassword').val();
+            
+                  // Check if new password and confirm password match
+                  if (newPassword !== confirmPassword) {
+                    alert('New password and confirm password do not match.');
+                    return false;
+                  }
+                  
+                  // Check if the password meets the required criteria
+                  var passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+                  if (!passwordPattern.test(newPassword)) {
+                    alert('New password must contain at least 8 characters, one letter, one digit, and one symbol.');
+                    return false;
+                  }
+                  
+                  // Additional validation logic can be added here
+            
+                  var requestData = {
+                    oldPassword: oldPassword,
+                    newPassword: newPassword,
+                  };
+            
+                  // Make the AJAX request
+                  var csrfToken = Cookies.get('csrftoken');
+                  var updatePasswordURL = "{% url 'accounts:update_password' user.id %}";
+                  $.ajax({
+                    type: 'POST',
+                    url: updatePasswordURL,
+                    beforeSend: function(xhr, settings) {
+                      xhr.setRequestHeader('X-CSRFToken', csrfToken);
+                    },
+                    data: requestData,
+                    success: function(response) {
+                      // Handle the success response from the server
+                      // You can perform any necessary actions here
+                      console.log('Password update successful');
+                    },
+                    error: function(xhr, textStatus, error) {
+                      // Handle any errors that occur during the AJAX request
+                      console.log('Password update failed:', error);
+                    }
+                  });
+                }
+            
+                // Event handler for cancel button click
+                $('#cancelButton').click(function(e) {
+                  e.preventDefault(); // Prevent the default form submission
+            
+                  // Clear the form or perform any necessary actions
+                  $('#passwordForm')[0].reset();
+                });
+              });
+            </script>
+            
             <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
                 <h3 class="mb-4">Security Settings</h3>
                 <div class="row">
@@ -592,26 +668,6 @@ $(document).ready(function() {
 </script>
 
 
-<script>
-  async function fetchText() {
-    let url = 'https://ipinfo.to/json?token=0234965537f85b'
-    let response = await fetch(url);
-    let data = await response.json()
-    console.log(data)
-
-  }
-  fetchText();
-</script>
-<script>
-  const geolocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((position) => 
-      {
-        console.log(position);
-      });
-  }
-};
-</script>
 
 
 {% endblock main %}

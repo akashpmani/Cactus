@@ -15,6 +15,8 @@ import random
 from . import verify
 from .otp import verify_otp
 from django.contrib import messages
+from django.http import JsonResponse
+from django.contrib.auth.hashers import make_password
 # from .helpers import delete_expired_otp
 # Create your views here.
 
@@ -157,6 +159,27 @@ def add_address(request):
         else:
             print(form.errors)
         return redirect('accounts:profile')
+    
+
+def update_password(request,id):    
+    print("booom")
+    if request.method == 'POST':
+        try:
+            user = User_Accounts.objects.get(id = id)
+        except:
+            pass
+        old_password = request.POST.get('oldPassword')
+        new_password = request.POST.get('newPassword')
+        print(new_password)
+        if user and check_password(old_password, user.password):
+            print("yeasss")
+            user.password = make_password(new_password)
+            user.save()
+            return JsonResponse({'message': 'Password update successful'})
+        else:
+            print("oombi")
+            return JsonResponse({'message': 'invalid credentials'})
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
 
 
 
