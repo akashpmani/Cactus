@@ -123,11 +123,21 @@ class Product_item(models.Model):
     quantity = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(default=timezone.now)
     is_active = models.BooleanField(default=True)
+    slug = models.SlugField(max_length=255, blank=True)
+    image = models.ImageField(null=True, blank=True)
 
     class Meta:
         verbose_name_plural = 'Products_varients'
         unique_together = ('product', 'size')
-
+        
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = self.product.slug
+        super(Product_item, self).save(*args, **kwargs)
+        if not self.image:
+            self.image = self.product.image
+        super(Product_item, self).save(*args, **kwargs)
+        
     def __str__(self):
         return f"{self.product.name}, {self.get_size_display()}"
 

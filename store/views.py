@@ -36,7 +36,7 @@ def home(request):
 
 
 def products(request):
-    product = Products_Table.objects.order_by('id')
+    product = Product_item.objects.order_by('id')
     categories = Category.objects.all()
     tags = Product_Tags.objects.all()
     paginator = Paginator(product,9)
@@ -243,7 +243,6 @@ def cart_items(request, total=0, quantity=0, cart_items=None):
 
             product_dict = {
                 'item_id' : product_item,
-                'name': product_table.name,
                 'description': product_table.description,
                 'size': size,
                 'price': price,

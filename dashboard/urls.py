@@ -27,5 +27,6 @@ urlpatterns = [
     path('changethumbnail/<int:id>/', views.changethumbnail, name='changethumbnail'),
     path('users', views.users, name='users'),
     path('userdetails/<int:id>/', views.userdetails, name='userdetails'),
-    #path('pro', views.products, name='products'),
+    path('product_item/<int:product_item_id>/', views.update_product_item, name='update_product_item'),
+    path('changestatus/<int:id>/', views.changestatus, name='changestatus'),
 ]

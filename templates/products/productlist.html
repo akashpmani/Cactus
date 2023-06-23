@@ -296,130 +296,163 @@
             xhr.send(data);
           }    
     </script>
-    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasFilters" aria-labelledby="offcanvasFiltersLabel">
-      <div class="offcanvas-header pb-0 d-flex align-items-center">
-        <h5 class="offcanvas-title" id="offcanvasFiltersLabel">Category Filters</h5>
-        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-      </div>
-      <div class="offcanvas-body">
-        <div class="d-flex flex-column justify-content-between w-100 h-100">
-    
-          <!-- Filters-->
-          <div>
-    
-            <!-- Price Filter -->
-            <div class="py-4 widget-filter widget-filter-price border-top">
-              <a class="small text-body text-decoration-none text-secondary-hover transition-all transition-all fs-6 fw-bolder d-block collapse-icon-chevron"
-                data-bs-toggle="collapse" href="#filter-modal-price" role="button" aria-expanded="true"
-                aria-controls="filter-modal-price">
-                Price
-              </a>
-              <div id="filter-modal-price" class="collapse show">
-                <div class="filter-price mt-6"></div>
-                <div class="d-flex justify-content-between align-items-center mt-7">
-                    <div class="input-group mb-0 me-2 border">
-                        <span class="input-group-text bg-transparent fs-7 p-2 text-muted border-0">$</span>
-                        <input type="number" min="00" max="1000" step="1" class="filter-min form-control-sm border flex-grow-1 text-muted border-0">
-                    </div>   
-                    <div class="input-group mb-0 ms-2 border">
-                        <span class="input-group-text bg-transparent fs-7 p-2 text-muted border-0">$</span>
-                        <input type="number" min="00" max="1000" step="1" class="filter-max form-control-sm flex-grow-1 text-muted border-0">
-                    </div>                
-                </div>          </div>
-            </div>
-            <!-- / Price Filter -->
-    
-            <!-- Brands Filter -->
-            <div class="py-4 widget-filter border-top">
-              <a class="small text-body text-decoration-none text-secondary-hover transition-all transition-all fs-6 fw-bolder d-block collapse-icon-chevron"
-                data-bs-toggle="collapse" href="#filter-modal-brands" role="button" aria-expanded="true"
-                aria-controls="filter-modal-brands">
-                Category
-              </a>
-              <div id="filter-modal-brands" class="collapse show">
-                <div class="input-group my-3 py-1">
-                  <input type="text" class="form-control py-2 filter-search rounded" placeholder="Search"
-                    aria-label="Search">
-                  <span class="input-group-text bg-transparent p-2 position-absolute top-10 end-0 border-0 z-index-20"><i
-                      class="ri-search-2-line text-muted"></i></span>
-                </div>
-                <div class="simplebar-wrapper">
-                  <div class="filter-options" data-pixr-simplebar>
-                    {% for cat in categories %}
-                    <div class="form-group form-check-custom mb-1">
-                    <input type="checkbox" class="form-check-input" id="filter-brands-modal-{{forloop.counter}}">
-                    <label class="form-check-label fw-normal text-body flex-grow-1 d-flex align-items-center"
-                        for="filter-brands-modal-{{forloop.counter}}">{{cat.category_name}}<span
-                            class="text-muted ms-1 fs-9">(21)</span></label>
-                    </div>     
-                 {% endfor %}  
-                  </div>
-                </div>
+<!-- HTML -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasFilters" aria-labelledby="offcanvasFiltersLabel">
+  <div class="offcanvas-header pb-0 d-flex align-items-center">
+    <h5 class="offcanvas-title" id="offcanvasFiltersLabel">Category Filters</h5>
+    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <div class="d-flex flex-column justify-content-between w-100 h-100">
+
+      <!-- Filters-->
+      <div>
+
+        <!-- Price Filter -->
+        <div class="py-4 widget-filter widget-filter-price border-top">
+          <a class="small text-body text-decoration-none text-secondary-hover transition-all transition-all fs-6 fw-bolder d-block collapse-icon-chevron"
+            data-bs-toggle="collapse" href="#filter-modal-price" role="button" aria-expanded="true"
+            aria-controls="filter-modal-price">
+            Price
+          </a>
+          <div id="filter-modal-price" class="collapse show">
+            <div class="filter-price mt-6"></div>
+            <div class="d-flex justify-content-between align-items-center mt-7">
+              <div class="input-group mb-0 me-2 border">
+                <span class="input-group-text bg-transparent fs-7 p-2 text-muted border-0">$</span>
+                <input type="number" min="00" max="1000" step="1" class="filter-min form-control-sm border flex-grow-1 text-muted border-0">
+              </div>
+              <div class="input-group mb-0 ms-2 border">
+                <span class="input-group-text bg-transparent fs-7 p-2 text-muted border-0">$</span>
+                <input type="number" min="00" max="1000" step="1" class="filter-max form-control-sm flex-grow-1 text-muted border-0">
               </div>
             </div>
-            <!-- / Brands Filter -->
-    
-            <!-- Sizes Filter -->
-            <div class="py-4 widget-filter border-top">
-              <a class="small text-body text-decoration-none text-secondary-hover transition-all transition-all fs-6 fw-bolder d-block collapse-icon-chevron"
-                data-bs-toggle="collapse" href="#filter-modal-sizes" role="button" aria-expanded="true"
-                aria-controls="filter-modal-sizes">
-                Sizes
-              </a>
-              <div id="filter-modal-sizes" class="collapse show">
-                <div class="filter-options mt-3">
-                  <div class="form-group d-inline-block mr-2 mb-2 form-check-bg form-check-custom">
-                      <input type="checkbox" class="form-check-bg-input" id="filter-sizes-modal-0">
-                      <label class="form-check-label fw-normal" for="filter-sizes-modal-0">Small</label>
-                  </div>              
-                  <div class="form-group d-inline-block mr-2 mb-2 form-check-bg form-check-custom">
-                      <input type="checkbox" class="form-check-bg-input" id="filter-sizes-modal-1">
-                      <label class="form-check-label fw-normal" for="filter-sizes-modal-1">Medium</label>
-                  </div>              
-                  <div class="form-group d-inline-block mr-2 mb-2 form-check-bg form-check-custom">
-                      <input type="checkbox" class="form-check-bg-input" id="filter-sizes-modal-2">
-                      <label class="form-check-label fw-normal" for="filter-sizes-modal-2">Large</label>
-                  </div>              
-                  <div class="form-group d-inline-block mr-2 mb-2 form-check-bg form-check-custom">
-                      <input type="checkbox" class="form-check-bg-input" id="filter-sizes-modal-3">
-                      <label class="form-check-label fw-normal" for="filter-sizes-modal-3">Extra Large</label>
-                  </div>                       
-                </div>
-              </div>
-            </div>
-          
-            <!-- / Sizes Filter -->
-    
-            <!-- Colour Filter -->
-            <div class="py-4 widget-filter border-top">
-              <a class="small text-body text-decoration-none text-secondary-hover transition-all transition-all fs-6 fw-bolder d-block collapse-icon-chevron"
-                data-bs-toggle="collapse" href="#filter-modal-colour" role="button" aria-expanded="true"
-                aria-controls="filter-modal-colour">
-                Colour
-              </a>
-              <div id="filter-modal-colour" class="collapse show">
-                <div class="filter-options mt-3">
-                  {% for tag in tags %}
-                  <div class="form-group d-inline-block mr-2 mb-2 form-check-bg form-check-custom">
-                    <input type="checkbox" class="form-check-bg-input" id="filter-tags-modal-{{forloop.counter}}">
-                    <label class="form-check-label fw-normal" for="filter-tags-modal-{{forloop.counter}}">{{tag.tag_name}}</label>
-                </div>  
-                  {% endfor %}          
-                </div>
-              </div>
-            </div>
-            <!-- / Colour Filter -->
           </div>
-          <!-- / Filters-->
-    
-          <!-- Filter Button-->
-          <div class="border-top pt-3">
-            <a href="#" class="btn btn-dark mt-2 d-block hover-lift-sm hover-boxshadow" data-bs-dismiss="offcanvas" aria-label="Close">Done</a>
-          </div>
-          <!-- /Filter Button-->
         </div>
+        <!-- / Price Filter -->
+
+        <!-- Brands Filter -->
+        <div class="py-4 widget-filter border-top">
+          <a class="small text-body text-decoration-none text-secondary-hover transition-all transition-all fs-6 fw-bolder d-block collapse-icon-chevron"
+            data-bs-toggle="collapse" href="#filter-modal-brands" role="button" aria-expanded="true"
+            aria-controls="filter-modal-brands">
+            Category
+          </a>
+          <div id="filter-modal-brands" class="collapse show">
+            <div class="input-group my-3 py-1">
+              <input type="text" class="form-control py-2 filter-search rounded" placeholder="Search"
+                aria-label="Search">
+              <span class="input-group-text bg-transparent p-2 position-absolute top-10 end-0 border-0 z-index-20"><i
+                  class="ri-search-2-line text-muted"></i></span>
+            </div>
+            <div class="simplebar-wrapper">
+              <div class="filter-options" data-pixr-simplebar>
+                {% for cat in categories %}
+                <div class="form-group form-check-custom mb-1">
+                  <input type="checkbox" class="form-check-input filter-category" id="filter-brands-modal-{{forloop.counter}}">
+                  <label class="form-check-label fw-normal text-body flex-grow-1 d-flex align-items-center"
+                    for="filter-brands-modal-{{forloop.counter}}">{{cat.category_name}}<span
+                      class="text-muted ms-1 fs-9">(21)</span></label>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- / Brands Filter -->
+
+        <!-- Sizes Filter -->
+        <div class="py-4 widget-filter border-top">
+          <a class="small text-body text-decoration-none text-secondary-hover transition-all transition-all fs-6 fw-bolder d-block collapse-icon-chevron"
+            data-bs-toggle="collapse" href="#filter-modal-sizes" role="button" aria-expanded="true"
+            aria-controls="filter-modal-sizes">
+            Sizes
+          </a>
+          <div id="filter-modal-sizes" class="collapse show">
+            <div class="filter-options mt-3">
+              <div class="form-group d-inline-block mr-2 mb-2 form-check-bg form-check-custom">
+                <input type="checkbox" class="form-check-bg-input filter-size" id="filter-sizes-modal-0">
+                <label class="form-check-label fw-normal" for="filter-sizes-modal-0">Small</label>
+              </div>
+              <div class="form-group d-inline-block mr-2 mb-2 form-check-bg form-check-custom">
+                <input type="checkbox" class="form-check-bg-input filter-size" id="filter-sizes-modal-1">
+                <label class="form-check-label fw-normal" for="filter-sizes-modal-1">Medium</label>
+              </div>
+              <div class="form-group d-inline-block mr-2 mb-2 form-check-bg form-check-custom">
+                <input type="checkbox" class="form-check-bg-input filter-size" id="filter-sizes-modal-2">
+                <label class="form-check-label fw-normal" for="filter-sizes-modal-2">Large</label>
+              </div>
+              <div class="form-group d-inline-block mr-2 mb-2 form-check-bg form-check-custom">
+                <input type="checkbox" class="form-check-bg-input filter-size" id="filter-sizes-modal-3">
+                <label class="form-check-label fw-normal" for="filter-sizes-modal-3">Extra Large</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- / Sizes Filter -->
+
+        <!-- Colour Filter -->
+        <div class="py-4 widget-filter border-top">
+          <a class="small text-body text-decoration-none text-secondary-hover transition-all transition-all fs-6 fw-bolder d-block collapse-icon-chevron"
+            data-bs-toggle="collapse" href="#filter-modal-colour" role="button" aria-expanded="true"
+            aria-controls="filter-modal-colour">
+            Colour
+          </a>
+          <div id="filter-modal-colour" class="collapse show">
+            <div class="filter-options mt-3">
+              {% for tag in tags %}
+              <div class="form-group d-inline-block mr-2 mb-2 form-check-bg form-check-custom">
+                <input type="checkbox" class="form-check-bg-input filter-colour" id="filter-tags-modal-{{forloop.counter}}">
+                <label class="form-check-label fw-normal" for="filter-tags-modal-{{forloop.counter}}">{{tag.tag_name}}</label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        <!-- / Colour Filter -->
       </div>
+      <!-- / Filters-->
+
+      <!-- Filter Button-->
+      <div class="border-top pt-3">
+        <a href="#" class="btn btn-dark mt-2 d-block hover-lift-sm hover-boxshadow" data-bs-dismiss="offcanvas" aria-label="Close">Done</a>
+      </div>
+      <!-- /Filter Button-->
     </div>
+  </div>
+</div>
+
+<script>
+  // JavaScript
+  // Add event listener to the "Done" button
+  const doneButton = document.querySelector('.btn-dark');
+  doneButton.addEventListener('click', handleFilter);
+
+  function handleFilter() {
+    // Get the selected filters
+    const minPrice = document.querySelector('.filter-min').value;
+    const maxPrice = document.querySelector('.filter-max').value;
+    const selectedCategories = document.querySelectorAll('.filter-category:checked');
+    const selectedSizes = document.querySelectorAll('.filter-size:checked');
+    const selectedColours = document.querySelectorAll('.filter-colour:checked');
+
+    // Prepare the filter data to be sent to the server or used for client-side filtering
+    const filterData = {
+      minPrice: minPrice,
+      maxPrice: maxPrice,
+      categories: Array.from(selectedCategories).map(category => category.value),
+      sizes: Array.from(selectedSizes).map(size => size.value),
+      colours: Array.from(selectedColours).map(colour => colour.value)
+    };
+
+    // Perform the filtering operation using the filterData
+
+    // Example: Print the filterData to the console
+    console.log(filterData);
+  }
+</script>
+
     
     {% endblock main %}
 

@@ -3,7 +3,7 @@ from django.shortcuts import redirect, render , get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from products.models import P_tags
 from products.models import Product_Tags, Products_Table, Product_item,Product_images
-from products.forms import CategoryForm, ProductsTableForm, ProductsTags, ProductItemForm, ProductTagForm
+from products.forms import CategoryForm, ProductsTableForm, ProductsTags, ProductItemForm, ProductTagForm ,ProductItemUpdateForm
 from products.models import Category
 from django.db import IntegrityError
 from django.contrib import messages
@@ -11,6 +11,8 @@ from accounts.models import User_Accounts
 from django.http import JsonResponse
 import base64
 from django.core.files.base import ContentFile
+from accounts.models import CartItem
+from django.core.paginator import Paginator
 
 # Create your views here.
 
@@ -24,26 +26,36 @@ def usermanager(request):
 
 
 def products(request):
-    
+    search = request.POST.get('search')
+    category = request.POST.get('category')
+    categories = Category.objects.all()
     products = Products_Table.objects.all()
-    size_choice = Product_item.SIZE_CHOICES
-    product_variants = []
-    for product in products:
-        product_items = product.product_item_set.all()
-        product_data = {
-            'product': product,
-            'product_items': product_items,
-            
-        }
-        product_variants.append(product_data)
-    context = {
-         'products':products,
-          'product_variants': product_variants,
-          'size_choice': size_choice,
-     }
     
-    return render(request, 'dashboard/deummy.html',context)    
-    # return render(request, 'dashboard/productlist.html',context)
+    if category:
+        try:
+            cat = Category.objects.get(category_name=category)
+            products = products.filter(category=cat)
+        except Category.DoesNotExist:
+            pass
+    
+    if search:
+        products = products.filter(name__icontains=search)
+
+    paginator = Paginator(products, 1)
+    total_pages = paginator.num_pages
+    
+    pagenum = request.POST.get('num')
+    productFinal = paginator.get_page(pagenum) if pagenum else paginator.get_page(1)
+    for i in productFinal:
+        print(i)
+        
+    context = {
+         'products': productFinal,
+         'pages': total_pages,
+         'categories': categories,
+     }
+
+    return render(request, 'dashboard/page-products-grid.html', context)
 
 
 def addproduct(request):
@@ -84,30 +96,26 @@ def addnewproduct(request):
             print(formtag.errors)
     return redirect('dashboard:addproduct')
 
-
 def addproductitems(request):
     if request.method == 'POST':
         form = ProductItemForm(request.POST)
-        
-        images = request.FILES.getlist('photo')
-        # images = request.FILES.getlist('cropped_images')
         if form.is_valid():
             try:
-                for image in images:
-                    print('image')
-                    Product_images.objects.create(
-                    product=form.cleaned_data['product'],
-                    image=image)
-                form.save()
+                product_item = form.save()
+                product = product_item.product
+                product_id = product.id 
                 messages.success(request, 'Product items added successfully.')
-                return redirect('dashboard:products')
+                print(product_item.product)
+                return redirect('dashboard:productdetails',product_id)
             except IntegrityError as e:
                 error_message = f"Error creating product image: {str(e)}"
                 messages.error(request, error_message)
         else:
             messages.error(request, 'Error in form submission.')
             print(form.errors)
-    return redirect('dashboard:products')
+    return redirect('dashboard:pro')
+
+        
 
 def orders(request):
     return render(request, 'orders.html')
@@ -220,6 +228,9 @@ def delete_tags(request, tag_id):
 def delete_product(request, id):
     try:
         product = Products_Table.objects.get(id=id)
+        product_items = Product_item.objects.filter(product = product)
+        for item in product_items:
+            CartItem.objects.filter(product= item).delete()
         product.delete()
         messages.success(request, "Product deleted successfully.")
     except product.DoesNotExist:
@@ -229,21 +240,30 @@ def delete_product(request, id):
 
     return redirect('dashboard:products')
 
+def changestatus(request, id):
+    try:
+        product = Products_Table.objects.get(id=id)
+        if product.is_active:
+            product.is_active = False
+        else:
+            product.is_active = True
+        product.save()
+    except product.DoesNotExist:
+        messages.error(request, "Product does not exist.")
+    except Exception as e:
+        messages.error(request, f"An error occurred: {str(e)}")
+
+    return redirect('dashboard:products')
 
 
 def status(request, id):
     try:
         product = Products_Table.objects.get(id=id)
         if product.is_active:
-            product.is_active = False
-            print("y")
-            
+            product.is_active = False   
         else:
             product.is_active = True
-            print("yeee")
-        
         product.save()
-         
         messages.success(request, "Product status changed.")
     except product.DoesNotExist:
         messages.error(request, "Product does not exist.")
@@ -256,14 +276,38 @@ def productdetails(request,id):
     product = Products_Table.objects.get(id = id)
     variations = Product_item.objects.filter(product = product)
     images = Product_images.objects.filter(product = product)
+    vform = ProductItemForm()
+    itemupdate=ProductItemUpdateForm()
+    size_choice = Product_item.SIZE_CHOICES
     context = {
          'product':product,
          'variations' : variations,
          'images' : images,
+         'form' : vform,
+         'size_choice' : size_choice,
+         'itemupdate' : itemupdate,
 
      }
 
     return render(request, 'dashboard/page-seller-detail.html',context)
+
+def update_product_item(request, product_item_id):
+    print("yererf")
+    product_item = Product_item.objects.get(id=product_item_id)
+    if request.method == 'POST':
+        form = ProductItemUpdateForm(request.POST)
+        if form.is_valid():
+            product_item.price = form.cleaned_data['price']
+            product_item.quantity = form.cleaned_data['quantity']
+            status = form.cleaned_data['status']
+            if status == 'active':
+                product_item.is_active = True
+            else:
+                product_item.is_active = False
+            product_item.save()
+    referring_page = request.META.get('HTTP_REFERER')
+    return HttpResponseRedirect(referring_page)
+
 
 
 def pro(request):
@@ -272,7 +316,7 @@ def pro(request):
          'products':products,
      }
 
-    return render(request, 'dashboard/allproducts.html',context)
+    return render(request, 'dashboard/page-products-grid.html',context)
 
 
 def deleteimage(request,id,image_id):

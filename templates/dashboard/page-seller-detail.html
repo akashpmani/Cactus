@@ -196,24 +196,7 @@
             </div>
         </header>
 
-        <div class="modal fade" id="varient" tabindex="-1" aria-labelledby="variantModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="variantModalLabel">Add Variant</h5>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                  <!-- Add your variant form or content here -->
-                  <p>This is the variant modal content.</p>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                  <button type="button" class="btn btn-primary">Save Variant</button>
-                </div>
-              </div>
-            </div>
-          </div>
+        
           <div class="modal fade" id="modalupload" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg" role="document">
               <div class="modal-content">
@@ -386,12 +369,10 @@
                         </div> <!--  col.// -->
                         <div class="col-xl-4 text-md-end">
                             <select class="form-select w-auto d-inline-block">
-                                <option>Actions</option>
-                                <option>Disable shop</option>
-                                <option>Analyze</option>
-                                <option>Something</option>
+                                <option>Disable</option>
+                                <option>Delete</option>
                             </select>
-                            <a href="#" class="btn btn-primary"> View live <i class="material-icons md-launch"></i> </a>
+                            <a href="{% url 'store:product_detail' product.slug %}" class="btn btn-primary"> View live <i class="material-icons md-launch"></i> </a>
                         </div> <!--  col.// -->
                     </div> <!-- card-body.// -->
                     <hr class="my-4">
@@ -425,56 +406,163 @@
             <div class="card-body">
                 <div class="d-flex align-items-center justify-content-between">
                     <h5 class="card-title">Product variations</h5>
+                    {% if variations|length <= 3 %}
                     <div class="add-variant-button">
-                      <button class="btn btn-primary" data-toggle="modal" data-target="#varientmodel">Add Variant</button>
+                        <button class="btn btn-primary" data-toggle="modal" data-target="#varientmodal">Add Variant</button>
                     </div>
-                  </div>
+                {% endif %}
+                
                   
-                {% for product in variations %}
-                          
+                   
+                  </div>
+                  <style>
+                    
+                </style>
+                {% for item in variations %}
                 <div class="card-body">
                     <article class="itemlist">
                         <div class="row align-items-center">
-                            <div class="col-lg-4 col-md-4 col-sm-4 flex-grow-1 ">
+                            <div class="col-lg-3 col-md-3  flex-grow-1">
                                 <div class="itemside" href="#">
-                                    <div class="info">
-                                        <h6 class="mb-0">{{product}}</h6>
+                                    <div class="info info-inline">
+                                        <h6 class="mb-0">{{ item }}</h6>
                                     </div>
-                                    <div class="info">
-                                        <h6 class="mb-0">{{product.name}}</h6>
+                                    <div class="info info-inline">
+                                        <h6 class="mb-0">{{ item.name }}</h6>
                                     </div>
-                                    <div class="info">
-                                        {% if  product.quantity > 20 %}
-                                    <span class="badge rounded-pill bg-success">{{product.quantity}} - In-stock</span>
-                                {% elif product.quantity > 0 %}
-                                    <span class="badge rounded-pill bg-warning">{{product.quantity}} - Low-stock</span>
-                                    {% else %}
-                                    <span class="badge rounded-pill bg-danger">{{product.quantity}} - Out of stock</span>
-                                {% endif %}
+                                    <div class="info info-inline">
+                                      {% if item.is_active %}
+                                      <span class="badge rounded-pill alert-success toggle-badge" data-product="{{ item.id }}">Active</span>
+                                      {% else %}
+                                      <span class="badge rounded-pill alert-warning toggle-badge" data-product="{{ item.id }}">Inactive</span>
+                                      {% endif %} 
                                     </div>
-                                    <div class="info">
-                                        <h6 class="mb-0">Size- {{product.size}}</h6>
+                                    <div class="info info-inline">
+                                        <h6 class="mb-0">Size- {{ item.size }}</h6>
                                     </div>
-                                    <div class="info">
-                                        <h6 class="mb-0">Price- {{product.price}}</h6>
-                                    </div>
+                              
+                                    <form id="product-form{{ forloop.counter }}" action="{% url 'dashboard:update_product_item' item.id %}" method="post">
+                                        {% csrf_token %}
+                                        <div class="info info-inline">
+                                            <label for="id_price">Price:</label>
+                                            <input type="number" name="price" id="id_price{{ forloop.counter }}" value="{{ item.price }}">
+                                        </div>
+                                        <div class="info info-inline">
+                                            <label for="id_quantity">Quantity:</label>
+                                            <input type="number" name="quantity" id="id_quantity{{ forloop.counter }}" value="{{ item.quantity }}">
+                                        </div>
+                                       
+                                        <div class="info info-inline">
+                                            <input type="hidden" id="initial-price{{ forloop.counter }}" value="{{ item.price }}">
+                                        </div>
+                                        <div class="info info-inline">
+                                            <input type="hidden" id="initial-quantity{{ forloop.counter }}" value="{{ item.quantity }}">
+                                        </div>
+                                      
+                                    
                                 </div>
                             </div>
-                            <div class="col-lg-3 col-md-3 col-sm-3 col-3 col-status">
-                                <span class="badge rounded-pill alert-success">Active</span>
-                            </div>
-                        </div> <!-- row .// -->
-                    </article> <!-- itemlist  .// -->
+                           
+                        <div class="col-lg-1 col-md-1 col-sm-1 col-1 col-status">
+                          <div class="info info-inline">
+                                <input type="hidden" name="status" id="product-status{{ forloop.counter }}" value="active">
+                                <button id="update-button{{ forloop.counter }}" type="submit" style="display: none;">Update</button>
+                          </div>
+                        </div>
+                          </form>
+                  </div> <!-- row .// -->
+                </article> <!-- itemlist  .// -->
                 </div>
-         
-        {% endfor %}
-               
+            
+                <script>
+                  document.addEventListener('DOMContentLoaded', function () {
+                    const form = document.getElementById('product-form{{ forloop.counter }}');
+                    const updateButton = document.getElementById('update-button{{ forloop.counter }}');
+                    const initialPrice = document.getElementById('initial-price{{ forloop.counter }}').value;
+                    const initialQuantity = document.getElementById('initial-quantity{{ forloop.counter }}').value;
+                    const toggleBadge = document.querySelector('.toggle-badge[data-product="{{ item.id }}"]');
+              
+        
+                    form.addEventListener('input', function () {
+                        const currentPrice = document.getElementById('id_price{{ forloop.counter }}').value;
+                        const currentQuantity = document.getElementById('id_quantity{{ forloop.counter }}').value;
+                    
+        
+                        if (currentPrice !== initialPrice || currentQuantity !== initialQuantity ) {
+                            updateButton.style.display = 'block';
+                        } else {
+                            updateButton.style.display = 'none';
+                        }
+                    });
+        
+                    toggleBadge.addEventListener('click', function () {
+                        const isActive = toggleBadge.classList.contains('alert-success');
+                        toggleBadge.classList.toggle('alert-success');
+                        toggleBadge.classList.toggle('alert-warning');
+                        toggleBadge.textContent = isActive ? 'Inactive' : 'Active';
+                        document.getElementById('product-status{{ forloop.counter }}').value = isActive ? 'inactive' : 'active';
+                      
+                    });
+                });
+                </script>
+            {% endfor %}
+            
             </div> <!--  card-body.// -->
         </div> <!--  card.// -->
         <!--  variation model// -->
         
         <!-- Modal -->
-
+        <div class="modal fade" id="varientmodal" tabindex="-1" aria-labelledby="variantModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="variantModalLabel">Add Variant</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <form method="post" action="{% url 'dashboard:addproductitems' %}">
+                {% csrf_token %}
+              <div class="modal-body">
+                <!-- Add your variant form or content here -->
+                <p>This is the variant modal content.</p>
+                <div class="container">
+              
+              <div class="mb-4">
+                <input type="text" placeholder="Product" class="form-control" name="product" value="{{ product.id }}" hidden />
+              </div>
+            
+              <div class="mb-4">
+                <label for="size" class="form-label">Size</label>
+                <select class="form-select" id="size" name="size" aria-placeholder="Parent">
+                  {% for size, label in size_choice %}
+                    <option value="{{ size }}">{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            
+              <div class="row">
+                <div class="col-lg-6">
+                  <div class="mb-4">
+                    <label for="price" class="form-label">Price</label>
+                    <input type="number" placeholder="Price" class="form-control" id="price" name="price" />
+                  </div>
+                </div>
+                <div class="col-lg-6">
+                  <div class="mb-4">
+                    <label for="quantity" class="form-label">Quantity</label>
+                    <input type="number" placeholder="Quantity" class="form-control" id="quantity" name="quantity" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Save Variant</button>
+              </div>
+            </div>
+          </form>
+          </div>
+        </div>
 
         <!--  product images// -->
         <style type="text/css">

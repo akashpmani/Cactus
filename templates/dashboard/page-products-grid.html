@@ -1,8 +1,9 @@
+{% load static %}
 <!DOCTYPE HTML>
 <html lang="en">
 
 
-<!-- Mirrored from wp.alithemes.com/html/evara/evara-backend/page-products-grid.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 01 Aug 2021 15:33:12 GMT -->
+<!-- Mirrored from wp.alithemes.com/html/evara/evara-backend/page-products-list.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 01 Aug 2021 15:33:00 GMT -->
 <head>
     <meta charset="utf-8">
     <title>Evara Dashboard</title>
@@ -16,7 +17,7 @@
     <!-- Favicon -->
     <link rel="shortcut icon" type="image/x-icon" href="assets/imgs/theme/favicon.svg">
     <!-- Template CSS -->
-    <link href="assets/css/main.css" rel="stylesheet" type="text/css" />
+    <link href="{% static 'dash_board/assets/css/main.css' %}" rel="stylesheet" type="text/css" />
 </head>
 
 <body>
@@ -42,8 +43,8 @@
                         <span class="text">Products</span>
                     </a>
                     <div class="submenu">
-                        <a href="page-products-list.html">Product List</a>
-                        <a href="page-products-grid.html" class="active">Product grid</a>
+                        <a href="page-products-list.html" class="active">Product List</a>
+                        <a href="page-products-grid.html">Product grid</a>
                         <a href="page-products-grid-2.html">Product grid 2</a>
                         <a href="page-categories.html">Categories</a>
                     </div>
@@ -205,192 +206,107 @@
                 <header class="card-header">
                     <div class="row gx-3">
                         <div class="col-lg-4 col-md-6 me-auto">
-                            <input type="text" placeholder="Search..." class="form-control">
+                            <input type="text" placeholder="Search..." class="form-control" id="search-input">
                         </div>
                         <div class="col-lg-2 col-6 col-md-3">
-                            <select class="form-select">
-                                <option>All category</option>
-                                <option>Electronics</option>
-                                <option>Clothings</option>
-                                <option>Something else</option>
-                            </select>
-                        </div>
-                        <div class="col-lg-2 col-6 col-md-3">
-                            <select class="form-select">
-                                <option>Latest added</option>
-                                <option>Cheap first</option>
-                                <option>Most viewed</option>
+                            <select class="form-select" id="category-select">
+                                <option value="">All category</option>
+                                {% for cat in categories %}
+                                <option value="{{ cat.category_name }}">{{ cat.category_name }}</option>
+                                {% endfor %}
                             </select>
                         </div>
                     </div>
-                </header> <!-- card-header end// -->
+                </header>
                 <div class="card-body">
-                    <div class="row gx-3 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 row-cols-xxl-5">
+                    <div class="row gx-3 row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4 row-cols-xxl-5" id="product-list">
+                        {% for product in products %}
                         <div class="col">
                             <div class="card card-product-grid">
-                                <a href="#" class="img-wrap"> <img src="assets/imgs/items/1.jpg" alt="Product"> </a>
+                                <a href="#" class="img-wrap"> <img src="{{product.image.url}}" alt="Product"> </a>
                                 <div class="info-wrap">
-                                    <a href="#" class="title text-truncate">Just another product name</a>
-                                    <div class="price mb-2">$179.00</div> <!-- price.// -->
-                                    <a href="#" class="btn btn-sm font-sm rounded btn-brand">
-                                        <i class="material-icons md-edit"></i> Edit
-                                    </a>
-                                    <a href="#" class="btn btn-sm font-sm btn-light rounded">
-                                        <i class="material-icons md-delete_forever"></i> Delete
-                                    </a>
+                                    <a href="#" class="title text-truncate">{{product.name}}</a>
+                                    <div class="price mb-2">{{product.bio_name}}</div> <!-- price.// -->
+                                    <div class="btn-group btn-group-justified" role="group" aria-label="Product Actions">
+                                        <a href="{% url 'dashboard:productdetails' product.id %}" class="btn btn-sm font-sm rounded btn-brand">
+                                            <i class="material-icons md-edit"></i>
+                                        </a>
+                                        <a href="{% url 'dashboard:deleteproduct' product.id %}" class="btn btn-sm font-sm btn-light rounded">
+                                            <i class="material-icons md-delete_forever"></i>
+                                        </a>
+                                        {% if product.is_active %}
+                                            <a href="{% url 'dashboard:changestatus' product.id %}" class="btn btn-sm font-sm btn-light rounded">
+                                                <i class="material-icons md-block
+                                                
+                                                "></i>
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'dashboard:changestatus' product.id %}" class="btn btn-sm font-sm btn-light rounded">
+                                                <i class="material-icons md-check_box"></i>
+                                             
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    
+                                    
                                 </div>
                             </div> <!-- card-product  end// -->
                         </div> <!-- col.// -->
-                        <div class="col">
-                            <div class="card card-product-grid">
-                                <a href="#" class="img-wrap"> <img src="assets/imgs/items/2.jpg" alt="Product"> </a>
-                                <div class="info-wrap">
-                                    <a href="#" class="title text-truncate">Brown Winter Jacket for Men</a>
-                                    <div class="price mb-2">$179.00</div> <!-- price.// -->
-                                    <a href="#" class="btn btn-sm font-sm rounded btn-brand">
-                                        <i class="material-icons md-edit"></i> Edit
-                                    </a>
-                                    <a href="#" class="btn btn-sm font-sm btn-light rounded">
-                                        <i class="material-icons md-delete_forever"></i> Delete
-                                    </a>
-                                </div>
-                            </div> <!-- card-product  end// -->
-                        </div> <!-- col.// -->
-                        <div class="col">
-                            <div class="card card-product-grid">
-                                <a href="#" class="img-wrap"> <img src="assets/imgs/items/3.jpg" alt="Product"> </a>
-                                <div class="info-wrap">
-                                    <a href="#" class="title text-truncate">Jeans short new model</a>
-                                    <div class="price mb-2">$179.00</div> <!-- price.// -->
-                                    <a href="#" class="btn btn-sm font-sm rounded btn-brand">
-                                        <i class="material-icons md-edit"></i> Edit
-                                    </a>
-                                    <a href="#" class="btn btn-sm font-sm btn-light rounded">
-                                        <i class="material-icons md-delete_forever"></i> Delete
-                                    </a>
-                                </div>
-                            </div> <!-- card-product  end// -->
-                        </div> <!-- col.// -->
-                        <div class="col">
-                            <div class="card card-product-grid">
-                                <a href="#" class="img-wrap"> <img src="assets/imgs/items/4.jpg" alt="Product"> </a>
-                                <div class="info-wrap">
-                                    <a href="#" class="title text-truncate">Travel Bag XL</a>
-                                    <div class="price mb-2">$179.00</div> <!-- price.// -->
-                                    <a href="#" class="btn btn-sm font-sm rounded btn-brand">
-                                        <i class="material-icons md-edit"></i> Edit
-                                    </a>
-                                    <a href="#" class="btn btn-sm font-sm btn-light rounded">
-                                        <i class="material-icons md-delete_forever"></i> Delete
-                                    </a>
-                                </div>
-                            </div> <!-- card-product  end// -->
-                        </div> <!-- col.// -->
-                        <div class="col">
-                            <div class="card card-product-grid">
-                                <a href="#" class="img-wrap"> <img src="assets/imgs/items/5.jpg" alt="Product"> </a>
-                                <div class="info-wrap">
-                                    <a href="#" class="title text-truncate">Just another product name</a>
-                                    <div class="price mb-2">$179.00</div> <!-- price.// -->
-                                    <a href="#" class="btn btn-sm font-sm rounded btn-brand">
-                                        <i class="material-icons md-edit"></i> Edit
-                                    </a>
-                                    <a href="#" class="btn btn-sm font-sm btn-light rounded">
-                                        <i class="material-icons md-delete_forever"></i> Delete
-                                    </a>
-                                </div>
-                            </div> <!-- card-product  end// -->
-                        </div> <!-- col.// -->
-                        <div class="col">
-                            <div class="card card-product-grid">
-                                <a href="#" class="img-wrap"> <img src="assets/imgs/items/6.jpg" alt="Product"> </a>
-                                <div class="info-wrap">
-                                    <a href="#" class="title text-truncate">Just another product name</a>
-                                    <div class="price mb-2">$179.00</div> <!-- price.// -->
-                                    <a href="#" class="btn btn-sm font-sm rounded btn-brand">
-                                        <i class="material-icons md-edit"></i> Edit
-                                    </a>
-                                    <a href="#" class="btn btn-sm font-sm btn-light rounded">
-                                        <i class="material-icons md-delete_forever"></i> Delete
-                                    </a>
-                                </div>
-                            </div> <!-- card-product  end// -->
-                        </div> <!-- col.// -->
-                        <div class="col">
-                            <div class="card card-product-grid">
-                                <a href="#" class="img-wrap"> <img src="assets/imgs/items/7.jpg" alt="Product"> </a>
-                                <div class="info-wrap">
-                                    <a href="#" class="title text-truncate">Just another product name</a>
-                                    <div class="price mb-2">$179.00</div> <!-- price.// -->
-                                    <a href="#" class="btn btn-sm font-sm rounded btn-brand">
-                                        <i class="material-icons md-edit"></i> Edit
-                                    </a>
-                                    <a href="#" class="btn btn-sm font-sm btn-light rounded">
-                                        <i class="material-icons md-delete_forever"></i> Delete
-                                    </a>
-                                </div>
-                            </div> <!-- card-product  end// -->
-                        </div> <!-- col.// -->
-                        <div class="col">
-                            <div class="card card-product-grid">
-                                <a href="#" class="img-wrap"> <img src="assets/imgs/items/8.jpg" alt="Product"> </a>
-                                <div class="info-wrap">
-                                    <a href="#" class="title text-truncate">Apple Airpods CB-133</a>
-                                    <div class="price mb-2">$179.00</div> <!-- price.// -->
-                                    <a href="#" class="btn btn-sm font-sm rounded btn-brand">
-                                        <i class="material-icons md-edit"></i> Edit
-                                    </a>
-                                    <a href="#" class="btn btn-sm font-sm btn-light rounded">
-                                        <i class="material-icons md-delete_forever"></i> Delete
-                                    </a>
-                                </div>
-                            </div> <!-- card-product  end// -->
-                        </div> <!-- col.// -->
-                        <div class="col">
-                            <div class="card card-product-grid">
-                                <a href="#" class="img-wrap"> <img src="assets/imgs/items/9.jpg" alt="Product"> </a>
-                                <div class="info-wrap">
-                                    <a href="#" class="title text-truncate">Apple Airpods CB-133</a>
-                                    <div class="price mb-2">$179.00</div> <!-- price.// -->
-                                    <a href="#" class="btn btn-sm font-sm rounded btn-brand">
-                                        <i class="material-icons md-edit"></i> Edit
-                                    </a>
-                                    <a href="#" class="btn btn-sm font-sm btn-light rounded">
-                                        <i class="material-icons md-delete_forever"></i> Delete
-                                    </a>
-                                </div>
-                            </div> <!-- card-product  end// -->
-                        </div> <!-- col.// -->
-                        <div class="col">
-                            <div class="card card-product-grid">
-                                <a href="#" class="img-wrap"> <img src="assets/imgs/items/10.jpg" alt="Product"> </a>
-                                <div class="info-wrap">
-                                    <a href="#" class="title text-truncate">Apple Airpods CB-133</a>
-                                    <div class="price mb-2">$179.00</div> <!-- price.// -->
-                                    <a href="#" class="btn btn-sm font-sm rounded btn-brand">
-                                        <i class="material-icons md-edit"></i> Edit
-                                    </a>
-                                    <a href="#" class="btn btn-sm font-sm btn-light rounded">
-                                        <i class="material-icons md-delete_forever"></i> Delete
-                                    </a>
-                                </div>
-                            </div> <!-- card-product  end// -->
-                        </div> <!-- col.// -->
-                    </div> <!-- row.// -->
-                </div> <!-- card-body end// -->
-            </div> <!-- card end// -->
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
             <div class="pagination-area mt-30 mb-50">
                 <nav aria-label="Page navigation example">
                     <ul class="pagination justify-content-start">
-                        <li class="page-item active"><a class="page-link" href="#">01</a></li>
-                        <li class="page-item"><a class="page-link" href="#">02</a></li>
-                        <li class="page-item"><a class="page-link" href="#">03</a></li>
-                        <li class="page-item"><a class="page-link dot" href="#">...</a></li>
-                        <li class="page-item"><a class="page-link" href="#">16</a></li>
-                        <li class="page-item"><a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a></li>
+                        {% for page in products.paginator.page_range %}
+                        <li class="page-item {% if products.number == page %}active{% endif %}">
+                            <a class="page-link" href="#" onclick="document.getElementById('page-num').value='{{ page }}'; document.getElementById('pagination-form').submit();">{{ page }}</a>
+                        </li>
+                        {% endfor %}
+                        <li class="page-item">
+                            <a class="page-link dot" href="#">...</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="#" onclick="document.getElementById('page-num').value='{{ products.paginator.num_pages }}'; document.getElementById('pagination-form').submit();">{{ products.paginator.num_pages }}</a>
+                        </li>
                     </ul>
                 </nav>
             </div>
+            
+            <form id="pagination-form" action="{% url 'dashboard:products' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="num" id="page-num" value="">
+                <input type="hidden" name="search" id="search-value" value="{{ request.GET.search }}">
+                <input type="hidden" name="category" id="category-value" value="">
+            </form>
+            <script>
+                // Function to submit the form
+                function submitForm() {
+                    // Get the selected category value
+                    var categorySelect = document.getElementById('category-select');
+                    var selectedCategory = categorySelect.value;
+                    
+                    // Get the search input value
+                    var searchInput = document.getElementById('search-input');
+                    var searchValue = searchInput.value;
+                    
+                    // Set the values of the hidden input fields
+                    document.getElementById('search-value').value = searchValue;
+                    document.getElementById('category-value').value = selectedCategory;
+                    
+                    // Submit the form
+                    document.getElementById('pagination-form').submit();
+                }
+            
+                // Bind change event to category select element
+                var categorySelect = document.getElementById('category-select');
+                categorySelect.addEventListener('change', function () {
+                    submitForm();
+                });
+            </script>
+            
         </section> <!-- content-main end// -->
         <footer class="main-footer font-xs">
             <div class="row pb-30 pt-15">

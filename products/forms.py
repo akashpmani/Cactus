@@ -99,3 +99,8 @@ class ProductTagForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['options'].choices = [(tag.id, tag.tag_name) for tag in Product_Tags.objects.all()]
 
+class ProductItemUpdateForm(forms.Form):
+    price = forms.IntegerField()
+    quantity = forms.IntegerField()
+    status = forms.CharField()
+
