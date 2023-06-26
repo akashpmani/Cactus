@@ -43,16 +43,17 @@
                                         </div>
                                         <div class="col-9 offset-1">
                                             <div>
+                                                <input type="hidden" name="" id="variation-id" value="{{item.id}}">
                                                 <h6 class="justify-content-between d-flex align-items-start mb-2">
                                                     {{ item.name }}
-                                                    <a href="{% url 'store:remove_cart' item.id %}" class="btn btn-primary btn-sm bg-white border-dark ms-auto">
+                                                    <button  href="{% url 'store:remove_cart' item.id %}" class="btn btn-primary btn-sm bg-white border-dark ms-auto"  onclick="decreaseQuantity({{ item.id }})">
                                                         <span style="color: black;">-</span>
-                                                      </a>
+                                                    </button>
                                                       
-                                                    <span class="d-block text-muted fw-bolder text-uppercase fs-9 m-1">Qty: {{ item.quantity }}</span>
-                                                    <a href="{% url 'store:add_cart' item.id 1 %}" class="btn btn-primary btn-sm bg-white border-dark me-1">
+                                                    <span class="d-block text-muted fw-bolder text-uppercase fs-9 m-1"  >Qty:<span id="quantity-{{item.id}}" > {{ item.quantity }}</span></span>
+                                                    <button class="btn btn-primary btn-sm bg-white border-dark me-1" onclick="increaseQuantity({{ item.id }})">
                                                         <span style="color: black;">+</span>
-                                                      </a>
+                                                    </button>
                                                       <a href="{% url 'store:delete_cart' item.id %}" >
                                                         <span style="color: black;"><i class="ri-close-line ms-3"></i></span>
                                                       </a>
@@ -65,8 +66,134 @@
                                     </div>
                                     <!-- / Cart Item -->
                                 </tbody>
-                                
+                               
                                 {% endfor %}
+                                <script>
+                                    
+                                    function increaseQuantity(variationId) {
+                                        const csrfToken = getCookie('csrftoken');
+                                        //var selectedSize = document.getElementById('quantity_no').value;
+                                        
+                                        const body = JSON.stringify({
+                                            product_id: variationId,
+                                            
+                                        });
+                                        
+                                        fetch('/check_quantity', {
+                                            method: 'POST',
+                                            headers: {
+                                                'X-CSRFToken': csrfToken,
+                                                'Content-Type': 'application/json'
+                                            },
+                                            body: body
+                                        })
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            // Handle the response from the server
+                                            if (data.inStock) {
+                                                // If the stock is available, increment the quantity and update the UI
+                                                console.log("bacccck")
+                                                quantity = data.quantity + 1
+                                                console.log(data.quantity + 1)
+                                                updateQuantity(variationId,quantity);
+                                            } else {
+                                                // If the stock is not available, display an error message or take appropriate action
+                                                alert('The requested quantity exceeds the available stock.');
+                                            }
+                                        })
+                                        .catch(error => {
+                                            // Handle any error that occurs during the request
+                                            console.error('Error:', error);
+                                        });
+                                    }
+                                    function updateQuantity(variationId,quantity) {
+                                        console.log("hooioio")
+                                        const csrfToken = getCookie('csrftoken');
+                                    
+                                        const body = JSON.stringify({
+                                            variation_id: variationId
+                                        });
+                                    
+                                        fetch('/update_cart_quantity/', {
+                                            method: 'POST',
+                                            headers: {
+                                                'X-CSRFToken': csrfToken,
+                                                'Content-Type': 'application/json'
+                                            },
+                                            body: body
+                                        })
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            // Handle the response from the server
+                                            if (data.success) {
+                                                // If the quantity update is successful, update the UI with the new quantity value
+                                                console.log(variationId)
+                                                const quantityElement = document.getElementById('quantity-' + variationId);
+                                                console.log(quantityElement);
+                                                const currentQuantity = parseInt(quantityElement.innerText.trim());
+                                                const newQuantity = quantity;
+                                                quantityElement.innerText = newQuantity;
+                                              
+
+                                            } else {
+                                                // If the quantity update fails, display an error message or take appropriate action
+                                                alert('Failed to update quantity. Please try again.');
+                                            }
+                                        })
+                                        .catch(error => {
+                                            // Handle any error that occurs during the request
+                                            console.error('Error:', error);
+                                        });
+                                    }
+                                    function decreaseQuantity(variationId) {
+                                        const csrfToken = getCookie('csrftoken');
+                                    
+                                        const body = JSON.stringify({
+                                            variation_id: variationId
+                                        });
+                                    
+                                        fetch('/decrease_cart_quantity/', {
+                                            method: 'POST',
+                                            headers: {
+                                                'X-CSRFToken': csrfToken,
+                                                'Content-Type': 'application/json'
+                                            },
+                                            body: body
+                                        })
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            // Handle the response from the server
+                                            if (data.success) {
+                                                // If the quantity update is successful, update the UI with the new quantity value
+                                                console.log(variationId)
+                                                const quantityElement = document.getElementById('quantity-' + variationId);
+                                                console.log(quantityElement);
+                                                const currentQuantity = parseInt(quantityElement.innerText.trim());
+                                                const newQuantity = data.quantity;
+                                                quantityElement.innerText = newQuantity;
+                                            if (data.quantity == 0){
+                                                location.reload();
+
+                                            }
+                                            } else {
+                                                // If the quantity update fails, display an error message or take appropriate action
+                                                alert('Failed to update quantity. Please try again.');
+                                            }
+                                        })
+                                        .catch(error => {
+                                            // Handle any error that occurs during the request
+                                            console.error('Error:', error);
+                                        });
+                                    }
+                                    
+                                    // Function to retrieve the value of a cookie by its name
+                                    function getCookie(name) {
+                                        const value = `; ${document.cookie}`;
+                                        const parts = value.split(`; ${name}=`);
+                                        if (parts.length === 2) return parts.pop().split(';').shift();
+                                    }
+                                </script>
+                                
                             </table>
                         </div>
                     </div>

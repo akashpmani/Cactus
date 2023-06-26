@@ -50,8 +50,9 @@ class OrderProduct(models.Model):
     payment = models.ForeignKey(Payment, on_delete=models.SET_NULL,blank=True, null=True)
     user = models.ForeignKey(User_Accounts, on_delete=models.CASCADE)
     product = models.ForeignKey(Product_item, on_delete=models.CASCADE)
-    quantity = models.IntegerField( )
-    product_price = models.FloatField( )
+    quantity = models.IntegerField()
+    product_price = models.FloatField()
+    
     ordered = models.BooleanField(default=False)
     created_at =models.DateTimeField(auto_now_add=True)
     updated_at =models.DateTimeField(auto_now=True)

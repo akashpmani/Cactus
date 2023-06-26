@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'cropperjs',
     "phonenumber_field",
     'orders',
+    'payment',
 ]
 
 MIDDLEWARE = [
@@ -161,3 +162,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+razor_pay_key_id = 'rzp_test_0cr8VAzWXYja52'
+key_secret = 'fgnut3ZvjRjbF3QgxtqemdUh' 

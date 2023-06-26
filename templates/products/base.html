@@ -181,7 +181,7 @@
                         <!-- Navbar Cart Icon-->
                         
                         <li class="ms-1 d-inline-block position-relative dropdown-cart">
-                            <button class="nav-link me-0 disable-child-pointer border-0 p-0 bg-transparent text-body" type="button">
+                            <button class="nav-link me-0 disable-child-pointer border-0 p-0 bg-transparent text-body shopping-cart" type="button">
                                 Bag({{ product_data|length }})
                             </button>
                             <div class="cart-dropdown dropdown-menu">
@@ -425,7 +425,7 @@
                                 </ul>
                               </li>
                                <li class="nav-item">
-                                <a class="nav-link" href=" {% url 'store:allproducts' %}" role="button">
+                                <a class="nav-link" href=" {% url 'store:products' %}" role="button">
                                   All Products
                                 </a>
                               </li>

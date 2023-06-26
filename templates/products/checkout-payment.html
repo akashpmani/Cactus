@@ -231,8 +231,11 @@
                             <div class="pt-5 mt-5 pb-5 border-top d-flex flex-column flex-md-row justify-content-between align-items-center">
                               <a href="./checkout-shipping.html" class="btn ps-md-0 btn-link fw-bolder w-100 w-md-auto mb-2 mb-md-0" role="button">Back to
                                 shipping</a>
-                              <a href="#" class="btn btn-dark w-100 w-md-auto" role="button">Complete Order</a>
+                              <a href="#" class="btn btn-dark w-100 w-md-auto d-none" id="completeOrderBtnstripe" role="button">Complete Order</a>
+                              <a href="#" class="btn btn-dark w-100 w-md-auto d-none" id="completeOrderBtncod" role="button">Complete Order</a>
+                              <a href="#" class="btn btn-dark w-100 w-md-auto d-none" id="rzp-button1" role="button">Complete Order</a>
                             </div>
+                         
                         </div>
                     </div>
                 </div>
@@ -295,6 +298,9 @@
         <!-- /Page Content -->
     </section>
     <!-- / Main Section-->
+    <form action="">
+      {% csrf_token %}
+    </form>
 
 
     <!-- Theme JS -->
@@ -303,73 +309,140 @@
     
     <!-- Theme JS -->
     <script src="./assets/js/theme.bundle.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function() {
+    // Get the payment options radio buttons
+    const paymentOptions = document.querySelectorAll('input[name="checkoutPaymentMethod"]');
+    const completeOrderBtn = document.getElementById('completeOrderBtnstripe');
+    completeOrderBtn.id = 'completeOrderStripeBtn';
+    
+    // Add event listener to each payment option
+    paymentOptions.forEach(option => {
+      option.addEventListener('change', handlePaymentOptionChange);
+    });
+    
+    // Call the handlePaymentOptionChange function to show the initial button
+    handlePaymentOptionChange();
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    // Function to handle payment option change
+    function handlePaymentOptionChange() {
+      const selectedOption = document.querySelector('input[name="checkoutPaymentMethod"]:checked').id;
 
-    <script>
-      $(document).ready(function() {
-        // Listen for change event on radio buttons
-        $('input[name="checkoutPaymentMethod"]').change(function() {
-          // Get the ID of the selected radio button
-          var selectedMethod = $(this).attr('id');
-          
-          // Show or hide content based on the selected radio button
-          if (selectedMethod === 'checkoutPaymentStripe') {
-            $('.card-details').removeClass('d-none');
-            $('.paypal-details').addClass('d-none');
-            $('.cod-details').addClass('d-none');
-          } else if (selectedMethod === 'checkoutPaymentPaypal') {
-            $('.card-details').addClass('d-none');
-            $('.paypal-details').removeClass('d-none');
-            $('.cod-details').addClass('d-none');
-          } else if (selectedMethod === 'checkoutPaymentcod') {
-            $('.card-details').addClass('d-none');
-            $('.paypal-details').addClass('d-none');
-            $('.cod-details').removeClass('d-none');
+      // Show or hide content based on the selected radio button
+      if (selectedOption === 'checkoutPaymentStripe') {
+        $('.card-details').removeClass('d-none');
+        $('.paypal-details').addClass('d-none');
+        $('.cod-details').addClass('d-none');
+
+        $('#completeOrderBtnstripe').removeClass('d-none');
+        $('#completeOrderBtncod').addClass('d-none');
+        $('#rzp-button1').addClass('d-none');
+        completeOrderBtn.id = 'completeOrderStripeBtn';
+      } else if (selectedOption === 'checkoutPaymentPaypal') {
+        $('.card-details').addClass('d-none');
+        $('.paypal-details').removeClass('d-none');
+        $('.cod-details').addClass('d-none');
+        
+        $('#completeOrderBtnstripe').addClass('d-none');
+        $('#completeOrderBtncod').addClass('d-none');
+        $('#rzp-button1').removeClass('d-none');
+        completeOrderBtn.id = 'rzp-button1';
+      } else if (selectedOption === 'checkoutPaymentcod') {
+        $('.card-details').addClass('d-none');
+        $('.paypal-details').addClass('d-none');
+        $('.cod-details').removeClass('d-none');
+        
+        $('#completeOrderBtnstripe').addClass('d-none');
+        $('#completeOrderBtncod').removeClass('d-none');
+        $('#rzp-button1').addClass('d-none');
+        completeOrderBtn.id = 'completeOrderCODBtn';
+      }
+    }
+  });
+</script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  document.getElementById('rzp-button1').onclick = function(e) {
+    e.preventDefault();
+    $.ajax({
+      method: "get",
+      url: "/payment/pay-with-razor",
+      success: function(response) {
+        var total = response.total ;
+        var total = parseInt(total) * 100
+        console.log(total)
+        var name = response.name;
+        console.log(name)
+        var email = response.email;
+        console.log(email)
+        var phone =parseInt( response.phone);
+        console.log(phone)
+        var total = 20000
+        var options = {
+          "key": 'rzp_test_8Pb1f6KGthfeQt', // Enter the Key ID generated from the Dashboard
+          "amount": total, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+          "currency": "INR",
+          "name": "CACTUS", // Your business name
+          "description": "Thank you for buying from us",
+          "image": "",
+          //"order_id": "order_9A33XWu170gUtm", // This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+          "handler": function(response_razor) {
+            //alert(response_razor.razorpay_payment_id);
+            //alert(response_razor.razorpay_order_id);
+            //alert(response_razor.razorpay_signature);
+            var token = $("[name='csrfmiddlewaretoken']").val();
+            data = {
+              "payment_mode" : "razorpay",
+              "payment_id" : response_razor.razorpay_payment_id,
+              csrfmiddlewaretoken : token,
+            }
+            $.ajax({
+              method = "POST",
+              url = "/payment/razorpay",
+              data = data,
+              success: function ( response){
+
+              }
+            })
+          },
+          "prefill": { // We recommend using the prefill parameter to auto-fill customer's contact information, especially their phone number
+            "name": name, // Your customer's name
+            "email": email,
+            "contact": phone // Provide the customer's phone number for better conversion rates
+          },
+          "notes": {
+            "address": "Razorpay Corporate Office"
+          },
+          "theme": {
+            "color": "#3399cc"
           }
+        };
+        var rzp1 = new Razorpay(options);
+        rzp1.on('payment.failed', function(response) {
+          alert(response.error.code);
+          alert(response.error.description);
+          alert(response.error.source);
+          alert(response.error.step);
+          alert(response.error.reason);
+          alert(response.error.metadata.order_id);
+          alert(response.error.metadata.payment_id);
         });
-      });
-    </script>
+        rzp1.open();
+      }
+    });
+  };
+</script>
+
+  
+  
 
     <script src="https://cdn.jsdelivr.net/gh/kushalcodes/captcha-gen-js@d606858041d81dfe67fc64d78f35c81cfcc05bcb/min/captcha-gen.min.js"></script>
-    <script>
-      $(document).ready(function() {
-        // Initialize with a specific ID
-        __Captcha.init("#my_captcha");
-    
-        // Listen for the verification event
-        $(document).on('captcha.verification', function(event, data) {
-          if (data.success) {
-            // CAPTCHA verification succeeded
-            console.log('CAPTCHA verification succeeded!');
-            // Show the "Complete Order" button
-            $('#completeOrderBtn').removeClass('d-none');
-          } else {
-            // CAPTCHA verification failed
-            console.log('CAPTCHA verification failed!');
-            // Hide the "Complete Order" button
-            $('#completeOrderBtn').addClass('d-none');
-          }
-        });
-    
-        // Handle the click event on the "Complete Order" button
-        $('#completeOrderBtn').on('click', function(event) {
-          // Prevent the default button click behavior
-          event.preventDefault();
-    
-          // Check if CAPTCHA verification succeeded
-          if (!$('#completeOrderBtn').hasClass('d-none')) {
-            // CAPTCHA verification succeeded, proceed with the order completion
-            console.log('Order completed!');
-          } else {
-            // CAPTCHA verification failed, show an error message
-            console.log('CAPTCHA verification failed! Cannot complete the order.');
-          }
-        });
-      });
-    </script>
-    
+  
 </body>
 
 </html>
+
+
+
+

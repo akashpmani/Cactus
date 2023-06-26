@@ -372,7 +372,7 @@
                                 <option>Disable</option>
                                 <option>Delete</option>
                             </select>
-                            <a href="{% url 'store:product_detail' product.slug %}" class="btn btn-primary"> View live <i class="material-icons md-launch"></i> </a>
+                            {% comment %} <a href="{% url 'store:product_detail' product.slug %}" class="btn btn-primary"> View live <i class="material-icons md-launch"></i> </a> {% endcomment %}
                         </div> <!--  col.// -->
                     </div> <!-- card-body.// -->
                     <hr class="my-4">
@@ -615,13 +615,10 @@
                         </form>
                         </section>
                       </div>
-
-
 <script>
     var bs_modal = $('#modalupload');
     var image = document.getElementById('imageupload');
     var cropper, reader, file;
-  
     // Get CSRF token from the cookie
     function getCSRFToken() {
       var name = 'csrftoken';
@@ -686,7 +683,6 @@
           var base64data = reader.result;
           // Get CSRF token
           var csrfToken = getCSRFToken();
-  
           $.ajax({
             type: "POST",
             dataType: "json",

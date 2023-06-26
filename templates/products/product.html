@@ -63,7 +63,7 @@
         <div class="row g-9" data-sticky-container>
         
             <!-- Product Images-->
-            
+            <div class="row g-9" data-sticky-container>
                 <style>
                     .thumb_list {
                         list-style: none;
@@ -73,7 +73,8 @@
                         flex-wrap: wrap;
                         margin-top: 20px;
                         display: flex;
-              
+                        overflow-x: hidden;
+                        flex-wrap: nowrap;
                       }
                       
                       @media (max-width: 600px) {
@@ -231,7 +232,7 @@
                         </picture>
                     </div>
             
-                    <div class="thumb" >
+                    <div class="thumb" id="slide">
                         <ul class="thumb_list">
                             <li class="thumb_item "><img onclick="image_gal(this)" src="{{data.image.url}}" alt=""></li>
                             {% for image in images %}
@@ -256,10 +257,10 @@
                 </style>
 
             
-                <!-- /Product Images-->
+            <!-- /Product Images-->
 
-                <!-- Product Information-->
-                <div class="col-12 col-md-6 col-lg-5">
+            <!-- Product Information-->
+            <div class="col-12 col-md-6 col-lg-5">
                 <div class="sticky-top top-5">
                     {% comment %} <div class="pb-3" data-aos="fade-in">
                         <div class="d-flex align-items-center mb-3">
@@ -289,94 +290,226 @@
                         
                         <h1 class="mb-1 fs-2 fw-bold">{{data.name}}</h1>
                         <h5 class="mb-1 ">{{data.bio_name}}</h5>
-                       
-                       
-                        
-                        <div class="border-top mt-4 mb-3 product-option">
-                            <small class="text-uppercase pt-4 d-block fw-bolder">
-                                <span class="text-muted">Selected Size ({{data.name}})</span> : <span class="selected-option fw-bold" data-pixr-product-option="size">M</span>
-                            </small>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <p class="fs-4 m-0" id="dynamic-price"></p>
-                            </div>
+                    
                            
-                            <div class="mt-4 d-flex justify-content-start flex-wrap align-items-start">
-                                {% for var in varients %}
-                                    <div class="form-check-option form-check-rounded">
-                                        <input 
-                                            type="radio" 
-                                            name="product-option-sizes" 
-                                            value="{{ var.size }}" 
-                                            id="option-sizes-{{ forloop.counter0 }}"
-                                            {% if var.size == selected_size %} checked {% endif %}
-                                            onclick="updatePrice('{{ var.price }}', '{{ var.id }}')">
-                                        <label for="option-sizes-{{ forloop.counter0 }}">
-                                            <small>{{ var.size }}</small>
-                                        </label>
+                            <div class="border-top mt-4 mb-3 product-option">
+                                <small class="text-uppercase pt-4 d-block fw-bolder">
+                                    <span class="text-muted">Selected Size ({{ data.name }})</span> : <span class="selected-option fw-bold" data-pixr-product-option="size">{{ size }}</span>
+                                </small>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <p class="fs-4 m-0" id="dynamic-price">{{var.price}}</p>
+                                </div>
+                               
+                                <div class="border-top mt-4 mb-3 product-option">
+                                    <!-- Option Labels and Price Display -->
+                                
+                                
+                                    <div class="mt-4 d-flex justify-content-start flex-wrap align-items-start">
+                                        {% for var in varients %}
+                                        <div class="form-check-option form-check-rounded">
+                                            {% if var in cart_items %}
+                                                <input 
+                                                type="radio" 
+                                                name="product-option-sizes" 
+                                                value="{{ var.size }}" 
+                                                id="option-sizes-{{ forloop.counter0 }}"
+                                                {% if var.size == size %} checked {% endif %}
+                                                onclick="updatePrice('{{ var.price }}', '{{ var.id }}'); resetCounter() " onload="setcount()">
+                                            {% else %}
+                                                <input 
+                                                type="radio" 
+                                                name="product-option-sizes" 
+                                                value="{{ var.size }}" 
+                                                id="option-sizes-{{ forloop.counter0 }}"
+                                                {% if var.size == size %} checked {% endif %}
+                                                onclick="updatePrice('{{ var.price }}', '{{ var.id }}'); resetCounter();">
+                                                {% endif %}
+                                            
+                                            <label for="option-sizes-{{ forloop.counter0 }}">
+                                                <small>{{ var.size }}</small>
+                                            </label>
+                                        </div>
+                                        {% endfor %}
                                     </div>
-                                {% endfor %}
-                            </div>
-                            
-                            <br>
-                            
-                            <div class="wrapper">
-                                <span class="minus">-</span>
-                                <span class="num" >01</span>
-                                <span class="plus">+</span>
-                            </div>
-                            
-                            <script>
-                                const plus = document.querySelector(".plus");
-                                const minus = document.querySelector(".minus");
-                                const quantityElement = document.querySelector(".num");
                                 
-                                let initalquantity = 1;
+                                    <br>
                                 
-                                plus.addEventListener("click", () => {
-                                  
-                                  initalquantity++;
-                                  quantityElement.innerText = (initalquantity < 10) ? "0" + initalquantity : initalquantity;
-                                });
+                                    <!-- Quantity Counter -->
+                                    <div class="wrapper">
+                                        <span class="minus" onclick="decreaseQuantity()">-</span>
+                                        <span class="num" id="quantity_no">1</span>
+                                        <span class="plus" onclick="increaseQuantity()">+</span>
+                                    </div>
                                 
-                                minus.addEventListener("click", () => {
-                                  if (initalquantity > 1) {
-                                    initalquantity--;
-                                    quantityElement.innerText = (initalquantity < 10) ? "0" + initalquantity : initalquantity;
-                                  
-                                  }
-                                });
+                                    <!-- Form -->
+                                    <form method="post" id="product-form">
+                                        {% csrf_token %}
+                                        <!-- other form fields -->
+                                        <input type="hidden" name="selected_size" id="selected-size" value="{{ size }}">
+                                        <input type="hidden" name="variation_id" id="variation-id" value="{{var.id}}">
+                                        <button class="btn btn-dark w-100 mt-4 mb-0 hover-lift-sm hover-boxshadow" onclick="quantity_check();">Add To Shopping Bag</button>
+                                    </form>
                                 
-                                function updatePrice(price, id) {
-                                    var dynamicPrice = document.getElementById('dynamic-price');
-                                    dynamicPrice.innerHTML = '&#8377;' + price;
-                                    
-                                    document.getElementById('variation-id').value = id;
-                                    
-                                }
-                            
-                                function updateFormAction() {
-                                    var form = document.getElementById('product-form');
-                                    var variationId = document.getElementById('variation-id').value;
-                                    var quantityElement = document.querySelector(".num");
-                                    let quantity = quantityElement.innerText;
-                                    console.log(quantity);
+                                    <script>
+                                        const plus = document.querySelector(".plus");
+                                        const minus = document.querySelector(".minus");
+                                        const quantityElement = document.querySelector(".num");
+                                        let quantity = 1;
+                                            
+                                    function setcount(){
+                                        console.log("ghsdfshjfg")
+                                        const csrfToken = getCookie('csrftoken');
+                                        var variationId = document.getElementById('variation-id').value;
+                                        const body = JSON.stringify({
+                                            product_id: variationId,
+                                        });
+                                        fetch('/get_added', {
+                                            method: 'POST',
+                                            headers: {
+                                                'X-CSRFToken': csrfToken,
+                                                'Content-Type': 'application/json'
+                                            },
+                                            body: body
+                                        })
+                                        .then(response => response.json())
+                                            .then(data => {
+                                                // Handle the response from the server
+                                                if (data.inStock) {
+                                                    // If the stock is available, increment the quantity and update the UI
+                                                    console.log("bacccck")
+                                                    quantity = data.quantity;
+                                                    updateQuantity();
+                                                } else {
+                                                    // If the stock is not available, display an error message or take appropriate action
+                                                    alert('The requested quantity exceeds the available stock.');
+                                                }
+                                            })
+                                            .catch(error => {
+                                                // Handle any error that occurs during the request
+                                                console.error('Error:', error);
+                                            });
 
-                                 
-                                    form.action = "/add_cart/" + variationId + "/" + quantity + "/";
-                                    form.submit();
-                                }
+                                    }
+
+                                        function increaseQuantity() {
+                                            const csrfToken = getCookie('csrftoken');
+                                            var variationId = document.getElementById('variation-id').value;
+                                            //var selectedSize = document.getElementById('quantity_no').value;
+                                            
+                                            const body = JSON.stringify({
+                                                product_id: variationId,
+                                                quantity: quantity
+                                            });
+                                            
+                                            fetch('/check_stock', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'X-CSRFToken': csrfToken,
+                                                    'Content-Type': 'application/json'
+                                                },
+                                                body: body
+                                            })
+                                            .then(response => response.json())
+                                            .then(data => {
+                                                console.log(data)
+                                                console.log(data.in_stock)
+                                                // Handle the response from the server
+                                                if (data.in_stock) {
+                                                    // If the stock is available, increment the quantity and update the UI
+                                                    console.log("bk")
+                                                    quantity++;
+                                                    updateQuantity();
+                                                } else {
+                                                    // If the stock is not available, display an error message or take appropriate action
+                                                    alert('The requested quantity exceeds the available stock.');
+                                                }
+                                            })
+                                            .catch(error => {
+                                                // Handle any error that occurs during the request
+                                                console.error('Error:', error);
+                                            });
+                                        }
+                                        
+                                        
+                                        // Function to retrieve the value of a cookie by its name
+                                        function getCookie(name) {
+                                            const value = `; ${document.cookie}`;
+                                            const parts = value.split(`; ${name}=`);
+                                            if (parts.length === 2) return parts.pop().split(';').shift();
+                                        }
+                                        
                             
-                                // Call updateFormAction initially to set the correct form action
-                                updateFormAction();
-                            </script>
+                                        function decreaseQuantity() {
+                                            if (quantity > 1) {
+                                                quantity--;
+                                                updateQuantity();
+                                            }
+                                        }
                             
-                            <form action="/add_cart" method="post" id="product-form">
-                                {% csrf_token %}
-                                <!-- other form fields -->
-                                <input type="hidden" name="selected_size" id="selected-quantity" value="">
-                                <input type="hidden" name="variation_id" id="variation-id" value="">
-                                <button class="btn btn-dark w-100 mt-4 mb-0 hover-lift-sm hover-boxshadow" onclick="updateFormAction();">Add To Shopping Bag</button>
-                            </form>
+                                        function updateQuantity() {
+                                            quantityElement.innerText = quantity < 10 ? "0" + quantity : quantity;
+                                        }
+                            
+                                        function resetCounter() {
+                                            quantity = 1;
+                                            updateQuantity();
+                                        }
+                            
+                                        function updatePrice(price, id) {
+                                            var dynamicPrice = document.getElementById('dynamic-price');
+                                            dynamicPrice.innerHTML = '&#8377;' + price;
+                            
+                                            document.getElementById('variation-id').value = id;
+                                        }
+                                                
+                                    function quantity_check(){
+                                        const csrfToken = getCookie('csrftoken');
+                                        var variationId = document.getElementById('variation-id').value;
+                                        const body = JSON.stringify({
+                                            product_id: variationId,
+                                            quantity : quantity,
+                                        });
+                                        fetch('/quantity_check', {
+                                            method: 'POST',
+                                            headers: {
+                                                'X-CSRFToken': csrfToken,
+                                                'Content-Type': 'application/json'
+                                            },
+                                            body: body
+                                        })
+                                        .then(response => response.json())
+                                            .then(data => {
+                                                // Handle the response from the server
+                                                if (data.inStock) {
+                                                    updateFormAction();
+                                                } else {
+                                                    // If the stock is not available, display an error message or take appropriate action
+                                                    alert('The requested quantity exceeds the available stock.');
+                                                }
+                                            })
+                                            .catch(error => {
+                                                // Handle any error that occurs during the request
+                                                console.error('Error:', error);
+                                            });
+
+                                    }
+                            
+                                        function updateFormAction() {
+                                            var form = document.getElementById('product-form');
+                                            var variationId = document.getElementById('variation-id').value;
+                                            var selectedSize = document.querySelector('input[name="product-option-sizes"]:checked').value;
+                                            document.getElementById('selected-size').value = selectedSize;
+                            
+                                            form.action = "/add_cart/" + variationId + "/" + quantity + "/";
+                                            form.submit();
+                                        }
+                            
+                                        // Call updateFormAction initially to set the correct form action
+                                        //updateFormAction();
+                                    </script>
+                                </div>
+                         
+                            
                         <!-- Product Highlights-->
                             <div class="my-5">
                                 <div class="row">
@@ -461,8 +594,7 @@
                           </div>
                         <!-- / Product Accordion-->
                     </div>                    </div>
-                </div>
-            
+            </div>
             <!-- / Product Information-->
         </div>
         <!-- / Product Top Section-->
@@ -517,7 +649,8 @@
                                       </div>
                               </div>
                               <div class="card-body px-0">
-                                  <a class="text-decoration-none link-cover" href="{% url 'store:product_detail' product.slug%}">{{product.name}}</a>
+                                {% comment "" %}{% url 'store:product_detail' product.slug%}{% endcomment %}
+                                  <a class="text-decoration-none link-cover" href="">{{product.name}}</a>
                                   <small class="text-muted d-block"></small>
                                           <p class="mt-2 mb-0 small"></p>
                               </div>
@@ -845,9 +978,6 @@
                 </div><!-- / Review Pagination-->                </div>
             <!-- / Reviews-->
         </div> {% endcomment %}
-        </div>
-    </div>
-    
 
     </div>
 
