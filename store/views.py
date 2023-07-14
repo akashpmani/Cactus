@@ -42,7 +42,7 @@ def products(request):
     product = Product_item.objects.order_by('id')
     categories = Category.objects.all()
     tags = Product_Tags.objects.all()   
-    paginator = Paginator(product, 12)
+    paginator = Paginator(product, 1)
     page_number = 1
     if request.method == 'POST':
         page_number = request.POST.get('page')
@@ -65,7 +65,7 @@ def allproducts(request):
     product = Products_Table.objects.order_by('id')
     categories = Category.objects.all()
     tags = Product_Tags.objects.all()
-    paginator = Paginator(product,9)
+    paginator = Paginator(product,1)
     page_number = 1
     if request.method == 'POST':
         data = json.loads(request.body)  # Parse the JSON data
@@ -190,7 +190,7 @@ def product_detail(request, slug , size):
 
 def profile(request):
 
-    return render(request, 'products/profile.html')
+    return render(request, 'accounts/profile1.html')
 
 
 def cart(request):

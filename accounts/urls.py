@@ -14,6 +14,13 @@ urlpatterns = [
     path('profile/add_address',views.add_address, name='add_address'),
     path('profile/edit_address/<int:id>',views.edit_address, name='edit_address'),
     path('profile/delete_address/<int:id>',views.delete_address, name='delete_address'),
-    path('profile/update_password/<int:id>',views.update_password, name='update_password'),
+    path('profile/update_password',views.update_password, name='update_password'),
+    path('myprofile',views.my_profile, name='my_profile'),
+    path('editprofile',views.editprofile, name='editprofile'),
+    path('addressbook',views.addressbook, name='addressbook'),
+    path('updateaddress',views.updateaddress, name='updateaddress'),
+    path('myorders',views.myorders, name='myorders'),
+    path('manage_order/<int:id>',views.manage_order, name='manage_order'),
+    path('returnedorders',views.returnedorders, name='returnedorders'),
 ]
 

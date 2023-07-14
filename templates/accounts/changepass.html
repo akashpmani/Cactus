@@ -1,0 +1,290 @@
+{% extends 'products/base.html' %}
+{% load static %}
+
+{% block main %}
+
+
+    <!--====== Google Font ======-->
+  <!-- Custom Google Fonts-->
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Roboto:wght@300;400;700&display=auto"
+    rel="stylesheet">
+
+    <!--====== Vendor Css ======-->
+    <link rel="stylesheet" href="{% static 'profile/vendor.css' %}">
+
+    <!--====== Utility-Spacing ======-->
+    <link rel="stylesheet" href="{% static 'profile/utility.css' %}">
+
+    <!--====== App ======-->
+    <link rel="stylesheet" href="{% static 'profile/app.css' %}">
+
+    <!--====== Main App ======-->
+    <body class="config">
+        <div class="app-content">
+
+            <!--====== Section 1 ======-->
+            <div class="u-s-p-y-60">
+
+                <!--====== Section Content ======-->
+                <div class="section__content">
+                    <div class="container">
+                        <div class="breadcrumb">
+                            <div class="breadcrumb__wrap">
+                                <ul class="breadcrumb__list">
+                                    <li class="has-separator">
+
+                                        <a href="index.html">Home</a></li>
+                                    <li class="is-marked">
+
+                                        <a href="dash-edit-profile.html">My Account</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--====== End - Section 1 ======-->
+
+
+            <!--====== Section 2 ======-->
+            <div class="u-s-p-b-60">
+
+                <!--====== Section Content ======-->
+                <div class="section__content">
+                    <div class="dash">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-lg-3 col-md-12">
+
+                                    <!--====== Dashboard Features ======-->
+                                    <div class="dash__box dash__box--bg-white dash__box--shadow u-s-m-b-30">
+                                        <div class="dash__pad-1">
+
+                                            <span class="dash__text u-s-m-b-16">Hello, John Doe</span>
+                                            <ul class="dash__f-list">
+                                                <li>
+
+                                                    <a class="dash-active" href="{% url 'accounts:profile' %}">Manage My Account</a></li>
+                                                <li>
+
+                                                    <a href="{% url 'accounts:my_profile' %}">My Profile</a></li>
+                                                <li>
+
+                                                    <a href="{% url 'accounts:addressbook' %}">Address Book</a></li>
+                                                <li>
+
+                                                    <a href="dash-track-order.html">Track Order</a></li>
+                                                <li>
+
+                                                    <a href="{% url 'accounts:myorders' %}">My Orders</a></li>
+                                                <li>
+
+                                                    <a href="dash-payment-option.html">My Payment Options</a></li>
+                                                <li>
+
+                                                    <a href="{% url 'accounts:returnedorders' %}">My Returns & Cancellations</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="dash__box dash__box--bg-white dash__box--shadow dash__box--w">
+                                        <div class="dash__pad-1">
+                                            <ul class="dash__w-list">
+                                                <li>
+                                                    <div class="dash__w-wrap">
+
+                                                        <span class="dash__w-icon dash__w-icon-style-1"><i class="fas fa-cart-arrow-down"></i></span>
+
+                                                        <span class="dash__w-text">4</span>
+
+                                                        <span class="dash__w-name">Orders Placed</span></div>
+                                                </li>
+                                                <li>
+                                                    <div class="dash__w-wrap">
+
+                                                        <span class="dash__w-icon dash__w-icon-style-2"><i class="fas fa-times"></i></span>
+
+                                                        <span class="dash__w-text">0</span>
+
+                                                        <span class="dash__w-name">Cancel Orders</span></div>
+                                                </li>
+                                                <li>
+                                                    <div class="dash__w-wrap">
+
+                                                        <span class="dash__w-icon dash__w-icon-style-3"><i class="far fa-heart"></i></span>
+
+                                                        <span class="dash__w-text">0</span>
+
+                                                        <span class="dash__w-name">Wishlist</span></div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <!--====== End - Dashboard Features ======-->
+                                </div>
+                                <div class="col-lg-9 col-md-12">
+                                    <div class="dash__box dash__box--shadow dash__box--radius dash__box--bg-white">
+                                        <div class="dash__pad-2">
+                                            <h1 class="dash__h1 u-s-m-b-14">Change Password</h1>
+
+                                          
+                                            <div class="row">
+                                                <div class="col-lg-12">
+                                                    <form class="dash-edit-p">
+                                                        <div class="gl-inline">
+                                                           
+                                                            <div class="u-s-m-b-30">
+
+                                                                <label class="gl-label" for="reg-lname">Current Password</label>
+
+                                                                <input class="input-text input-text--primary-style" type="text" id="oldPassword"  placeholder="Current Password"></div>
+                                                        </div>
+
+                                                      
+                                                </div>
+                                                <div class="col-lg-12">
+                                                    <span class="dash__text u-s-m-b-30">New password must contain at least 8 characters, one letter, one digit, and one symbol.</span>
+                                                
+                                                        <div class="gl-inline">
+                                                            <div class="u-s-m-b-30">
+
+                                                                <label class="gl-label" for="reg-fname">New Password</label>
+
+                                                                <input class="input-text input-text--primary-style" type="text" id="newPassword"  placeholder="New Password"></div>
+                                                            <div class="u-s-m-b-30">
+
+                                                                <label class="gl-label" for="reg-lname">Re-enter New Password</label>
+
+                                                                <input class="input-text input-text--primary-style" type="text" id="confirmPassword" placeholder="Re-enter New Password"></div>
+                                                        </div>
+
+                                                        <button class="btn btn--e-brand-b-2" id="updateBtn" type="submit">SAVE</button>
+                                                    </form>
+                                                    <form action="">
+                                                        {% csrf_token %}
+                                                      </form>
+                                                    <script>
+                                                        $(document).ready(function() {
+                                                            $('#updateBtn').click(function(e) {
+                                                              e.preventDefault();
+                                                              if (validatePasswords()) {
+                                                                // Alert moved inside the AJAX success callback
+                                                              } 
+                                                            });
+                                                          
+                                                            function validatePasswords() {
+                                                              var oldPassword = $('#oldPassword').val();
+                                                              var newPassword = $('#newPassword').val();
+                                                              var confirmPassword = $('#confirmPassword').val();
+                                                          
+                                                              // Check if new password and confirm password match
+                                                              if (newPassword !== confirmPassword) {
+                                                                alert('New password and confirm password do not match.');
+                                                                return false;
+                                                              }
+                                                          
+                                                              // Check if the password meets the required criteria
+                                                              var passwordPattern = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+                                                              if (!passwordPattern.test(newPassword)) {
+                                                                alert('New password must contain at least 8 characters, one letter, one digit, and one symbol.');
+                                                                return false;
+                                                              }
+                                                          
+                                                              var token = $("[name='csrfmiddlewaretoken']").val();
+                                                              var requestData = {
+                                                                oldPassword: oldPassword,
+                                                                newPassword: newPassword,
+                                                                csrfmiddlewaretoken: token
+                                                              };
+                                                          
+                                                              var updatePasswordURL = "{% url 'accounts:update_password' %}";
+                                                              $.ajax({
+                                                                type: 'POST',
+                                                                url: updatePasswordURL,
+                                                                data: requestData,
+                                                                success: function(response) {
+                                                                  // Handle the success response from the server
+                                                                  // Perform any necessary actions here
+                                                                  alert('Password changed successfully');
+                                                                  setTimeout(function() {
+                                                                    window.location.href = '{% url 'accounts:profile' %}'; // Replace with the desired URL
+                                                                  }, 2000); // 3000
+                                                                },
+                                                                error: function(xhr, textStatus, error) {
+                                                                  // Handle any errors that occur during the AJAX request
+                                                                  console.log('Password update failed:', error);
+                                                                }
+                                                              });
+                                                          
+                                                              // Return false here to prevent the form from submitting immediately
+                                                              return false;
+                                                            }
+                                                          
+                                                            // Event handler for cancel button click
+                                                            $('#cancelButton').click(function(e) {
+                                                              e.preventDefault(); // Prevent the default form submission
+                                                          
+                                                              // Clear the form or perform any necessary actions
+                                                              $('#passwordForm')[0].reset();
+                                                            });
+                                                          });
+                                                          
+                                                      </script>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--====== End - Section Content ======-->
+            </div>
+            <!--====== End - Section 2 ======-->
+        </div>
+
+
+    <!--====== Google Analytics: change UA-XXXXX-Y to be your site's ID ======-->
+    <script>
+        window.ga = function() {
+            ga.q.push(arguments)
+        };
+        ga.q = [];
+        ga.l = +new Date;
+        ga('create', 'UA-XXXXX-Y', 'auto');
+        ga('send', 'pageview')
+    </script>
+    <script src="https://www.google-analytics.com/analytics.js" async defer></script>
+
+    <!--====== Vendor Js ======-->
+    <script src="js/vendor.js"></script>
+
+    <!--====== jQuery Shopnav plugin ======-->
+    <script src="js/jquery.shopnav.js"></script>
+
+    <!--====== App ======-->
+    <script src="js/app.js"></script>
+
+    <!--====== Noscript ======-->
+    <noscript>
+        <div class="app-setting">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="app-setting__wrap">
+                            <h1 class="app-setting__h1">JavaScript is disabled in your browser.</h1>
+
+                            <span class="app-setting__text">Please enable JavaScript in your browser or upgrade to a JavaScript-capable browser.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </noscript>
+
+
+
+</body>
+
+{% endblock main %}

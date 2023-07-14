@@ -21,6 +21,7 @@ class Order(models.Model):
         ('shipping','shipping'),
         ('Delivered','Delivered'),
         ('Cancelled','Cancelled'),
+        ('Returned','Returned')
     )
     
     user    = models.ForeignKey(User_Accounts, on_delete=models.SET_NULL,null=True)
@@ -35,6 +36,7 @@ class Order(models.Model):
     is_ordered = models.BooleanField(default= False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    deliverd_at = models.DateTimeField(null=True)
     
     def full_name(self):
         return f'{self.first_name} {self.last_name}'
@@ -52,7 +54,6 @@ class OrderProduct(models.Model):
     product = models.ForeignKey(Product_item, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     product_price = models.FloatField()
-    
     ordered = models.BooleanField(default=False)
     created_at =models.DateTimeField(auto_now_add=True)
     updated_at =models.DateTimeField(auto_now=True)

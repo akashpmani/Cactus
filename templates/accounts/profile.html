@@ -67,7 +67,7 @@
                 </a>
                 <a class="nav-link" id="security-tab" data-toggle="pill" href="#security" role="tab" aria-controls="security" aria-selected="false">
                     <i class="fa fa-user text-center mr-1"></i>
-                    Security
+                    Orders
                 </a>
               
                 <a class="nav-link" id="notification-tab" data-toggle="pill" href="#notification" role="tab" aria-controls="notification" aria-selected="false">
@@ -211,37 +211,120 @@
                 });
               });
             </script>
+
+            <style>
+
+
+
+
+.order-track {
+  margin-top: 2rem;
+  padding: 0 1rem;
+  border-top: 1px dashed #2c3e50;
+  padding-top: 2.5rem;
+  display: flex;
+  flex-direction: column;
+}
+.order-track-step {
+  display: flex;
+  height: 7rem;
+}
+.order-track-step:last-child {
+  overflow: hidden;
+  height: 4rem;
+}
+.order-track-step:last-child .order-track-status span:last-of-type {
+  display: none;
+}
+.order-track-status {
+  margin-right: 1.5rem;
+  position: relative;
+}
+.order-track-status-dot {
+  display: block;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  background: #f05a00;
+}
+.order-track-status-line {
+  display: block;
+  margin: 0 auto;
+  width: 2px;
+  height: 7rem;
+  background: #f05a00;
+}
+.order-track-text-stat {
+
+  font-weight: 500;
+  margin-bottom: 3px;
+}
+.order-track-text-sub {
+ 
+  font-weight: 300;
+}
+
+.order-track {
+  transition: all .3s height 0.3s;
+  transform-origin: top center;
+}
+.order-track {
+  display: none;
+}
+
+.order-track.show {
+  display: block;
+}
+
+            </style>
             
             <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
-                <h3 class="mb-4">Security Settings</h3>
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Login</label>
-                            <input type="text" class="form-control">
-                        </div>
+                <h3 class="mb-4">Your Orders</h3>
+                <section class="root">
+                  <figure class="accordion">
+                    <img src="https://image.flaticon.com/icons/svg/970/970514.svg" alt="">
+                    <figcaption>
+                      <h6>Tracking Details</h6>
+                      <h6>Order Number</h6>
+                      <h6># A61452B</h6>
+                    </figcaption>
+                  </figure>
+                  <div class="order-track">
+                    <div class="order-track-step">
+                      <div class="order-track-status">
+                        <span class="order-track-status-dot"></span>
+                        <span class="order-track-status-line"></span>
+                      </div>
+                      <div class="order-track-text">
+                        <p class="order-track-text-stat">Label Created</p>
+                        <span class="order-track-text-sub">1st November, 2019</span>
+                      </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label>Two-factor auth</label>
-                            <input type="text" class="form-control">
-                        </div>
+                    <div class="order-track-step">
+                      <div class="order-track-status">
+                        <span class="order-track-status-dot"></span>
+                        <span class="order-track-status-line"></span>
+                      </div>
+                      <div class="order-track-text">
+                        <p class="order-track-text-stat"> Shipped - 123 Start St.
+                Seattle, WA </p>
+                        <span class="order-track-text-sub">1st November, 2019</span>
+                      </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="" id="recovery">
-                                <label class="form-check-label" for="recovery">
-                                    Recovery
-                                </label>
-                            </div>
-                        </div>
+                    <div class="order-track-step">
+                      <div class="order-track-status">
+                        <span class="order-track-status-dot"></span>
+                        <span class="order-track-status-line"></span>
+                      </div>
+                      <div class="order-track-text">
+                        <p class="order-track-text-stat"> Estimated - 456 End St.
+                New York City, NY</p>
+                        <span class="order-track-text-sub">3rd November, 2019</span>
+                      </div>
                     </div>
-                </div>
-                <div>
-                    <button class="btn btn-primary">Update</button>
-                    <button class="btn btn-primary">Cancel</button>
-                </div>
+                  </div>
+                </section>
+               
             </div>
             <div class="tab-pane fade" id="application" role="tabpanel" aria-labelledby="application-tab">
                 <h3 class="mb-4">Address</h3>

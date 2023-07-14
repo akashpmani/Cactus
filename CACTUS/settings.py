@@ -166,4 +166,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 razor_pay_key_id = 'rzp_test_0cr8VAzWXYja52'
-key_secret = 'fgnut3ZvjRjbF3QgxtqemdUh' 
+key_secret = 'fgnut3ZvjRjbF3QgxtqemdUh'
+
+ 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+ 
+# response email settings
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'cactusplants.in@gmail.com'
+EMAIL_HOST_PASSWORD = 'Akashpmani5011'
+EMAIL_USE_TLS = True
+

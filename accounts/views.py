@@ -17,6 +17,8 @@ from .otp import verify_otp
 from django.contrib import messages
 from django.http import JsonResponse
 from django.contrib.auth.hashers import make_password
+from orders.models import Order,OrderProduct,Payment
+from django.db import transaction
 # from .helpers import delete_expired_otp
 # Create your views here.
 
@@ -107,11 +109,13 @@ def profile(request):
         country = Country.objects.all()
         states = State.objects.all()
         addressform = AddressBookForm()
+        orders = Order.objects.filter(user = request.user).exclude(status="New").order_by('-created_at')
         context = {
             'user' : user, 
             'states' : states,
             'country' : country,
-            'addressform' : addressform,    
+            'addressform' : addressform, 
+            'orders' : orders,   
         }
         try:
             if Profile.objects.filter(user = user).exists:
@@ -126,9 +130,17 @@ def profile(request):
                 context['address'] = address
         except:
             pass
+        try:
+            if AddressBook.objects.filter(user = user , default = True).exists:
+                print("dfs")
+                d_address = AddressBook.objects.get(user = user ,default = True)
+                print(d_address)
+                context['d_address'] = d_address
+        except:
+            pass
         
       
-        return render(request, 'accounts/profile.html',context)
+        return render(request, 'accounts/profile1.html',context)
     
     
     return redirect('accounts:signin')
@@ -144,10 +156,9 @@ def edit_address(request,id):
     return redirect('accounts:profile')
 
 def delete_address(request,id):
-    if request.method == 'POST':
-        address =  AddressBook.objects.get(id = id)
-        address.delete()
-        return redirect('accounts:profile')
+    address =  AddressBook.objects.get(id = id)
+    address.delete()
+    return redirect('accounts:addressbook')
     
 def add_address(request):
     if request.method == 'POST':
@@ -156,16 +167,19 @@ def add_address(request):
             address = form.save(commit=False)
             address.user = request.user 
             address.save()
+            print("jajasdkajsdkajsdkajskdjaskdj")
         else:
             print(form.errors)
         return redirect('accounts:profile')
     
 
-def update_password(request,id):    
-    print("booom")
+def update_password(request):    
+    print("get")
     if request.method == 'POST':
+        print("booom")
         try:
-            user = User_Accounts.objects.get(id = id)
+            user = request.user
+            user = User_Accounts.objects.get(id = user.id)
         except:
             pass
         old_password = request.POST.get('oldPassword')
@@ -179,7 +193,83 @@ def update_password(request,id):
         else:
             print("oombi")
             return JsonResponse({'message': 'invalid credentials'})
-    return JsonResponse({'error': 'Invalid request method'}, status=400)
+    return render(request , 'accounts/changepass.html')
+
+
+
+def my_profile(request):
+    current_user = request.user
+    profile = Profile.objects.get(user=request.user)
+    user = User_Accounts.objects.get(username = current_user.username)
+    
+    return render(request , 'accounts/myprofile.html',{'profile':profile,'user':user})
+
+
+@transaction.atomic
+def editprofile(request):
+    if request.method == 'POST':
+        user = request.user
+        try:
+            profile=Profile.objects.get(user = user)
+        except Profile.DoesNotExist as e :
+            profile = Profile(user = user)
+        profile.first_name = request.POST.get('first_name')
+        profile.last_name = request.POST.get('last_name')
+        profile.date_of_birth = request.POST.get('birthday')
+        profile.gender = request.POST.get('gender')
+        profile.save()
+        return redirect('accounts:profile')
+    try:
+        profile=Profile.objects.get(user = request.user)
+        return render(request , 'accounts/editprofile.html',{'profile':profile})
+    except Profile.DoesNotExist as e :
+        return render(request , 'accounts/editprofile.html')
+    
+def addressbook(request):
+    address = AddressBook.objects.filter(user = request.user)
+    context = {
+        'address' : address
+        
+    }
+    
+    return render(request , 'accounts/addressbook.html',context)    
+
+def updateaddress(request):
+    country = Country.objects.all()
+    states = State.objects.all()
+    addressform = AddressBookForm()
+    context = {
+        'states' : states,
+        'country' : country,
+        'addressform' : addressform, 
+  
+    }
+    return render(request , 'accounts/addaddress.html',context)
+
+def myorders(request):
+    orders = Order.objects.filter(user = request.user).exclude(status="New").order_by('-created_at')
+    context = {
+        'orders':orders
+    }
+    
+    return render(request , 'accounts/myorders.html',context)
+
+def manage_order(request,id):
+    order = Order.objects.get(id = id)
+    products = OrderProduct.objects.filter(order = order)
+    context = {
+        'order' : order,
+        'products' : products
+    }
+    return render(request , 'accounts/manageorder.html',context)
+
+
+def returnedorders(request):
+    orders = Order.objects.filter(user = request.user).order_by('-created_at')
+    context = {
+        'orders':orders
+    }
+    return render(request , 'accounts/returnedorders.html')
 
 
 

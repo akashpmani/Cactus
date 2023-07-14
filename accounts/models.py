@@ -42,8 +42,20 @@ def upload_path(instance, filename):
 
 
 class Profile(models.Model):
+    GENDER_CHOICES = [
+        ('male', 'Male'),
+        ('female', 'Female'),
+        ('other', 'Other'),
+    ]
     user = models.OneToOneField(User_Accounts, on_delete=models.CASCADE, related_name="profile")
+    first_name = models.CharField(max_length=30,null = True)
+    last_name = models.CharField(max_length=30,null = True)
     profile_image = models.ImageField(upload_to=upload_path)
+    date_of_birth = models.DateField(null=True)
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES, null=True)
+
+    def __str__(self):
+        return self.user.username
 
 
 

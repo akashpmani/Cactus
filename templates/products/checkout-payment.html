@@ -286,16 +286,43 @@
                             </div>
                         </div>
                         <div class="py-4">
-                            <div class="input-group mb-0">
-                                <input type="text" class="form-control" placeholder="Enter your coupon code">
-                                <button class="btn btn-dark btn-sm px-4">Apply</button>
-                            </div>
+                          <div class="input-group mb-0">
+                            <input type="text" class="form-control" id="couponInput" placeholder="Enter your coupon code">
+                            <input type="hidden" name="" id="couponval">
+                            <button class="btn btn-dark btn-sm px-4" id="applyButton">Apply</button>
+                        </div>                        
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <!-- /Page Content -->
+        <script>
+          $(document).ready(function() {
+            $('#applyButton').click(function() {
+                var couponCode = $('#couponInput').val();
+                if (couponCode.trim() === '') {
+                    console.log("Coupon code is empty");
+                    return;
+                }
+                $.ajax({
+                    url: '/payment/check_coupon',
+                    type: 'GET',
+                    data: {
+                        'coupon_code': couponCode
+                    },
+                    success: function(response) {
+                        console.log(response);
+                        // Update the hidden input with the response data
+                        $('#couponval').val(response.code); // Assuming the response has a 'data' attribute
+                    },
+                    error: function(xhr, errmsg, err) {
+                        console.log("");
+                    }
+                });
+            });
+        });        
+        </script>
     </section>
     <!-- / Main Section-->
     <form action="">
@@ -365,20 +392,20 @@
 <script>
   document.getElementById('rzp-button1').onclick = function(e) {
     e.preventDefault();
+    var hiddenValue = document.getElementById('couponval').value;
+    var data = {
+      hidden_value: hiddenValue
+    };
     $.ajax({
       method: "get",
-      url: "/payment/pay-with-razor",
+      url: "/payment/payment_details",
+      data: data,
       success: function(response) {
-        var total = response.total ;
-        var total = parseInt(total) * 100
-        console.log(total)
+        var total = parseInt(response.total) * 100;
         var name = response.name;
-        console.log(name)
         var email = response.email;
-        console.log(email)
-        var phone =parseInt( response.phone);
-        console.log(phone)
-        var total = 20000
+        var phone = parseInt(response.phone);
+        var order_id = response.order_number;
         var options = {
           "key": 'rzp_test_8Pb1f6KGthfeQt', // Enter the Key ID generated from the Dashboard
           "amount": total, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
@@ -386,25 +413,52 @@
           "name": "CACTUS", // Your business name
           "description": "Thank you for buying from us",
           "image": "",
-          //"order_id": "order_9A33XWu170gUtm", // This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+          //"order_id": order_id,
           "handler": function(response_razor) {
-            //alert(response_razor.razorpay_payment_id);
-            //alert(response_razor.razorpay_order_id);
-            //alert(response_razor.razorpay_signature);
             var token = $("[name='csrfmiddlewaretoken']").val();
             data = {
-              "payment_mode" : "razorpay",
-              "payment_id" : response_razor.razorpay_payment_id,
-              csrfmiddlewaretoken : token,
-            }
+              "payment_mode": "razorpay",
+              "payment_id": response_razor.razorpay_payment_id,
+              "order_id": order_id,
+              "status": "success",
+              csrfmiddlewaretoken: token
+            };
+            console.log(response_razor.razorpay_payment_id)
+            console.log(order_id)
+            
             $.ajax({
-              method = "POST",
-              url = "/payment/razorpay",
-              data = data,
-              success: function ( response){
+              method: "post",
+              url: "/payment/payment",
+              data: data,
+              success: function(response_success) {
+                console.log("Payment success:", response_success);
+                var orderNumber = response_success.order_number;
+                var transactionID = response_success.transID;
+                var orderData = {
+                  payment_id: transactionID,
+                  order_number: orderNumber,
+                  csrfmiddlewaretoken: token
+                };
 
+                $.ajax({
+                  method: "POST",
+                  url: "/payment/order_complete",
+                  data: orderData,
+                  success: function(response) {
+                    console.log("Order complete response:", response);
+                    // Handle the response or perform any actions
+                  },
+                  error: function(xhr, status, error) {
+                    console.error("Order complete error:", error);
+                    // Handle the error case here
+                  }
+                });
+              },
+              error: function(xhr, status, error) {
+                console.error("Payment error:", error);
+                // Handle the error case here
               }
-            })
+            });
           },
           "prefill": { // We recommend using the prefill parameter to auto-fill customer's contact information, especially their phone number
             "name": name, // Your customer's name
@@ -433,6 +487,7 @@
     });
   };
 </script>
+
 
   
   

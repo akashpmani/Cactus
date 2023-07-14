@@ -5,6 +5,7 @@ from products.models import P_tags
 from products.models import Product_Tags, Products_Table, Product_item,Product_images
 from products.forms import CategoryForm, ProductsTableForm, ProductsTags, ProductItemForm, ProductTagForm ,ProductItemUpdateForm
 from products.models import Category
+from orders.models import Order,OrderProduct
 from django.db import IntegrityError
 from django.contrib import messages
 from accounts.models import User_Accounts
@@ -13,6 +14,7 @@ import base64
 from django.core.files.base import ContentFile
 from accounts.models import CartItem
 from django.core.paginator import Paginator
+from django.utils import timezone
 
 # Create your views here.
 
@@ -118,7 +120,27 @@ def addproductitems(request):
         
 
 def orders(request):
-    return render(request, 'orders.html')
+    orders_list = Order.objects.filter(is_ordered=True).exclude(status="New").order_by('-created_at')
+    context = {
+        'orders' : orders_list,
+    }
+    
+    return render(request, 'dashboard/orders.html',context)
+
+def change_order_status(request, id):
+    order_ = Order.objects.get(order_number = id)
+    status = request.POST.get('status')
+    if status == "Deliverd" :
+        order_.deliverd_at = timezone.now()
+    elif status == "Returned" :
+        pass
+    else:
+        order_.deliverd_at = None
+    if status:
+        order_.status = status
+        order_.save()
+
+    return redirect('dashboard:orders')
 
 
 def tagsandcategory(request):
@@ -407,3 +429,18 @@ def userdetails(request,id):
     # return render(request,'dashboard/userdetails.html',context)
     return HttpResponse(user.username)
     
+
+
+def change_user_status(request, name):
+    user = User_Accounts.objects.get(username=name)
+    status = request.POST.get('status')
+    print(user)
+    print(status)
+    
+    if status:
+        user.account_status = status
+        user.save()
+    print(user.account_status)
+    return redirect('dashboard:users')
+
+ 

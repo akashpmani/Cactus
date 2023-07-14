@@ -1,0 +1,313 @@
+{% extends 'products/base.html' %}
+{% load static %}
+
+{% block main %}
+
+
+    <!--====== Google Font ======-->
+  <!-- Custom Google Fonts-->
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Roboto:wght@300;400;700&display=auto"
+    rel="stylesheet">
+
+    <!--====== Vendor Css ======-->
+    <link rel="stylesheet" href="{% static 'profile/vendor.css' %}">
+
+    <!--====== Utility-Spacing ======-->
+    <link rel="stylesheet" href="{% static 'profile/utility.css' %}">
+
+    <!--====== App ======-->
+    <link rel="stylesheet" href="{% static 'profile/app.css' %}">
+
+    <!--====== Main App ======-->
+    <body class="config">
+       <!--====== App Content ======-->
+       <div class="app-content">
+
+        <!--====== Section 1 ======-->
+        <div class="u-s-p-y-60">
+
+            <!--====== Section Content ======-->
+            <div class="section__content">
+                <div class="container">
+                    <div class="breadcrumb">
+                        <div class="breadcrumb__wrap">
+                            <ul class="breadcrumb__list">
+                                <li class="has-separator">
+
+                                    <a href="index.html">Home</a></li>
+                                <li class="is-marked">
+
+                                    <a href="dash-address-edit.html">My Account</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--====== End - Section 1 ======-->
+
+
+        <!--====== Section 2 ======-->
+        <div class="u-s-p-b-60">
+
+            <!--====== Section Content ======-->
+            <div class="section__content">
+                <div class="dash">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-lg-3 col-md-12">
+
+                                <!--====== Dashboard Features ======-->
+                                <div class="dash__box dash__box--bg-white dash__box--shadow u-s-m-b-30">
+                                    <div class="dash__pad-1">
+
+                                        <span class="dash__text u-s-m-b-16">Hello, John Doe</span>
+                                        <ul class="dash__f-list">
+                                            <li>
+
+                                                <a href="{% url 'accounts:profile' %}">Manage My Account</a></li>
+                                            <li>
+
+                                                <a href="{% url 'accounts:my_profile' %}">My Profile</a></li>
+                                            <li>
+
+                                                <a class="dash-active" href="{% url 'accounts:addressbook' %}">Address Book</a></li>
+                                            <li>
+
+                                                <a href="dash-track-order.html">Track Order</a></li>
+                                            <li>
+
+                                                <a href="{% url 'accounts:myorders' %}">My Orders</a></li>
+                                            <li>
+
+                                                <a href="dash-payment-option.html">My Payment Options</a></li>
+                                            <li>                                                <a href="{% url 'accounts:returnedorders' %}">My Returns & Cancellations</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="dash__box dash__box--bg-white dash__box--shadow dash__box--w">
+                                    <div class="dash__pad-1">
+                                        <ul class="dash__w-list">
+                                            <li>
+                                                <div class="dash__w-wrap">
+
+                                                    <span class="dash__w-icon dash__w-icon-style-1"><i class="fas fa-cart-arrow-down"></i></span>
+
+                                                    <span class="dash__w-text">4</span>
+
+                                                    <span class="dash__w-name">Orders Placed</span></div>
+                                            </li>
+                                            <li>
+                                                <div class="dash__w-wrap">
+
+                                                    <span class="dash__w-icon dash__w-icon-style-2"><i class="fas fa-times"></i></span>
+
+                                                    <span class="dash__w-text">0</span>
+
+                                                    <span class="dash__w-name">Cancel Orders</span></div>
+                                            </li>
+                                            <li>
+                                                <div class="dash__w-wrap">
+
+                                                    <span class="dash__w-icon dash__w-icon-style-3"><i class="far fa-heart"></i></span>
+
+                                                    <span class="dash__w-text">0</span>
+
+                                                    <span class="dash__w-name">Wishlist</span></div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <!--====== End - Dashboard Features ======-->
+                            </div>
+                            <div class="col-lg-9 col-md-12">
+                                <div class="dash__box dash__box--shadow dash__box--radius dash__box--bg-white">
+                                    <div class="dash__pad-2">
+                                        <h1 class="dash__h1 u-s-m-b-14">Add/Edit Address</h1>
+
+                                        <span class="dash__text u-s-m-b-30">We need an address where we could deliver products.</span>
+                                        <form class="dash-address-manipulation" action="{% url 'accounts:add_address' %}" method="post">
+                                            {% csrf_token %}
+                                            <div class="gl-inline">
+                                                <div class="u-s-m-b-30">
+
+                                                    <label class="gl-label" for="address-fname">FIRST NAME *</label>
+
+                                                    <input class="input-text input-text--primary-style" type="text" id="address-fname" name="first_name" placeholder="John Doe"></div>
+                                                <div class="u-s-m-b-30">
+
+                                                    <label class="gl-label" for="address-lname">LAST NAME *</label>
+
+                                                    <input class="input-text input-text--primary-style" type="text" id="address-lname" name="last_name" placeholder="Doe"></div>
+                                            </div>
+                                            <div class="gl-inline">
+                                                <div class="u-s-m-b-30">
+
+                                                    <label class="gl-label" for="address-phone">PHONE *</label>
+
+                                                    <input class="input-text input-text--primary-style" type="text" name="phone" id="address-phone" placeholder="(+0) 900901904"></div>
+                                                {% comment %} <div class="u-s-m-b-30">
+
+                                                    <label class="gl-label" for="address-street">STREET ADDRESS *</label>
+
+                                                    <input class="input-text input-text--primary-style" type="text" id="address-street" placeholder="4247 Ashford Drive Virginia"></div> {% endcomment %}
+                                            </div>
+                                            <div class="gl-inline">
+                                                <div class="u-s-m-b-30">
+
+                                                    <label class="gl-label" for="address-street">ADDRESS LINE ONE</label>
+
+                                                    <input class="input-text input-text--primary-style" name="address_line_1" type="text" id="address-street" placeholder="4247 Ashford Drive Virginia"></div>
+                                                <div class="u-s-m-b-30">
+
+                                                    <label class="gl-label" for="address-street">ADDRESS LINE TWO</label>
+
+                                                    <input class="input-text input-text--primary-style" name="address_line_2" type="text" id="address-street" placeholder="4247 Ashford Drive Virginia"></div>
+                                            </div>
+                                            <div class="gl-inline">
+                                                <div class="u-s-m-b-30">
+
+                                                    <!--====== Select Box ======-->
+
+                                                    <label class="gl-label" for="address-country">COUNTRY *</label><select class="select-box select-box--primary-style country-select" id="country" name="country" required>
+                                                        <option value=""></option>
+                                                        {% for country in country %}
+                                                            <option value="{{ country.id }}">{{country.name}}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                    <!--====== End - Select Box ======-->
+                                                </div>
+                                                <div class="u-s-m-b-30">
+
+                                                    <!--====== Select Box ======-->
+
+                                                    <label class="gl-label" for="address-state">STATE/PROVINCE *</label><select class="select-box select-box--primary-style state-select"  name="state" id="state" required="">
+                                                        <option selected value="">Choose State/Province</option>
+                                                      
+                                                    </select>
+                                                    <!--====== End - Select Box ======-->
+                                                </div>
+                                            </div>
+                                            <div class="gl-inline">
+                                                <div class="u-s-m-b-30">
+
+                                                    <label class="gl-label" for="address-city">TOWN/CITY *</label>
+
+                                                    <input class="input-text input-text--primary-style" name="city" type="text" id="address-city"></div>
+                                                <div class="u-s-m-b-30">
+
+                                                    <label class="gl-label" for="address-street">ZIP/POSTAL CODE *</label>
+
+                                                    <input class="input-text input-text--primary-style" name="pincode" type="text" id="address-postal" placeholder="20006"></div>
+                                            </div>
+
+                                            <button class="btn btn--e-brand-b-2" type="submit">SAVE</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--====== End - Section Content ======-->
+            
+<script>
+    // Get all country and state select elements
+    const countrySelects = document.querySelectorAll('.country-select');
+    const stateSelects = document.querySelectorAll('.state-select');
+  
+    // Define the state options object
+    const stateOptions = {
+      {% for country in country %}
+        '{{ country.id }}': [
+          {% for state in country.state_set.all %}
+            { value: '{{ state.id }}', label: '{{ state.name }}' },
+          {% endfor %}
+        ],
+      {% endfor %}
+    };
+  
+    // Function to populate the state select options based on the selected country
+    function populateStates(countrySelect, stateSelect) {
+      const selectedCountry = countrySelect.value;
+      const options = stateOptions[selectedCountry] || [];
+  
+      // Clear existing options
+      stateSelect.innerHTML = '';
+  
+      // Add new options
+      options.forEach((option) => {
+        const { value, label } = option;
+        const optionElement = document.createElement('option');
+        optionElement.value = value;
+        optionElement.textContent = label;
+        stateSelect.appendChild(optionElement);
+      });
+    }
+  
+    // Event listener to trigger state population on country selection change for each form instance
+    countrySelects.forEach((countrySelect, index) => {
+      const stateSelect = stateSelects[index];
+      countrySelect.addEventListener('change', () => {
+        populateStates(countrySelect, stateSelect);
+      });
+    });
+  
+    // Initial population for each form instance on page load
+    countrySelects.forEach((countrySelect, index) => {
+      const stateSelect = stateSelects[index];
+      populateStates(countrySelect, stateSelect);
+    });
+  </script>
+  
+        </div>
+        <!--====== End - Section 2 ======-->
+    </div>
+    <!--====== End - App Content ======-->
+
+
+    <!--====== Google Analytics: change UA-XXXXX-Y to be your site's ID ======-->
+    <script>
+        window.ga = function() {
+            ga.q.push(arguments)
+        };
+        ga.q = [];
+        ga.l = +new Date;
+        ga('create', 'UA-XXXXX-Y', 'auto');
+        ga('send', 'pageview')
+    </script>
+    <script src="https://www.google-analytics.com/analytics.js" async defer></script>
+
+    <!--====== Vendor Js ======-->
+    <script src="js/vendor.js"></script>
+
+    <!--====== jQuery Shopnav plugin ======-->
+    <script src="js/jquery.shopnav.js"></script>
+
+    <!--====== App ======-->
+    <script src="js/app.js"></script>
+
+    <!--====== Noscript ======-->
+    <noscript>
+        <div class="app-setting">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="app-setting__wrap">
+                            <h1 class="app-setting__h1">JavaScript is disabled in your browser.</h1>
+
+                            <span class="app-setting__text">Please enable JavaScript in your browser or upgrade to a JavaScript-capable browser.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </noscript>
+
+
+
+</body>
+
+{% endblock main %}

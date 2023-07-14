@@ -21,7 +21,7 @@
 
     <!--====== Main App ======-->
     <body class="config">
-    <div id="app">
+
         <!--====== App Content ======-->
         <div class="app-content">
 
@@ -39,7 +39,7 @@
                                         <a href="index.html">Home</a></li>
                                     <li class="is-marked">
 
-                                        <a href="dashboard.html">My Account</a></li>
+                                        <a href="dash-my-order.html">My Account</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -67,7 +67,7 @@
                                             <ul class="dash__f-list">
                                                 <li>
 
-                                                    <a class="dash-active" href="{% url 'accounts:profile' %}">Manage My Account</a></li>
+                                                    <a href="{% url 'accounts:profile' %}">Manage My Account</a></li>
                                                 <li>
 
                                                     <a href="{% url 'accounts:my_profile' %}">My Profile</a></li>
@@ -79,12 +79,12 @@
                                                     <a href="dash-track-order.html">Track Order</a></li>
                                                 <li>
 
-                                                    <a href="{% url 'accounts:myorders' %}">My Orders</a></li>
+                                                    <a class="dash-active" href="{% url 'accounts:myorders' %}">My Orders</a></li>
                                                 <li>
 
                                                     <a href="dash-payment-option.html">My Payment Options</a></li>
                                                 <li>
-                                                    
+
                                                     <a href="{% url 'accounts:returnedorders' %}">My Returns & Cancellations</a></li>
                                             </ul>
                                         </div>
@@ -127,102 +127,58 @@
                                 <div class="col-lg-9 col-md-12">
                                     <div class="dash__box dash__box--shadow dash__box--radius dash__box--bg-white u-s-m-b-30">
                                         <div class="dash__pad-2">
-                                            <h1 class="dash__h1 u-s-m-b-14">Manage My Account</h1>
+                                            <h1 class="dash__h1 u-s-m-b-14">My Orders</h1>
 
-                                            <span class="dash__text u-s-m-b-30">From your My Account Dashboard you have the ability to view a snapshot of your recent account activity and update your account information. Select a link below to view or edit information.</span>
-                                            <div class="row">
-                                                <div class="col-lg-6 u-s-m-b-30">
-                                                    <div class="dash__box dash__box--bg-grey dash__box--shadow-2 u-h-100">
-                                                        <div class="dash__pad-3">
-                                                            <h2 class="dash__h2 u-s-m-b-8">PERSONAL PROFILE</h2>
-                                                            <div class="dash__link dash__link--secondary u-s-m-b-8">
+                                            <span class="dash__text u-s-m-b-30">Here you can see all products that have been delivered.</span>
+                                            <form class="m-order u-s-m-b-30">
+                                                <div class="m-order__select-wrapper">
 
-                                                                <a href="{% url 'accounts:editprofile' %}">Edit</a></div>
-                                                                {% if profile %}
-                                                                <span class="dash__text">{{profile.first_name}} {{profile.last_name}}</span>
-                                                            <span class="dash__text">{{user.email}}</span>
-                                                            {% else %}
-                                                            <span class="dash__text">complete profile for getting Flat 15% off on your next checkout</span>
-
-                                                            {% endif %}
-                                                            {% comment %} <div class="dash__link dash__link--secondary u-s-m-t-8">
-
-                                                                 <a data-modal="modal" data-modal-id="#dash-newsletter">Subscribe Newsletter</a></div> {% endcomment %}
-                                                        </div>
-                                                    </div>
+                                                    <label class="u-s-m-r-8" for="my-order-sort">Show:</label><select class="select-box select-box--primary-style" id="my-order-sort">
+                                                        <option selected>Last 5 orders</option>
+                                                        <option>Last 15 days</option>
+                                                        <option>Last 30 days</option>
+                                                        <option>Last 6 months</option>
+                                                        <option>Orders placed in 2018</option>
+                                                        <option>All Orders</option>
+                                                    </select></div>
+                                            </form>
+                                            <div class="dash__box dash__box--shadow dash__box--bg-white dash__box--radius">
+                                                <h2 class="dash__h2 u-s-p-xy-20">YOUR ORDERS</h2>
+                                                <div class="dash__table-wrap gl-scroll">
+                                                    <table class="dash__table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th>Order #</th>
+                                                                <th>Placed On</th>
+                                                                <th>Status</th>
+                                                                <th>Total</th>
+                                                            </tr>
+                                                        </thead>
+                                                        
+                                                        <tbody>
+                                                            {% for ord in orders %}
+                                                            <tr>
+                                                                <td>{{ord.order_number}}</td>
+                                                                <td>{{ord.created_at}}</td>
+                                                                <td>
+        
+                                                                        <span>{{ord.status}}</span>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="dash__table-total">
+        
+                                                                        <span>{{ord.order_total}}</span>
+                                                                        <div class="dash__link dash__link--brand">
+        
+                                                                            <a href="{% url 'accounts:manage_order' ord.id %}">MANAGE</a></div>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>{% endfor %}
+                                                           
+                                                        </tbody>
+                                                    </table>
                                                 </div>
-                                                <div class="col-lg-6 u-s-m-b-30">
-                                                   {% if d_address %}
-                                                   <div class="dash__box dash__box--bg-grey dash__box--shadow-2 u-h-100">
-                                                    <div class="dash__pad-3">
-                                                        <h2 class="dash__h2 u-s-m-b-8">ADDRESS BOOK</h2>
-
-                                                        <span class="dash__text-2 u-s-m-b-8">Default Shipping Address</span>
-                                                        <div class="dash__link dash__link--secondary u-s-m-b-8">
-
-                                                            <a href="{% url 'accounts:updateaddress' %}">Edit</a>
-                                                        </div>
-
-                                                        <span class="dash__text">4247 Ashford Drive Virginia - VA-20006 - USA</span>
-
-                                                        <span class="dash__text">(+0) 900901904</span>
-                                                    </div>
-                                                </div>
-                                                    {% else %}
-                                                    <div class="dash__box dash__box--bg-grey dash__box--shadow-2 u-h-100">
-                                                        <div class="dash__pad-3">
-                                                            <h2 class="dash__h2 u-s-m-b-8">ADDRESS BOOK</h2>
-    
-                                                            <span class="dash__text-2 u-s-m-b-8">There is no address added add address for fast checkout</span>
-                                                            <div class="dash__link dash__link--secondary u-s-m-b-8">
-    
-                                                                <a href="{% url 'accounts:add_address' %}"> + ADD Address</a>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    {% endif %}
-                                                
                                             </div>
-
-                                                
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="dash__box dash__box--shadow dash__box--bg-white dash__box--radius">
-                                        <h2 class="dash__h2 u-s-p-xy-20">RECENT ORDERS</h2>
-                                        <div class="dash__table-wrap gl-scroll">
-                                            <table class="dash__table">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Order #</th>
-                                                        <th>Placed On</th>
-                                                        <th>Status</th>
-                                                        <th>Total</th>
-                                                    </tr>
-                                                </thead>
-                                                
-                                                <tbody>
-                                                    {% for ord in orders %}
-                                                    <tr>
-                                                        <td>{{ord.order_number}}</td>
-                                                        <td>{{ord.created_at}}</td>
-                                                        <td>
-
-                                                                <span>{{ord.status}}</span>
-                                                        </td>
-                                                        <td>
-                                                            <div class="dash__table-total">
-
-                                                                <span>{{ord.order_total}}</span>
-                                                                <div class="dash__link dash__link--brand">
-
-                                                                    <a href="{% url 'accounts:manage_order' ord.id %}">MANAGE</a></div>
-                                                            </div>
-                                                        </td>
-                                                    </tr>{% endfor %}
-                                                   
-                                                </tbody>
-                                            </table>
                                         </div>
                                     </div>
                                 </div>
@@ -235,11 +191,6 @@
             <!--====== End - Section 2 ======-->
         </div>
         <!--====== End - App Content ======-->
-
-
-    </div>
-    <!--====== End - Main App ======-->
-
 
     <!--====== Google Analytics: change UA-XXXXX-Y to be your site's ID ======-->
     <script>
