@@ -34,14 +34,22 @@
                         <div class="breadcrumb">
                             <div class="breadcrumb__wrap">
                                 <ul class="breadcrumb__list">
-                                    <li class="has-separator">
-
-                                        <a href="index.html">Home</a></li>
-                                    <li class="is-marked">
-
-                                        <a href="dashboard.html">My Account</a></li>
+                                  <li class="has-separator">
+                                    <a href="index.html">Home</a>
+                                  </li>
+                                  <li class="is-marked">
+                                    <a href="dashboard.html">My Account</a>
+                                  </li>
                                 </ul>
                             </div>
+                              
+                              <a href="{% url 'accounts:logout' %}" class="logout-button btn btn--e-brand-b-2">Logout</a>
+                              
+<style>
+        .logout-button {
+        margin-left: auto;
+      }           
+</style>                              
                         </div>
                     </div>
                 </div>

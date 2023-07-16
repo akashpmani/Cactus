@@ -30,4 +30,11 @@ urlpatterns = [
     path('decrease_cart_quantity/',views.decrease_cart_quantity,name="decrease_cart_quantity"),
     path('check_quantity',views.check_quantity_cart,name="check_quantity_cart"),
     path('quantity_check',views.quantity_check,name="quantity_check"),
+    
+    
+    
+    path('checkout_signin/', views.checkout_signin, name='checkout_signin'),
+    path('checkout_signup/', views.checkout_signup, name='checkout_signup'),
+    path('checkout_signinotp/', views.checkout_signinotp, name='checkout_signinotp'),
+    path('checkout_signinotp_verification/', views.checkout_signinotp_verification, name='checkout_signinotp_verification'),
 ]

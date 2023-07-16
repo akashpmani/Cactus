@@ -9,6 +9,7 @@ from django.contrib.auth import get_user_model
 from django.contrib import messages,auth
 from .manager import AccountsManager
 from django.contrib.auth import authenticate, login
+from django.contrib.auth import logout
 from django.contrib.auth.hashers import check_password
 from django.utils import timezone
 import random
@@ -102,6 +103,10 @@ def otp(request):
 def  verifyemail(request):
     return render(request, 'accounts/verifyemail.html')
 
+
+def log_out(request):
+    logout(request)
+    return redirect('store:home')
 def profile(request):
     current_user = request.user
     if current_user.is_authenticated:

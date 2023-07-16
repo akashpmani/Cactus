@@ -5,7 +5,7 @@ from django.shortcuts import redirect, render
 import razorpay
 from django.conf import settings
 from store.views import cart_items2
-from accounts.models import User_Accounts
+from accounts.models import User_Accounts,Profile
 from orders.models import AddressBook,CartItem,Order,OrderProduct,Payment
 from accounts.models import CartItem,Cart
 from products.models import Product_item,Products_Table
@@ -119,6 +119,43 @@ def order_complete(request):
         return render(request, 'products/ordersuccessfull.html',context)      
     except(Payment.DoesNotExist,Order.DoesNotExist):
         return redirect('store:home')
+
+def order_success(request):
+    o_id = request.GET.get('order_number')
+    t_id = payment_id = request.GET.get('payment_id')
+    print("oid")
+    print(o_id)
+    print("tid")
+    print(t_id)
+    try:
+        order = Order.objects.get(order_number=o_id, is_ordered= True)
+        order.status = 'Confirmed'
+        ordered_product = OrderProduct.objects.filter(order_id= order.id)
+        subtotal =0
+        for item in ordered_product:
+            subtotal += item.product_price*item.quantity
+        
+        payment = Payment.objects.get(payment_id=t_id)
+        order.save()
+        address = AddressBook.objects.get(id = order.address.id)
+        context = {
+            'order':order,
+            'ordered_product':ordered_product,
+            'transID':payment.payment_id,
+            'payment':payment,
+            'subtotal':subtotal,
+            'address' : address,
+        }
+        try:
+            profile = Profile.objects.get(user = request.user)
+            context['profile'] = profile
+        except:
+            pass
+        
+        return render(request, 'products/ordersuccessfull.html',context) 
+    except(Payment.DoesNotExist,Order.DoesNotExist):
+        return redirect('store:home')
+    
       
 def check_coupon(request):
     
@@ -130,3 +167,18 @@ def check_coupon(request):
 
 def samp(request):
     return render(request, 'products/ordersuccessfull.html')
+
+
+#  $.ajax({
+#                   method: "POST",
+#                   url: "/payment/order_complete",
+#                   data: orderData,
+#                   success: function(response) {
+#                     console.log("Order complete response:", response);
+#                     // Handle the response or perform any actions
+#                   },
+#                   error: function(xhr, status, error) {
+#                     console.error("Order complete error:", error);
+#                     // Handle the error case here
+#                   }
+#                 });

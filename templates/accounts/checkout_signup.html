@@ -23,7 +23,7 @@
             <div class="card mx-auto card-login">
                 <div class="card-body">
                     <h4 class="card-title mb-4">Create an Account</h4>
-                    <form action="{% url 'accounts:signup'%}" method="post">
+                    <form action="{% url 'store:checkout_signup'%}" method="post">
                         {% csrf_token %} <div class="mb-3">
                         <label class="form-label">Username</label>
                         <input class="form-control" placeholder="Username" type="text" name="username">
@@ -60,7 +60,7 @@
                             <button type="submit" class="btn btn-primary w-100"> Signup </button>
                         </div> <!-- form-group// -->
                     </form> 
-                    <p class="text-center mb-2">Already have an account? <a href="{% url 'accounts:signin' %}">Sign in now</a></p>
+                    <p class="text-center mb-2">Already have an account? <a href="{% url 'store:checkout_signin' %}">Sign in now</a></p>
                 </div>
             </div>
         </section>

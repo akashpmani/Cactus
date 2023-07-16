@@ -10,6 +10,7 @@ urlpatterns = [
     path('check_coupon',views.check_coupon, name='check_coupon'),
     path('samp',views.samp, name='samp'),
     path('order_complete',views.order_complete, name='order_complete'),
+    path('order-success',views.order_success,name = 'order_success')
 
 ]
 

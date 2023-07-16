@@ -439,20 +439,10 @@
                   order_number: orderNumber,
                   csrfmiddlewaretoken: token
                 };
-
-                $.ajax({
-                  method: "POST",
-                  url: "/payment/order_complete",
-                  data: orderData,
-                  success: function(response) {
-                    console.log("Order complete response:", response);
-                    // Handle the response or perform any actions
-                  },
-                  error: function(xhr, status, error) {
-                    console.error("Order complete error:", error);
-                    // Handle the error case here
-                  }
-                });
+                // Construct the redirect URL with parameters
+                var redirectURL = '/payment/order-success?order_number=' + orderNumber + '&payment_id=' + transactionID;
+                // Redirect the user to the URL
+                window.location.href = redirectURL;
               },
               error: function(xhr, status, error) {
                 console.error("Payment error:", error);

@@ -12,9 +12,16 @@ from .serilizers import Product_itemSerializer
 from rest_framework.renderers import JSONRenderer
 import json
 from django.core.serializers.json import DjangoJSONEncoder
+from accounts.forms import CustomerRegisterForm, Signin_Form , Otp_Form ,AddressBookForm
+from django.contrib.auth import get_user_model
+from django.contrib import messages,auth
+from accounts.manager import AccountsManager
+from django.contrib.auth import authenticate, login
+from django.contrib.auth import logout
+from django.contrib.auth.hashers import check_password
+from accounts import verify
 # Create your views here.
-
-
+account_manager = AccountsManager()
 
 def search_view(request):
     query = request.GET.get('q', '')
@@ -250,6 +257,7 @@ def cart_items2(request, total=0, quantity=0, cart_items=None):
             cart_items = CartItem.objects.filter(user = request.user)
         else:
             cart = Cart.objects.get(cart_id=_cart_id(request))
+            cart_items = CartItem.objects.filter(cart = cart)
         total_price = 0
         product_data = []
         products = []
@@ -259,7 +267,7 @@ def cart_items2(request, total=0, quantity=0, cart_items=None):
             product_table = product_item.product
             size = product_item.size
             price = product_item.price
-            total_price += price
+            
             image = product_table.image
             quant = item.quantity
             total_price += price*quant
@@ -310,6 +318,7 @@ def cart_items(request, total=0, quantity=0, cart_items=None):
             cart_items = CartItem.objects.filter(user = request.user)
         else:
             cart = Cart.objects.get(cart_id=_cart_id(request))
+            cart_items = CartItem.objects.filter(cart = cart)
         total_price = 0
         product_data = []
         products = []
@@ -400,8 +409,6 @@ def add_cart(request, product_id,quantity = None):
     else:      
         if request.method == "POST":
             product = Product_item.objects.get(id=product_id)
-            print(product)
-
         try:
             cart = Cart.objects.get(cart_id=_cart_id(request))
         except Cart.DoesNotExist:
@@ -433,11 +440,8 @@ def add_cart(request, product_id,quantity = None):
 def remove_cart(request, product_id):
     print("reachrdf casrd")
     user = request.user
-
-
     product = get_object_or_404(Product_item, id=product_id)
-    print(product)
-    
+    print(product)   
     try:
         if request.user.is_authenticated:
             item = CartItem.objects.get(
@@ -481,7 +485,132 @@ def checkout_manager(request):
     if current_user.is_authenticated:
         return redirect('store:checkout')
     else:
-        return redirect('store:checkout_signup')
+        return redirect('store:checkout_signin')
+    
+def checkout_signin(request):
+    current_user = request.user
+    if current_user.is_authenticated:
+        return redirect('store:checkout')
+    else:
+        if request.method == 'POST':
+            loginform = Signin_Form(request.POST)
+            if loginform.is_valid():
+                login_cred = loginform.cleaned_data['login_cred']
+                password = loginform.cleaned_data['password']
+                user = account_manager.authenticate(
+                    request, email=login_cred, phone=login_cred, username=login_cred, password=password)
+                if user is not None:
+                    try:
+                        cart = Cart.objects.get(cart_id= _cart_id(request))
+                        is_cart_item_exist = CartItem.objects.filter(cart = cart).exists()
+                        if is_cart_item_exist:
+                            cart_items = CartItem.objects.filter(cart=cart)
+                            for item in cart_items:
+                                item_in_user_cart = CartItem.objects.filter(user = user,product = item.product).exists()
+                                if item_in_user_cart:
+                                    product = CartItem.objects.get(user = user,product = item.product)
+                                    product.quantity = item.quantity
+                                    item.delete()
+                                    product.save()
+                                else:
+                                    new_cart_item = CartItem(user=user, quantity=item.quantity, product=item.product)
+                                    new_cart_item.save()
+                    except:
+                        pass
+                    auth.login(request, user)
+                    return redirect('store:cart')
+                else:
+                    messages.error(request, 'Invalid login credentials')
+                    return HttpResponse('Invalid login credentials')
+            else:
+                return HttpResponse('form not valid')
+        loginform = Signin_Form()
+        return render(request,"accounts/checkout_signin.html",{"form":loginform})
+    
+def checkout_signup(request):
+    current_user = request.user
+    if current_user.is_authenticated:
+        return redirect('store:checkout')
+    else:
+        if request.method == 'POST':
+            signupform = CustomerRegisterForm(request.POST)
+            if signupform.is_valid():
+                user = signupform.save()
+                try:
+                    cart = Cart.objects.get(cart_id= _cart_id(request))
+                    is_cart_item_exist = CartItem.objects.filter(cart = cart).exists()
+                    if is_cart_item_exist:
+                        cart_items = CartItem.objects.filter(cart=cart)
+                        for item in cart_items:
+                            item.user = user
+                            item.cart = None
+                            item.save()
+                except:
+                    pass
+                auth.login(request, user)
+                return redirect('store:cart')
+            else:
+                print(signupform.errors)
+                return HttpResponse("failed")
+
+        form = CustomerRegisterForm()
+        return render(request,"accounts/checkout_signup.html",{"form":form})
+    
+    
+def checkout_signinotp(request):
+    if request.method == 'POST':
+        login_cred = request.POST.get('login_cred')
+        user = account_manager.getuser(
+                request, email=login_cred, phone=login_cred, username=login_cred)
+        if user is not None:
+            request.session['email']=user.email
+            verify.send(user.phone)
+            otp_form = Otp_Form()
+            return render(request, 'store/checkout_otpverification.html', {'form': otp_form , 'user' : user})          
+        else:
+            messages.error(request, 'Invalid login credentials')
+            return HttpResponse('Invalid login credentials')
+    return render(request, 'store/signinotp.html')
+
+def checkout_signinotp_verification(request):
+    if request.method == 'POST':
+        form = Otp_Form(request.POST)
+        if form.is_valid():
+            UserModel = get_user_model()
+            code = form.cleaned_data['otp']
+            user = UserModel.objects.get(email=request.session.get('email'))
+            print(user.email)
+            
+            if verify.check(user.phone, code):
+                messages.success(request, "OTP verified")
+                try:
+                    cart = Cart.objects.get(cart_id= _cart_id(request))
+                    is_cart_item_exist = CartItem.objects.filter(cart = cart).exists()
+                    if is_cart_item_exist:
+                        cart_items = CartItem.objects.filter(cart=cart)
+                        for item in cart_items:
+                            item_in_user_cart = CartItem.objects.filter(user = user,product = item.product).exists()
+                            if item_in_user_cart:
+                                product = CartItem.objects.get(user = user,product = item.product)
+                                product.quantity = item.quantity
+                                item.delete()
+                                product.save()
+                            else:
+                                new_cart_item = CartItem(user=user, quantity=item.quantity, product=item.product)
+                                new_cart_item.save()
+                except:
+                    pass
+                auth.login(request, user)
+                return redirect('store:cart')
+            else:
+
+                error_msg = "Invalid OTP. Please try again later."
+                messages.error(request, error_msg)
+        else:
+            messages.error(request, "Invalid OTP form submission. Please try again.")
+    else:
+        form = Otp_Form()
+    return render(request, 'store/checkout_otpverification.html', {'form': form})
 
 def address_components(request):
         country = Country.objects.all()
