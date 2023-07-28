@@ -5,14 +5,15 @@ from django.shortcuts import redirect, render
 import razorpay
 from django.conf import settings
 from store.views import cart_items2
-from accounts.models import User_Accounts,Profile
+from accounts.models import User_Accounts,Profile,Wallet
 from orders.models import AddressBook,CartItem,Order,OrderProduct,Payment
-from accounts.models import CartItem,Cart
+from accounts.models import CartItem,Cart,Wallet,Transaction
 from products.models import Product_item,Products_Table
 
 from django.template.loader import render_to_string
 from django.core.mail import EmailMessage,send_mail
 from django.conf import settings
+from dashboard.models import Coupon,Verify_coupon
 # Create your views here.
 
 
@@ -24,6 +25,29 @@ def payment_details(request):
     user = User_Accounts.objects.get(username=request.user.username)
     address_id = request.session['address_id']
     address = AddressBook.objects.get(id = address_id)
+    wallet = request.GET.get('wallet')
+    coupon_code = request.GET.get('code')
+    spike_use = False
+    spike_discount = 0
+    coupon_use = False
+    coupon_discount = 0
+    
+    
+    if coupon_code:
+            try:
+                coupon = Coupon.objects.get(code=coupon_code)
+                coupon_discount = min((total_price/100)*coupon.discount,coupon.max_discount)
+                print(coupon_discount)
+                total_price = total_price - coupon_discount
+                coupon_use = True
+                coupon_code = coupon_code
+            except Coupon.DoesNotExist:
+                pass
+    if wallet:
+        wal = Wallet.objects.get(user = request.user)
+        total_price -= wal.balance
+        spike_use = True
+        spike_discount = wal.balance
     data = Order()
     data.user = current_user
     data.address = address
@@ -39,20 +63,59 @@ def payment_details(request):
     data.order_number = current_date + str(data.id)
     data.save()    
     print(data.order_number)    
-    return JsonResponse({'total' : total_price,'name' : user.username , 'email':user.email,'phone' : user.phone , 'order_number' :data.order_number })
+    return JsonResponse({'total' : total_price,'name' : user.username , 'email':user.email,
+                         'phone' : user.phone , 'order_number' :data.order_number,'coupon_discount':coupon_discount,
+                        'coupon_use':coupon_use,'coupon_code' : coupon_code,'spike_use':spike_use,'spike_discount':spike_discount })
 
 def payment(request):
-    print("ggg")
     order = Order.objects.get(user= request.user, is_ordered = False , order_number = request.POST.get('order_id'))
+    if request.POST.get('spike_use') == 'true':
+        print("hooorrrraaa")
+        spiked = True
+        wal = Wallet.objects.get(user = request.user)
+        Transaction.objects.create(user = request.user , amount = wal.balance , transaction_type = 'debit' ,
+                        description = 'Payed using spike order ref number'+str(order.order_number))
+        wal.balance = 0
+        wal.save()
+    else:
+        spiked  = False
+        
+    if request.POST.get('coupon_use') == 'true':
+        coped = True
+        coupon_code = request.POST.get('coupon_code')
+        try:
+            coupon = Coupon.objects.get(code=coupon_code)
+            print(coupon)
+            try:
+                verify_use = Verify_coupon.objects.get(user=request.user, coupon=coupon)
+                verify_use.uses += 1
+            except Verify_coupon.DoesNotExist:
+                verify_use = Verify_coupon.objects.create(user=request.user, coupon=coupon, uses=1)
+            verify_use.save()
+        except Coupon.DoesNotExist:
+            # Handle the case when the Coupon with the provided code does not exist
+            # You can show an error message to the user or perform any other appropriate action
+            print("Coupon with code", coupon_code, "does not exist")
+    else:
+        coped = False
+
+   
     payment = Payment(
         user= request.user,
         payment_id =request.POST.get('payment_id'),
         payment_method = request.POST.get('payment_mode'),
         amount_paid = order.order_total,
         status = request.POST.get('status'),
+        spike_use = spiked ,
+        spike_discount = request.POST.get('spike_discount'),
+        coupon_use = coped,
+        coupon_discount = request.POST.get('coupon_discount'),
+        coupon_code = request.POST.get('coupon_code'),
+     
     )
-    print("ggg")
+    
     payment.save()
+    print(payment)
     order.payment = payment
     order.is_ordered = True
     order.save()
@@ -94,8 +157,7 @@ def payment(request):
     }
     return JsonResponse(data)
 
-
-    
+  
 def order_complete(request):
     order_number = request.POST.get('order_number')
     transID = request.POST.get('payment_id')
@@ -123,10 +185,6 @@ def order_complete(request):
 def order_success(request):
     o_id = request.GET.get('order_number')
     t_id = payment_id = request.GET.get('payment_id')
-    print("oid")
-    print(o_id)
-    print("tid")
-    print(t_id)
     try:
         order = Order.objects.get(order_number=o_id, is_ordered= True)
         order.status = 'Confirmed'
@@ -134,7 +192,6 @@ def order_success(request):
         subtotal =0
         for item in ordered_product:
             subtotal += item.product_price*item.quantity
-        
         payment = Payment.objects.get(payment_id=t_id)
         order.save()
         address = AddressBook.objects.get(id = order.address.id)
@@ -169,16 +226,41 @@ def samp(request):
     return render(request, 'products/ordersuccessfull.html')
 
 
-#  $.ajax({
-#                   method: "POST",
-#                   url: "/payment/order_complete",
-#                   data: orderData,
-#                   success: function(response) {
-#                     console.log("Order complete response:", response);
-#                     // Handle the response or perform any actions
-#                   },
-#                   error: function(xhr, status, error) {
-#                     console.error("Order complete error:", error);
-#                     // Handle the error case here
-#                   }
-#                 });
+def cancelorder(request):
+    order_id = request.GET.get('order_id')
+
+    order = Order.objects.get(id = order_id)
+    spike = order.payment.spike_use
+    print(spike)
+    if spike:
+        discount = order.payment.spike_discount
+
+        wallet = Wallet.objects.get(user = request.user)
+        wallet.balance += discount
+        trans = Transaction.objects.create(user = request.user , amount = discount , transaction_type = 'credit' ,
+                    description = 'Refund for cancelled order ref number'+str(order.order_number))
+        trans.save()
+
+    order.status = 'Cancelled'
+    order.save()
+    response_data = {'canceled': 'Order cancellation successful'}
+    return JsonResponse(response_data)
+
+def returnorder(request):
+    order_id = request.GET.get('order_id')
+
+    order = Order.objects.get(id = order_id)
+    order.status = 'Return initiated'
+    order.save()
+    response_data = {'return': 'Order return initiated successfully , Our pickup team will be at the deliverd address shortly '}
+    return JsonResponse(response_data)
+
+def cancelreturn(request):
+    order_id = request.GET.get('order_id')
+
+    order = Order.objects.get(id = order_id)
+    order.status = 'Delivered'
+    order.save()
+    response_data = {'return': 'Order return Canceled successfully '}
+    return JsonResponse(response_data)
+    

@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path, include, re_path
 from . import views
 app_name = 'accounts'
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
 
@@ -10,6 +11,8 @@ urlpatterns = [
     path('signinwithotp',views.signinotp, name='signinotp'),
     path('confirmlogin',views.otp, name='otp'),
     path('logout',views.log_out, name='logout'),
+    path('forgotpassword',views.forgotpassword, name='forgotpassword'),
+    
     path('verifyemail',views.verifyemail, name='verifyemail'),
     path('profile',views.profile, name='profile'),
     path('profile/add_address',views.add_address, name='add_address'),
@@ -23,5 +26,10 @@ urlpatterns = [
     path('myorders',views.myorders, name='myorders'),
     path('manage_order/<int:id>',views.manage_order, name='manage_order'),
     path('returnedorders',views.returnedorders, name='returnedorders'),
+    path('wallet',views.wallet,name="mywallet"),
+    
+    path('forgotpassword/', views.forgotpassword, name='forgotpassword'),
+    path('reset_password/<uidb64>/<token>/',views.reset_password,name='reset_password'),
+    path('resetpassword/', views.resetpassword, name='resetpassword'),
 ]
 

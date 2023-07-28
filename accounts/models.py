@@ -9,6 +9,7 @@ class User_Accounts(AbstractUser):
     phone =  models.CharField(max_length=20, unique=True, blank=False)
     is_verified = models.BooleanField(default=False , blank=False )
     account_status = models.CharField(max_length=10, default='active', blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
     USERNAME_FIELD = 'phone'
     EMAIL_FIELD = 'email'
     REQUIRED_FIELDS = ['email', 'username']
@@ -72,6 +73,7 @@ class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE , related_name='cart_items' , null=True)
     product = models.ForeignKey(Product_item ,on_delete=models.SET_NULL , null=True , blank=True)
     quantity = models.PositiveIntegerField(null= False , blank=False)
+    in_stock = models.BooleanField(default=True)
     
     def sub_total(self):
         return self.product.price * self.quantity
@@ -111,5 +113,23 @@ class State(models.Model):
     def __str__(self):
         return self.name
     
+    
+    
+class Wallet(models.Model):
+    user = models.OneToOneField(User_Accounts, on_delete=models.CASCADE)
+    balance = models.PositiveIntegerField(default=0)
+    
+    def __str__(self):
+        return f"{self.user.username}'s Wallet"
  
+class Transaction(models.Model):
+    user = models.ForeignKey(User_Accounts, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    transaction_type = models.CharField(choices=[('credit', 'Credit'), ('debit', 'Debit')], max_length=10)
+    description = models.CharField(max_length=255)
+    date = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.transaction_type}: {self.amount}"
+    
 

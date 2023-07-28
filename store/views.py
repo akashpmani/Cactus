@@ -3,7 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from accounts.models import AddressBook,Country, State
 from products.models import Category, Product_Tags, Products_Table, Product_item, Product_images,P_tags,ProductClassification,classfiedProducts
-from accounts.models import Cart, CartItem
+from accounts.models import Cart, CartItem ,Wallet ,Transaction
 from accounts.forms import AddressBookForm,CustomerRegisterForm
 from django.core.paginator import Paginator
 from django.http import JsonResponse
@@ -20,6 +20,10 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout
 from django.contrib.auth.hashers import check_password
 from accounts import verify
+from django.db.models import Q
+from dashboard.models import Verify_coupon,Coupon
+import random
+from django.db.models import F
 # Create your views here.
 account_manager = AccountsManager()
 
@@ -30,26 +34,110 @@ def search_view(request):
     return JsonResponse(search_results, safe=False)
 
 
+import random
+
 def home(request):
     current_user = request.user
     categories = Category.objects.all()
     tags = Product_Tags.objects.all()
     classification = ProductClassification.objects.all()
+    random_products = Product_item.objects.filter(offer_price__lt=F('price'), is_active=True).order_by('?')[:4]
     
     context = {
         'categories': categories,
         'tags': tags,
-        'classification' : classification,
-        
+        'classification': classification,
+        'random_products': random_products,
     }
+    
     context.update(cart_items(request))
     return render(request, 'products/index.html', context)
 
+
 def products(request):
-    product = Product_item.objects.order_by('id')
+    try:
+        searchContent = request.GET.get('searchContent','')  
+    except:
+        pass
+    print(searchContent)
+    matching_tags = Product_Tags.objects.filter(tag_name__icontains=searchContent)
+    matching_product_ids = P_tags.objects.filter(tag__in=matching_tags).values_list('product__id', flat=True)
+    product_items = Product_item.objects.filter(
+        Q(product__name__icontains=searchContent) | 
+        Q(product__description__icontains=searchContent) | 
+        Q(product__category__category_name__icontains=searchContent) |
+        Q(product__id__in=matching_product_ids) 
+        ).order_by('id')
+    if request.method == 'POST':
+        print("reached")
+        filter_data = json.loads(request.body)
+        min_price = float(filter_data.get('minPrice'))
+        max_price = float(filter_data.get('maxPrice'))*5
+        categories = filter_data.get('categories')
+        sizes = list(filter_data.get('sizes'))
+        tags = filter_data.get('tags')
+        searchContent = filter_data.get('searchContent')
+        page = int(filter_data.get('page'))
+        sort = int(filter_data.get('sort'))
+        # Start with all products from the Product_Table
+        
+        # Filter based on selected tags
+        if tags:
+            queryset = Products_Table.objects.filter(p_tags_set__tag__tag_name__in=tags)
+        else:
+            queryset = Products_Table.objects.all()
+        # Filter based on selected categories
+        if categories:
+            queryset = queryset.filter(category__category_name__in=categories)
+        product_items = Product_item.objects.filter(product__in=queryset)
+        #Filter based on selected sizes
+        if sizes:
+            print(sizes)
+            product_items = product_items.filter(size__in=sizes)
+        if searchContent != '':
+            matching_tags = Product_Tags.objects.filter(tag_name__icontains=searchContent)
+            matching_product_ids = P_tags.objects.filter(tag__in=matching_tags).values_list('product__id', flat=True)
+        if min_price is not None and max_price is not None:
+            product_items = product_items.filter(
+                Q(product__name__icontains=searchContent) |
+                Q(product__description__icontains=searchContent) |
+                Q(product__category__category_name__icontains=searchContent) |
+                Q(product__id__in=matching_product_ids),
+                price__range=(min_price, max_price)
+            )
+        if sort:
+            if sort == 0:
+                pass
+            elif sort == 1:
+                product_items = product_items.filter().order_by('-price')
+            elif sort == 2:
+                product_items = product_items.filter().order_by('price')
+            elif sort == 3:
+                product_items = product_items.filter().order_by('product__name')
+                
+        paginator = Paginator(product_items, 12)
+        product_items = paginator.get_page(page)
+        total_pages = paginator.num_pages
+        for i in product_items:
+            print(i)
+        filtered_items = [
+        {
+            'id': item.id,
+            'name': item.product.name,
+            'price' : item.price,
+            'offer_price' : item.offer_price,
+            'slug' : item.slug,
+            'size' : item.size,
+            'image' : item.image.url,
+            
+            
+        }
+        for item in product_items 
+        ]
+        return JsonResponse({'filtered_items': filtered_items,'searchContent':searchContent,'total_pages' : total_pages,'curr': page,})
     categories = Category.objects.all()
     tags = Product_Tags.objects.all()   
-    paginator = Paginator(product, 1)
+    paginator = Paginator(product_items,12)
     page_number = 1
     if request.method == 'POST':
         page_number = request.POST.get('page')
@@ -60,9 +148,9 @@ def products(request):
         'categories': categories,
         'tags': tags,
         'total_pages': total_pages,
-        'curr': page_number
+        'curr': page_number,
+        'searchContent':searchContent
     }
-    
     context.update(cart_items(request))
     return render(request, 'products/productlist.html', context)
 
@@ -72,7 +160,7 @@ def allproducts(request):
     product = Products_Table.objects.order_by('id')
     categories = Category.objects.all()
     tags = Product_Tags.objects.all()
-    paginator = Paginator(product,1)
+    paginator = Paginator(product,12)
     page_number = 1
     if request.method == 'POST':
         data = json.loads(request.body)  # Parse the JSON data
@@ -208,15 +296,22 @@ def cart(request):
         else:
             cart = Cart.objects.get(cart_id=_cart_id(request))
             cart_items = CartItem.objects.filter(cart=cart.id)
-        total_price = 0
+        total = 0
         product_data = []
         for item in cart_items:
+            if item.quantity > item.product.quantity:
+                item.in_stock = False
+                in_stock = False
+            else:
+                item.in_stock = True
+                in_stock = True
+            item.save()
             product_item = item.product
             id = product_item.id
             product_table = product_item.product
             size = product_item.size
             price = product_item.price
-            total_price += price
+            total += price * item.quantity
             image = product_table.image
             quantity = item.quantity
             name = product_table.name
@@ -231,13 +326,15 @@ def cart(request):
                 'total_price' : quantity*price,
                 'name': name,
                 'image': image,
+                'in_stock' : in_stock
             }
             product_data.append(product_dict)
-        tax = round(total_price * 0.4, 3)
-        total_price += tax
+        tax = round(total * 0.2, 3)
+        g_total = total + tax
         tax = {
             'cart_items' : cart_items,
-            'total': total_price,
+            'net' : total,
+            'total': g_total,
             'tax': tax,
         }
     except Cart.DoesNotExist:
@@ -284,7 +381,7 @@ def cart_items2(request, total=0, quantity=0, cart_items=None):
                 'image': image,
             }
             product_data.append(product_dict)
-        tax = round(total_price * 0.4, 3)
+        tax = round(total_price * 0.2, 3)
         total_price += tax
        
         context = {
@@ -310,6 +407,40 @@ def cart_items2(request, total=0, quantity=0, cart_items=None):
 
     return context
 
+
+def cart_info(request):
+
+    current_user = request.user
+    try:
+        if request.user.is_authenticated:
+            cart_items = CartItem.objects.filter(user = request.user)
+        else:
+            cart = Cart.objects.get(cart_id=_cart_id(request))
+            cart_items = CartItem.objects.filter(cart = cart)
+        net = 0
+        for item in cart_items:
+            quant = item.quantity
+            price = item.product.price
+            net += price*quant
+        tax = round(net * 0.2, 3)
+        total = tax +net
+        context = {
+        'net' : net,
+        'total': total,
+        'tax': tax,
+        }
+        
+        return context
+    except Cart.DoesNotExist:
+        pass
+    context = {
+        'net' : 0,
+        'total': 0,
+        'tax': 0,
+    }
+
+    return context
+
 def cart_items(request, total=0, quantity=0, cart_items=None):
 
     current_user = request.user
@@ -328,7 +459,7 @@ def cart_items(request, total=0, quantity=0, cart_items=None):
             product_table = product_item.product
             size = product_item.size
             price = product_item.price
-            total_price += price
+            total_price += price * item.quantity
             image = product_table.image
             quant = item.quantity
             name = product_table.name
@@ -344,11 +475,13 @@ def cart_items(request, total=0, quantity=0, cart_items=None):
                 'image': image,
             }
             product_data.append(product_dict)
-        tax = round(total_price * 0.4, 3)
+        tax = round(total_price * 0.2, 3)
+        net = total_price
         total_price += tax
         tax = {
             'total': total_price,
             'tax': tax,
+            'net' : net
         }
         context = {
         'cart_items' : products,
@@ -380,6 +513,7 @@ def _cart_id(request):
 
 
 def add_cart(request, product_id,quantity = None):
+    print("hooi")
     current_user = request.user
     product = Product_item.objects.get(id=product_id)
     if current_user.is_authenticated:
@@ -530,12 +664,14 @@ def checkout_signin(request):
 def checkout_signup(request):
     current_user = request.user
     if current_user.is_authenticated:
-        return redirect('store:checkout')
+        return redirect('store:checkout')   
     else:
         if request.method == 'POST':
             signupform = CustomerRegisterForm(request.POST)
             if signupform.is_valid():
                 user = signupform.save()
+                wallet = Wallet.objects.create(user=user, balance=100)
+                Transaction.objects.create(user=user,amount=100,transaction_type='credit',description='Signup bonus',)
                 try:
                     cart = Cart.objects.get(cart_id= _cart_id(request))
                     is_cart_item_exist = CartItem.objects.filter(cart = cart).exists()
@@ -642,7 +778,7 @@ def payment_with_existing_address(request):
 def payment_with_new_address(request):
     
     if request.method == 'POST':
-        print("yep")
+        
         form = AddressBookForm(request.POST)
         if form.is_valid():
             address = form.save(commit=False)
@@ -654,13 +790,19 @@ def payment_with_new_address(request):
         return redirect('store:payment')
     
 
-
+from django.core.exceptions import ObjectDoesNotExist
 def payment(request):
     address_id = request.session.get('address_id')
     address = AddressBook.objects.get(id = address_id)
+    try:
+        wallet = Wallet.objects.get(user = request.user)
+    except ObjectDoesNotExist:
+        wallet = Wallet.objects.create(user=request.user, balance=100)
+        Transaction.objects.create(user=request.user,amount=100,transaction_type='credit',description='Signup bonus',)
+    
     context = {
         'address' : address,
-        
+        'wallet' : wallet,
     }
     context.update(cart_items(request))
     return render(request, 'products/checkout-payment.html',context)
@@ -774,14 +916,16 @@ def update_cart_quantity(request):
         if current_user.is_authenticated:
             cart_item = CartItem.objects.get(user=current_user, product=product)
             cart_item.quantity += 1
-            cart_item.save()
-            return JsonResponse({'success': True})
+            cart_item.save()   
+            context = cart_info(request)
+            return JsonResponse({'success': True,'total' : cart_item.product.price * cart_item.quantity,'net' : context['net'],'tax' : context['tax'],'g_total' : context['total'],})
         else:
             cart = Cart.objects.get(cart_id=_cart_id(request))
             cart_item = CartItem.objects.get(cart = cart, product=product)
             cart_item.quantity += 1
             cart_item.save()
-            return JsonResponse({'success': True})
+            context = cart_info(request)
+            return JsonResponse({'success': True,'total' : cart_item.product.price * cart_item.quantity,'net' : context['net'],'tax' : context['tax'],'g_total' : context['total'],})
     return JsonResponse({'success': False})
 
 
@@ -797,10 +941,16 @@ def decrease_cart_quantity(request):
             cart_item = CartItem.objects.get(user=current_user, product=product)
             cart_item.quantity -= 1
             cart_item.save()
+            context = cart_info(request)
             response_data = {
                 'quantity': cart_item.quantity,
-                'success' : True  
+                'total' : cart_item.product.price * cart_item.quantity,
+                'success' : True, 
+                'net': context['net'],
+                'g_total' : context['total'],
+                'tax' : context['tax']
             }
+            
             if cart_item.quantity == 0:
                 cart_item.delete()
             return JsonResponse(response_data)
@@ -809,12 +959,83 @@ def decrease_cart_quantity(request):
             cart_item = CartItem.objects.get(cart = cart, product=product)
             cart_item.quantity -= 1
             cart_item.save()
+            context = cart_info(request)
             response_data = {
                 'quantity': cart_item.quantity,
-                'success' : True  
+                'total' : cart_item.product.price * cart_item.quantity,
+                'success' : True, 
+                'net': context['net'],
+                'g_total' : context['total'],
+                'tax' : context['tax']
             }
+            
             if cart_item.quantity == 0:
                 cart_item.delete()
+            return JsonResponse(response_data)
+        
+    return JsonResponse({'success': False})
+
+def decrease_cart_quantity_os(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        product_id = data.get('variation_id')
+        print(product_id)
+        current_user = request.user
+        product = Product_item.objects.get(id=product_id)
+        print(product)
+        if current_user.is_authenticated:
+            cart_item = CartItem.objects.get(user=current_user, product=product)
+            cart_item.quantity -= 1
+            cart_item.save()
+            context = cart_info(request)
+            response_data = {
+                'name': cart_item.product.product.name,
+                'id' : cart_item.product.id,
+                'image' : cart_item.product.image.url,
+                'size' : cart_item.product.size,
+                'price' : cart_item.product.price,
+                'total' : cart_item.quantity * cart_item.product.price,
+                'net' : context['net'],
+                'tax' : context['tax'],
+                'quantity': cart_item.quantity,
+                'success' : True ,
+                'g_total' : context['total'],
+            }
+            if cart_item.quantity <= product.quantity:
+                response_data['in_stock'] = True
+            else:
+                response_data['in_stock'] = False
+            if cart_item.quantity == 0:
+                cart_item.delete()
+            return JsonResponse(response_data)
+        else:
+            cart = Cart.objects.get(cart_id=_cart_id(request))
+            cart_item = CartItem.objects.get(cart = cart, product=product)
+            cart_item.quantity -= 1
+            cart_item.save()
+            context = cart_info(request)
+
+            response_data = {
+                'name': cart_item.product.product.name,
+                'id' : cart_item.product.id,
+                'image' : cart_item.product.image.url,
+                'size' : cart_item.product.size,
+                'price' : cart_item.product.price,
+                'total' : cart_item.quantity * cart_item.product.price,
+                
+                'quantity': cart_item.quantity,
+                'success' : True ,
+                'net' : context['net'],
+                'tax' : context['tax'] ,
+                'g_total' : context['total'],
+            }
+            if cart_item.quantity <= product.quantity:
+                response_data['in_stock'] = True
+            else:
+                response_data['in_stock'] = False
+            if cart_item.quantity == 0:
+                cart_item.delete()
+            
             return JsonResponse(response_data)
         
     return JsonResponse({'success': False})
@@ -913,3 +1134,29 @@ def quantity_check(request):
     return JsonResponse(response_data)
     
         # rzp_test_0cr8VAzWXYja52
+
+def apply_coupon(request):
+    if request.method == "GET":
+        coupon_code = request.GET.get('coupon')
+        total = request.GET.get('total')
+        total = total.replace('₹', '').replace(',', '')
+        # Convert the total value to a float
+        total = float(total)
+        if coupon_code:
+            try:
+                coupon = Coupon.objects.get(code=coupon_code)
+                verify_coupon_exists = Verify_coupon.objects.filter(user=request.user, coupon=coupon).exists()
+                if verify_coupon_exists:
+                    verify_coupon = Verify_coupon.objects.get(user= request.user , coupon = coupon)
+                    if coupon.uses <= verify_coupon.uses:
+                        return JsonResponse({'failed': 'You Have Used Up This Coupon '})
+                    if coupon.min_amount > total:
+                        return JsonResponse({'failed': ' Minimum Cart Value for Applaying This Coupon Is ' +str(coupon.min_amount)+'. Add More Products And Try Again'})
+                discounted_price = total - min((total/100)*coupon.discount,coupon.max_discount)
+                print(discounted_price)
+                
+                return JsonResponse({'success': 'Coupon verified successfully!  '+str(total-discounted_price)   +   '  has been reduced','total':discounted_price})
+            except Coupon.DoesNotExist:
+                return JsonResponse({'error': 'Invalid coupon code'})
+
+    return JsonResponse({'error': 'Invalid request'})

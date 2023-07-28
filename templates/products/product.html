@@ -506,6 +506,39 @@
                             
                                         // Call updateFormAction initially to set the correct form action
                                         //updateFormAction();
+                                        function checkstock(variationId){
+                                            const csrfToken = getCookie('csrftoken');
+                                            var variationId = variationId
+                                            const url = `/add_cart/${variationId}/1/`;
+                                            const body = JSON.stringify({
+                                                product_id: variationId,
+                                                quantity : 1,
+                                            });
+                                            fetch('/quantity_check', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'X-CSRFToken': csrfToken,
+                                                    'Content-Type': 'application/json'
+                                                },
+                                                body: body
+                                            })
+                                            .then(response => response.json())
+                                                .then(data => {
+                                                    // Handle the response from the server
+                                                    if (data.inStock) {
+                                                   
+                                                        alert("The Item added successfully")
+                                                    } else {
+                                                        // If the stock is not available, display an error message or take appropriate action
+                                                        alert('The requested quantity exceeds the available stock.');
+                                                    }
+                                                })
+                                                .catch(error => {
+                                                    // Handle any error that occurs during the request
+                                                    console.error('Error:', error);
+                                                });
+                            
+                                        }
                                     </script>
                                 </div>
                          

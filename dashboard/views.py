@@ -1,3 +1,5 @@
+from datetime import timedelta
+from io import BytesIO
 from django.shortcuts import render
 from django.shortcuts import redirect, render , get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
@@ -15,12 +17,76 @@ from django.core.files.base import ContentFile
 from accounts.models import CartItem
 from django.core.paginator import Paginator
 from django.utils import timezone
+from .models import Coupon
+from .forms import CouponForm
+from django.http import HttpResponse
+from django.template.loader import get_template
+from django.views import View
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Paragraph
+from reportlab.lib.styles import getSampleStyleSheet
+from datetime import date
+from django.db.models import Sum
+from reportlab.pdfgen import canvas
 
 # Create your views here.
+def get_month_name(month):
+    months_in_english = {
+        1: 'January',
+        2: 'February',
+        3: 'March',
+        4: 'April',
+        5: 'May',
+        6: 'June',
+        7: 'July',
+        8: 'August',
+        9: 'September',
+        10: 'October',
+        11: 'November',
+        12: 'December'
+    }
+    return months_in_english[month]
 
 
 def dashboard(request):
-    return render(request, 'dashboard/index.html')
+    orders = Order.objects.filter(status = "Delivered")
+    total_rev = 0
+    total_this = 0
+    recent_users = User_Accounts.objects.filter().order_by('created_at')[:3]
+    recent_act = Order.objects.exclude(status="new").order_by('-created_at')[:3]
+    for i in orders:
+        total_rev += i.order_total
+    current_datetime = timezone.now()
+    orders_this_month = Order.objects.filter(
+            status="Delivered",
+            deliverd_at__year=current_datetime.year,
+            deliverd_at__month=current_datetime.month)
+    for i in orders_this_month:
+        total_this += i.order_total
+    
+    current_datetime = timezone.now()
+    start_date = current_datetime - timedelta(days=180)
+    data = [['Month', 'New User Signups', 'New Orders']]
+    while start_date < current_datetime:
+        end_date = start_date.replace(day=1) + timedelta(days=31)
+        new_user_signups = User_Accounts.objects.filter(created_at__gte=start_date, created_at__lt=end_date).count()
+        new_orders = Order.objects.filter(created_at__gte=start_date, created_at__lt=end_date).count()
+        month_name = get_month_name(start_date.month)
+        data.append([month_name, new_user_signups, new_orders])
+        start_date = end_date
+    for i in data:
+        print(i)
+
+        
+    context = {
+        'no_orders': len(Order.objects.filter(status="Delivered")),
+        'total_rev': total_rev,
+        'total_this': total_this,
+        'data': data,
+        'recent_users':recent_users,
+        'recent_act' : recent_act
+    }
+    return render(request, 'dashboard/index.html',context)
 
 
 def usermanager(request):
@@ -43,7 +109,7 @@ def products(request):
     if search:
         products = products.filter(name__icontains=search)
 
-    paginator = Paginator(products, 1)
+    paginator = Paginator(products, 12)
     total_pages = paginator.num_pages
     
     pagenum = request.POST.get('num')
@@ -126,19 +192,37 @@ def orders(request):
     }
     
     return render(request, 'dashboard/orders.html',context)
+from accounts.models import Wallet,Transaction
 
 def change_order_status(request, id):
     order_ = Order.objects.get(order_number = id)
     status = request.POST.get('status')
-    if status == "Deliverd" :
+    print(status)
+    user = order_.user
+    print(user)
+    if status == "Delivered":
         order_.deliverd_at = timezone.now()
+        user = order_.user
+        print(user)
+        total =  order_.order_total
+        applicable_spikes = total//10
+        try:
+            wallet = Wallet.objects.get(user = user)
+        except:
+            wallet = Wallet.objects.create(user = user , balance = 100 )
+            Transaction.objects.create(user = user , amount = 100 , transaction_type = 'credit' , description = 'Login Bounus')
+        wallet.balance += applicable_spikes
+        wallet.save()
+        Transaction.objects.create(user = user , amount = applicable_spikes , transaction_type = 'credit' , description = 'Purchase bonus for the order ref no'+str(order_.order_number))
+
+        
     elif status == "Returned" :
-        pass
+        order_.returned_at = timezone.now()
     else:
         order_.deliverd_at = None
     if status:
         order_.status = status
-        order_.save()
+    order_.save()
 
     return redirect('dashboard:orders')
 
@@ -444,3 +528,80 @@ def change_user_status(request, name):
     return redirect('dashboard:users')
 
  
+def coupons(request):
+    coupon = Coupon.objects.all().order_by('-created_at')
+    context = {
+        'coupon': coupon,
+    }
+    
+    return render(request, 'dashboard/coupon.html',context)
+
+def add_coupons(request):
+    if request.method == "POST":
+        form = CouponForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Coupon added successfully.')
+            return redirect('dashboard:coupons')
+        else:
+            messages.error(request, 'Error: Invalid data. Please check the form.')
+    else:
+        form = CouponForm()
+    coupon = Coupon.objects.all().order_by('-created_at')
+    context = {
+        "form": form,
+        'coupon': coupon,
+    }
+    return render(request, 'dashboard/add_coupon.html', context)
+
+def activate_coupon(request, id):
+    if request.method == 'POST':
+        pi = Coupon.objects.get(id=id)
+        pi.active = True
+        pi.save()
+        messages.success(request, 'Coupon activated successfully.')
+    return redirect('dashboard:coupons')
+
+def disable_coupon(request, id):
+    if request.method == 'POST':
+        pi = Coupon.objects.get(id=id)
+        pi.active = False
+        pi.save()
+        messages.success(request, 'Coupon disabled successfully.')
+    return redirect('dashboard:coupons')
+
+
+class SalesReportPDFView(View):
+    def get(self, request, *args, **kwargs):
+        total_users = len(User_Accounts.objects.all())
+        new_orders = len(Order.objects.all().exclude(status="new"))
+        revenue_total = 0
+        delivered_orders = Order.objects.filter(status="Delivered")
+        for order in delivered_orders:
+            revenue_total += order.order_total
+        current_date = date.today()
+        delivered_orders_this_month = Order.objects.filter(
+            status="Delivered",
+            deliverd_at__year=current_date.year,
+            deliverd_at__month=current_date.month
+        )
+        month_len = len(delivered_orders_this_month)
+        revenue_this_month = delivered_orders_this_month.aggregate(Sum('order_total'))['order_total__sum']
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="sales_report.pdf"'
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter)
+        styles = getSampleStyleSheet()
+        elements = []
+        elements.append(Paragraph("Sales Report", styles['Title']))
+        elements.append(Paragraph(f"Total Users: {total_users}", styles['Normal']))
+        elements.append(Paragraph(f"Total Orders: {new_orders}", styles['Normal']))
+        elements.append(Paragraph(f"Total Orders This month: {month_len}", styles['Normal']))
+        elements.append(Paragraph(f"Revenue Total: ₹{revenue_total}", styles['Normal']))
+        elements.append(Paragraph(f"Revenue Total This Month: ₹{revenue_this_month}", styles['Normal']))
+        doc.build(elements)
+        pdf = buffer.getvalue()
+        buffer.close()
+        response.write(pdf)
+
+        return response

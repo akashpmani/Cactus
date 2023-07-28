@@ -47,7 +47,7 @@
   </noscript>
 
   <!-- Page Title -->
-  <title>OldSkool | Bootstrap 5 HTML Template</title>
+  <title>Cactusplants.in</title>
 
 </head>
 <body class="">
@@ -60,7 +60,7 @@
                 <div class="d-flex justify-content-between align-items-center flex-wrap">
     
                     <!-- Logo-->
-                    <a class="navbar-brand fw-bold fs-3 m-0 p-0 flex-shrink-0 order-0" href="./index.html">
+                    <a class="navbar-brand fw-bold fs-3 m-0 p-0 flex-shrink-0 order-0" href="{% url 'store:home' %}">
                         <div class="d-flex align-items-center">
                             <svg class="f-w-7" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 77.53 72.26"><path d="M10.43,54.2h0L0,36.13,10.43,18.06,20.86,0H41.72L10.43,54.2Zm67.1-7.83L73,54.2,68.49,62,45,48.47,31.29,72.26H20.86l-5.22-9L52.15,0H62.58l5.21,9L54.06,32.82,77.53,46.37Z" fill="currentColor" fill-rule="evenodd"/></svg>
                         </div>
@@ -79,89 +79,52 @@
                         <!-- /Mobile Nav Toggler-->
     
                         <!-- Navbar Search-->
+                        <form action="{% url 'store:products' %}" id="searchform">
                         <li class="d-none d-sm-block">
                             <span class="nav-link text-body search-trigger cursor-pointer">Search</span>
-    
+                        
                             <!-- Search navbar overlay-->
-                            <style>
-                                .search-results li{
-                                    font-size: 13px;
-                                    padding: 10px 10px;
-                                    list-style: none;
-                                    border-top: 1px solid #dddd;
-                                }
-                            
-                               
-                            </style>
-                            
                             <div class="navbar-search d-none">
                                 <div class="input-group mb-3 h-100">
-                                    <span class="input-group-text px-4 bg-transparent border-0"><i
-                                            class="ri-search-line ri-lg"></i></span>
-                                    <input type="text" id="search-input" class="form-control text-body bg-transparent border-0"
+                                    <span class="input-group-text px-4 bg-transparent border-0 search-icon"  onclick="sendRequest()"><i class="ri-search-line ri-lg"></i></button></span>
+                                    <style>
+                                        .search-icon {
+                                            cursor: crosshair
+                                        }
+                                    </style>
+                                    <input id="search-input" type="text" name="searchContent" class="form-control text-body bg-transparent border-0"
                                         placeholder="Enter your search terms...">
-                                    <span
-                                        class="input-group-text px-4 cursor-pointer disable-child-pointer close-search bg-transparent border-0"><i
-                                            class="ri-close-circle-line ri-lg"></i></span>               
+                                   
+                                    <span class="input-group-text px-4 cursor-pointer disable-child-pointer close-search bg-transparent border-0">
+                                    
+                                        <i class="ri-close-circle-line ri-lg"></i>
+                                    </span>
                                 </div>
-                                <div class="resultBox">
-                                    <!-- here list are inserted from javascript -->
-                                  </div>
-                                <div class="search-results"></div>
-                               
                             </div>
-                            
-                    
+                            <div class="search-overlay"></div>
                             <!-- / Search navbar overlay-->
-    
+                        
                         </li>
-                        <!-- /Navbar Search-->
+                    </form>
                         <script>
-                            const searchTrigger = document.querySelector('.search-trigger');
-                            const searchOverlay = document.querySelector('.search-overlay');
-                            const searchInput = document.querySelector('#search-input');
-                            const searchResults = document.querySelector('.search-results');
-                        
-                            searchTrigger.addEventListener('click', () => {
-                                searchOverlay.classList.toggle('active');
-                                searchInput.focus();
-                            });
-                        
-                            searchInput.addEventListener('input', () => {
-                                const query = searchInput.value.trim();
-                                console.log(query);
-                        
-                                if (query !== '') {
-                                    fetch(`/search/?q=${query}`)
-                                        .then(response => response.json())
-                                        .then(data => displaySearchResults(data));
-                                } else {
-                                    clearSearchResults();
+                            const searchInput = document.getElementById('search-input');
+                            const searchForm = document.getElementById('searchform');
+
+                            searchInput.addEventListener('keypress', function(event) {
+                                if (event.key === 'Enter') {
+                                    event.preventDefault(); // Prevent the default form submission behavior
+                                    searchForm.submit(); // Submit the form
+                                    
+                                    // You can handle the form submission and perform any additional actions if needed
                                 }
                             });
-                        
-                            function displaySearchResults(data) {
-                                // Clear previous search results
-                                clearSearchResults();
-                        
-                                // Display search results
-                                data.forEach(result => {
-                                    const div = document.createElement('div');
-                                    div.classList.add('card-img', 'position-relative');
-                                    
-                                    div.innerHTML = `
-                                
-                                    `;
-                                    
-                                    searchResults.appendChild(div);
-                                  });
-                                  
-                            }
-                        
-                            function clearSearchResults() {
-                                searchResults.innerHTML = '';
-                            }
+                            function sendRequest() {
+                                searchForm.submit(); 
+                            }  
                         </script>
+                        
+                        <!-- /Navbar Search-->
+                
                         
                             
                        
@@ -266,7 +229,7 @@
                                                       <h6 class="dropdown-heading">Categories</h6>
                                                       <ul class="list-unstyled">
                                                        {% for category in categories %}
-                                                       <li class="dropdown-list-item"><a class="dropdown-item" href="./category.html">{{category.category_name}}</a></li>
+                                                       <a class="dropdown-item" href="{% url 'store:products' %}?searchContent={{ category.category_name }}">{{ category.category_name }}</a>
                                                        {% endfor %}
                                                       </ul>
                                                   </div>
@@ -277,7 +240,7 @@
                                                       <h6 class="dropdown-heading">Collections</h6>
                                                       <ul class="list-unstyled">
                                                         {% for tag in tags %}
-                                                          <li class="dropdown-list-item"><a class="dropdown-item" href="./category.html">{{tag.tag_name}}</a></li>
+                                                          <li class="dropdown-list-item"><a class="dropdown-item"  href="{% url 'store:products' %}?searchContent={{tag.tag_name}}">{{tag.tag_name}}</a></li>
                                                           {% endfor %}
                                                         </ul>
                                                   </div>
@@ -305,7 +268,7 @@
                                                       <h6 class="dropdown-heading text-danger">Special Offers</h6>
                                                       <ul class="list-unstyled">
                                                          {% for cat in Categories %}
-                                                         <li class="dropdown-list-item"><a class="dropdown-item text-danger" href="./category.html">cat.Category_name</a></li>
+                                                         <a class="dropdown-item" href="{% url 'store:products' %}?searchContent={{ category.category_name }}">{{ category.category_name }}</a>
                                                          {% endfor %}
                                                           {% comment %} <li class="dropdown-list-item"><a class="dropdown-item text-danger" href="./category.html">Bodywarmers</a></li>
                                                           <li class="dropdown-list-item"><a class="dropdown-item text-danger" href="./category.html">Parkas</a></li>
@@ -419,7 +382,7 @@
                                 </a>
                                 <ul class="dropdown-menu">
                                     {% for cat in categories  %}
-                                  <li><a class="dropdown-item" href="./category.html">{{cat.category_name}}</a></li>
+                                    <a class="dropdown-item" href="{% url 'store:products' %}?searchContent={{ cat.category_name }}">{{ cat.category_name }}</a>
                                   {% endfor %}
                                  
                                 </ul>

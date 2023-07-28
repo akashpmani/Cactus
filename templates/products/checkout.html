@@ -119,10 +119,11 @@
                                   </span>
                                 </label>
                               </div>
-                            </form>
-                            {% endfor %} 
+                              </form>
+                            
+                              {% endfor %} 
                             </div>
-                          
+                            
                         {% endif %}
                             
                             <h3 class="fs-5 mt-5  fw-bolder mb-4 border-bottom pb-4" id="createaddress">Create Shipping Address</h3>
@@ -212,16 +213,18 @@
                                 </div>
                               </div>
                                
-                            <div class="pt-5 mt-5 pb-5 border-top d-flex justify-content-md-end align-items-center">
-                              <button class="btn btn-dark w-100 w-md-auto" type="submit">Proceed to Payment</button>
-                              
-                            </div> 
-                      </div>
+                              <div class="pt-5 mt-5 pb-5 border-top d-flex justify-content-md-end align-items-center">
+                                <button class="btn btn-dark w-100 w-md-auto" type="submit">Proceed to Payment</button>
+                                
+                              </div> 
+                            </div>
                             <!-- / Billing Address-->
-                                                  </div>
+                                                  
+                          
                            </form>
                     </div>
                 </div>
+            
                 <div class="col-12 col-lg-5 bg-light pt-lg-10 aside-checkout pb-5 pb-lg-0 my-5 my-lg-0">
                     <div class="p-4 py-lg-0 pe-lg-0 ps-lg-5">
                         <div class="pb-3">
@@ -242,7 +245,7 @@
                                         </h6>
                                         <span class="d-block text-muted fw-bolder text-uppercase fs-9">Size: {{data.size}} / Qty: {{data.quantity}}</span>
                                     </div>
-                                    <p class="fw-bolder text-end text-muted m-0">₹{{data.price}} X {{ data.quantity }} = {{ data.total_price }} </p>
+                                    <p class="fw-bolder text-end text-muted m-0">₹{{data.price}} X {{ data.quantity }} = ₹{{ data.total_price }} </p>
                                 </div>
                             </div>  
                             <!-- / Cart Item-->{% endfor %}
@@ -251,32 +254,37 @@
                         <div class="py-4 border-bottom">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <p class="m-0 fw-bolder fs-6">Subtotal</p>
-                                <p class="m-0 fs-6 fw-bolder">$422.99</p>
+                                <p class="m-0 fs-6 fw-bolder">₹{{tax.net}}</p>
                             </div>
                             <div class="d-flex justify-content-between align-items-center ">
+                              <p class="m-0 fw-bolder fs-6">Tax</p>
+                              <p class="m-0 fs-6 fw-bolder">₹{{tax.tax}}</p>
+                          </div>
+                            {% comment %} <div class="d-flex justify-content-between align-items-center ">
                                 <p class="m-0 fw-bolder fs-6">Shipping</p>
                                 <p class="m-0 fs-6 fw-bolder">$8.95</p>
-                            </div>
+                            </div> {% endcomment %}
                         </div>
                         <div class="py-4 border-bottom">
                             <div class="d-flex justify-content-between">
                                 <div>
                                     <p class="m-0 fw-bold fs-5">Grand Total</p>
-                                    <span class="text-muted small">Inc $45.89 sales tax</span>
+                                    
                                 </div>
-                                <p class="m-0 fs-5 fw-bold">$422.99</p>
+                                <p class="m-0 fs-5 fw-bold">₹{{tax.total}}</p>
                             </div>
                         </div>
-                        <div class="py-4">
+                        {% comment %} <div class="py-4">
                             <div class="input-group mb-0">
                                 <input type="text" class="form-control" placeholder="Enter your coupon code">
                                 <button class="btn btn-dark btn-sm px-4">Apply</button>
                             </div>
-                        </div>
+                        </div> {% endcomment %}
                     </div>
                 </div>
-            </div>
+            
         </div>
+        
         <!-- /Page Content -->
     </section>
     <!-- / Main Section-->

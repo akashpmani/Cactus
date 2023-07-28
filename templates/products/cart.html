@@ -32,42 +32,48 @@
                         <h3 class="fs-5 fw-bolder mb-0 border-bottom pb-4">Your Cart</h3>
                         <div class="table-responsive">
                             <table class="table align-middle">
-                                {% for item in product_data %}
-                                <tbody class="border-0">
-                                    <!-- Cart Item -->
-                                    <div class="row mx-0 py-4 g-0 border-bottom">
-                                        <div class="col-2 position-relative">
-                                            <picture class="d-block border">
-                                                <img class="img-fluid" src="{{item.image.url}}" alt="HTML Bootstrap Template by Pixel Rocket">
-                                            </picture>
-                                        </div>
-                                        <div class="col-9 offset-1">
-                                            <div>
-                                                <input type="hidden" name="" id="variation-id" value="{{item.id}}">
-                                                <h6 class="justify-content-between d-flex align-items-start mb-2">
-                                                    {{ item.name }}
-                                                    <button  href="{% url 'store:remove_cart' item.id %}" class="btn btn-primary btn-sm bg-white border-dark ms-auto"  onclick="decreaseQuantity({{ item.id }})">
-                                                        <span style="color: black;">-</span>
-                                                    </button>
-                                                      
-                                                    <span class="d-block text-muted fw-bolder text-uppercase fs-9 m-1"  >Qty:<span id="quantity-{{item.id}}" > {{ item.quantity }}</span></span>
-                                                    <button class="btn btn-primary btn-sm bg-white border-dark me-1" onclick="increaseQuantity({{ item.id }})">
-                                                        <span style="color: black;">+</span>
-                                                    </button>
-                                                      <a href="{% url 'store:delete_cart' item.id %}" >
-                                                        <span style="color: black;"><i class="ri-close-line ms-3"></i></span>
-                                                      </a>
-                                                    
-                                                </h6>
-                                                <span class="d-block text-muted fw-bolder text-uppercase fs-9">Size: {{ item.size }} </span>
+                                <tbody class="border-0"  {% if item.in_stock %} style="opacity: .5; "{% endif %}>
+                                    {% for item in product_data %}
+                                        <div class="row mx-0 py-4 g-0 border-bottom" id="cartcol{{item.id}}">
+                                            <div class="col-2 position-relative">
+                                                <picture class="d-block border">
+                                                    {% if item.in_stock %}
+                                                    <img class="img-fluid" src="{{item.image.url}}" alt="HTML Bootstrap Template by Pixel Rocket">
+                                                    {% else %}
+                                                    <img style="opacity: .5;" class="img-fluid" src="{{item.image.url}}" alt="HTML Bootstrap Template by Pixel Rocket">
+                                                    {% endif %}
+                                                </picture>
                                             </div>
-                                            <p class="fw-bolder text-end text-muted m-0">₹{{ item.price}} *{{ item.quantity }} = {{item.total_price}}</p>
+                                            <div class="col-9 offset-1">
+                                                <div>
+                                                    <input type="hidden" name="" id="variation-id" value="{{item.id}}">
+                                                    <h6 class="justify-content-between d-flex align-items-start mb-2">
+                                                        {% if item.in_stock %}
+                                                            {{ item.name }}
+                                                        {% else %}
+                                                            <s>{{ item.name }}   </s> <span style="color: red;">:   Out of Stock</span>
+                                                        {% endif %}
+                                                        <button href="{% url 'store:remove_cart' item.id %}" class="btn btn-primary btn-sm bg-white border-dark ms-auto" {% if item.in_stock %} onclick="decreaseQuantity({{ item.id }})" {% else %} onclick="decreaseQuantity_os({{ item.id }})" {% endif %} >
+                                                            <span style="color: black;">-</span>
+                                                        </button>
+                                                        <span class="d-block text-muted fw-bolder text-uppercase fs-9 m-1">Qty:<span id="quantity-{{item.id}}" > {{ item.quantity }}</span></span>
+                                                        <button {% if not item.in_stock %} disabled {% endif %} class="btn btn-primary btn-sm bg-white border-dark me-1" onclick="increaseQuantity({{ item.id }})">
+                                                            <span style="color: black;">+</span>
+                                                        </button>
+                                                        <a href="{% url 'store:delete_cart' item.id %}">
+                                                            <span style="color: black;"><i class="ri-close-line ms-3"></i></span>
+                                                        </a>
+                                                    </h6>
+                                                    <span class="d-block text-muted fw-bolder text-uppercase fs-9">Size: {{ item.size }} </span>
+                                                </div>
+                                                <p class="fw-bolder text-end text-muted m-0">₹{{ item.price }} *<span  id="price_section-{{item.id}}" >{{ item.quantity }} = {{ item.total_price }} </span></p>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <!-- / Cart Item -->
+                                        <!-- / Cart Item -->
+                                    {% endfor %}
                                 </tbody>
-                               
-                                {% endfor %}
+                            </table>
+                            
                                 <script>
                                     
                                     function increaseQuantity(variationId) {
@@ -107,7 +113,7 @@
                                         });
                                     }
                                     function updateQuantity(variationId,quantity) {
-                                        console.log("hooioio")
+                                       
                                         const csrfToken = getCookie('csrftoken');
                                     
                                         const body = JSON.stringify({
@@ -133,6 +139,16 @@
                                                 const currentQuantity = parseInt(quantityElement.innerText.trim());
                                                 const newQuantity = quantity;
                                                 quantityElement.innerText = newQuantity;
+                                                const price_section = document.getElementById('price_section-'+variationId)
+                                                price_section.innerHTML = ''
+                                                price_section.innerHTML = `${newQuantity} = ${data.total}`;
+                                                const net_in = document.getElementById('net_invoice')
+                                                const tax_in = document.getElementById('tax_invoice')
+                                                const tot_in = document.getElementById('total_invoice')
+                                                net_in.innerHTML = `${data.net}`;
+                                                tax_in.innerHTML = `${data.tax}`;
+                                                tot_in.innerHTML = `${data.g_total}`;
+
                                               
 
                                             } else {
@@ -171,6 +187,109 @@
                                                 const currentQuantity = parseInt(quantityElement.innerText.trim());
                                                 const newQuantity = data.quantity;
                                                 quantityElement.innerText = newQuantity;
+                                                const price_section = document.getElementById('price_section-'+variationId)
+                                                price_section.innerHTML = ''
+                                                price_section.innerHTML = `${newQuantity} = ${data.total}`;
+                                                const net_in = document.getElementById('net_invoice')
+                                                const tax_in = document.getElementById('tax_invoice')
+                                                const tot_in = document.getElementById('total_invoice')
+                                                net_in.innerHTML = `${data.net}`;
+                                                tax_in.innerHTML = `${data.tax}`;
+                                                tot_in.innerHTML = `${data.g_total}`;
+
+
+
+                                            if (data.quantity == 0){
+                                                location.reload();
+
+                                            }
+                                            } else {
+                                                // If the quantity update fails, display an error message or take appropriate action
+                                                alert('Failed to update quantity. Please try again.');
+                                            }
+                                        })
+                                        .catch(error => {
+                                            // Handle any error that occurs during the request
+                                            console.error('Error:', error);
+                                        });
+                                    }
+                                    
+                                    function decreaseQuantity_os(variationId) {
+                                        const csrfToken = getCookie('csrftoken');
+                                    
+                                        const body = JSON.stringify({
+                                            variation_id: variationId
+                                        });
+                                    
+                                        fetch('/decrease_cart_quantity_os/', {
+                                            method: 'POST',
+                                            headers: {
+                                                'X-CSRFToken': csrfToken,
+                                                'Content-Type': 'application/json'
+                                            },
+                                            body: body
+                                        })
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            // Handle the response from the server
+                                            if (data.success) {
+                                                // If the quantity update is successful, update the UI with the new quantity value
+                                                console.log(data.success)
+                                                const quantityElement = document.getElementById('quantity-' + variationId);
+                                                console.log(data.in_stock);
+                                                const currentQuantity = parseInt(quantityElement.innerText.trim());
+                                                if (data.in_stock){
+                                                    const cartcol = document.getElementById('cartcol'+variationId)
+                                                    cartcol.innerHTML = '';
+                                                    cartcol.innerHTML = `
+                                                    <div class="row mx-0 py-4 g-0 border-bottom" id="cartcol">
+                                                        <div class="col-2 position-relative">
+                                                            <picture class="d-block border">
+                                                                ${data.in_stock
+                                                                    ? `<img class="img-fluid" src="${data.image}" alt="HTML Bootstrap Template by Pixel Rocket">`
+                                                                    : `<img style="opacity: .5;" class="img-fluid" src="${data.image}" alt="HTML Bootstrap Template by Pixel Rocket">`
+                                                                }
+                                                            </picture>
+                                                        </div>
+                                                        <div class="col-9 offset-1">
+                                                            <div>
+                                                                <h6 class="justify-content-between d-flex align-items-start mb-2">
+                                                                    ${data.in_stock
+                                                                        ? `${data.name}`
+                                                                        : `<s>${data.name}</s><span style="color: red;">: Out of Stock</span>`
+                                                                    }
+                                                                    <button href="/remove_cart/${data.id} " class="btn btn-primary btn-sm bg-white border-dark ms-auto" ${data.in_stock ? `onclick="decreaseQuantity(${data.id})"` : `onclick="decreaseQuantity_os(${data.id})"`}>
+                                                                        <span style="color: black;">-</span>
+                                                                    </button>
+                                                                    <span class="d-block text-muted fw-bolder text-uppercase fs-9 m-1"><span id="quantity-${data.id}">${data.quantity}</span></span>
+                                                                    <button ${data.in_stock ? '' : 'disabled'} class="btn btn-primary btn-sm bg-white border-dark me-1" onclick="increaseQuantity(${data.id})">
+                                                                        <span style="color: black;">+</span>
+                                                                    </button>
+                                                                    <a href="/delete_cart/${data.id} %}">
+                                                                        <span style="color: black;"><i class="ri-close-line ms-3"></i></span>
+                                                                    </a>
+                                                                </h6>
+                                                                <span class="d-block text-muted fw-bolder text-uppercase fs-9">Size: ${data.size}</span>
+                                                            </div>
+                                                            <p class="fw-bolder text-end text-muted m-0">₹${data.price} * ${data.quantity} = ${data.total}</p>
+                                                        </div>
+                                                    </div>
+                                                `;
+                                                const net_in = document.getElementById('net_invoice')
+                                                const tax_in = document.getElementById('tax_invoice')
+                                                const tot_in = document.getElementById('total_invoice')
+                                                net_in.innerHTML = `${data.net}`;
+                                                tax_in.innerHTML = `${data.tax}`;
+                                                tot_in.innerHTML = `${data.g_total}`;
+                                                
+
+                                                }
+                                                else{
+                                                    alert("item still os")
+                                                }
+
+                                                const newQuantity = data.quantity;
+                                                quantityElement.innerText = newQuantity;
                                             if (data.quantity == 0){
                                                 location.reload();
 
@@ -194,29 +313,39 @@
                                     }
                                 </script>
                                 
-                            </table>
+                            
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-12 col-lg-5 bg-light pt-lg-10 aside-checkout pb-5 pb-lg-0 my-5 my-lg-0">
                 <div class="p-4 py-lg-0 pe-lg-0 ps-lg-5">
-                    <div class="pb-4 border-bottom">
-                        <div class="d-flex flex-column flex-md-row justify-content-md-between mb-4 mb-md-2">
+                   
+                    <div class="py-4 border-bottom">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <p class="m-0 fw-bolder fs-6">Subtotal</p>
+                            <p class="m-0 fs-6 fw-bolder" > ₹ <span id="net_invoice">{{tax.net}}</span></p>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center ">
+                          <p class="m-0 fw-bolder fs-6">Tax</p>
+                          <p class="m-0 fs-6 fw-bolder" >₹<span id="tax_invoice">{{tax.tax}}</span></p>
+                       </div>
+                        {% comment %} <div class="d-flex justify-content-between align-items-center ">
+                            <p class="m-0 fw-bolder fs-6">Shipping</p>
+                            <p class="m-0 fs-6 fw-bolder">$8.95</p>
+                        </div> {% endcomment %}
+                    </div>
+                    <div class="py-4 border-bottom">
+                        <div class="d-flex justify-content-between">
                             <div>
                                 <p class="m-0 fw-bold fs-5">Grand Total</p>
-                                <span class="text-muted small">Inc $45.89 sales tax</span>
+                                
                             </div>
-                            <p class="m-0 fs-5 fw-bold">$422.99</p>
+                            <p class="m-0 fs-5 fw-bold" >₹<span id="total_invoice">{{tax.total}}</span></p>
                         </div>
                     </div>
-                    <div class="py-4">
-                        <div class="input-group mb-0">
-                            <input type="text" class="form-control" placeholder="Enter coupon code">
-                            <button class="btn btn-secondary btn-sm px-4">Apply</button>
-                        </div>
-                    </div>
-                    <a href="{% url 'store:checkout_manager' %}" class="btn btn-dark w-100 text-center" role="button">Proceed to checkout</a>
+                    <a href="{% url 'store:checkout_manager' %}" class="btn btn-dark w-100 text-center" role="button">Proceed to checkout</a>                    </div>
+
                 </div>
             </div>
         </div>

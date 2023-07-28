@@ -27,11 +27,11 @@
                         <nav aria-label="breadcrumb">
                             <ol class="breadcrumb">
                               <li class="breadcrumb-item"><a href="#">Home</a></li>
-                              <li class="breadcrumb-item"><a href="#">Sneakers</a></li>
+                              <li class="breadcrumb-item"><a href="#">plants</a></li>
                               <li class="breadcrumb-item active" aria-current="page">New Releases</li>
                             </ol>
-                        </nav>        <h1 class="fw-bold fs-3 mb-2">New Releases (121)</h1>
-                        <p class="m-0 text-muted small">Showing 1 - 9 of 121</p>
+                        {% comment %} </nav>        <h1 class="fw-bold fs-3 mb-2">New Releases (121)</h1>
+                        <p class="m-0 text-muted small">Showing 1 - 9 of 121</p> {% endcomment %}
                     </div>
                     <div class="d-flex justify-content-end align-items-center mt-4 mt-lg-0 flex-column flex-md-row">
                 
@@ -42,8 +42,8 @@
                         <!-- / Filter Trigger-->
                 
                         <!-- Sort Options-->
-                            <select class="form-select form-select-sm border-0 bg-light p-3 pe-5 lh-1 fs-7">
-                                <option selected>Sort By</option>
+                            <select class="form-select form-select-sm border-0 bg-light p-3 pe-5 lh-1 fs-7" id="sortselect" onchange="handleFilter(1)">
+                                <option value="0" selected>Sort By</option>
                                 <option value="1">Hi Low</option>
                                 <option value="2">Low Hi</option>
                                 <option value="3">Name</option>
@@ -51,7 +51,13 @@
                         <!-- / Sort Options-->
                     </div>
                 </div>            <!-- /Category Toolbar-->
-
+                <div class="col-12 col-sm-12 col-lg-12 " id="issearch">
+                  {% if searchContent != '' %}
+                  <span style="font-size: 30px; font-weight: bold;">Showing Results For <span style="color: red;">{{searchContent}}</span>  ... <a style="text-decoration: none;" href="{% url 'store:products' %}">clear  </a></span><i class="ri-close-circle-line ri-lg"></i>
+                  <br>
+                  <br>
+                  {% endif %}
+                </div>
             <!-- Products-->
             {% if product %}
             <div class=" row g-4"  id="product-list-container">
@@ -63,7 +69,8 @@
                        {% if item.price > item.offer_price %}
                        <div class="card-badges">
                         <span class="badge badge-card"><span class="f-w-2 f-h-2 bg-danger rounded-circle d-block me-1"></span> Sale</span>
-                </div> {% endif %}
+                      </div> 
+                        {% endif %}
                           <a href="{% url 'store:add_wishlist' item.id %}">
                             <span class="position-absolute top-0 end-0 p-2 z-index-20 text-muted" C><i class="ri-heart-line"></i></span></a>
                             <a href="{% url 'store:product_detail' item.slug item.size %}">
@@ -72,9 +79,9 @@
                             </picture>
                           </a>
 
-                                <a href="{% url 'store:add_cart' item.id 1%}"><div class="position-absolute start-0 bottom-0 end-0 z-index-20 p-2">
-                                  <button class="btn btn-quick-add"><i class="ri-add-line me-2"></i> Quick Add</button>
-                              </div></a>
+                                <div class="position-absolute start-0 bottom-0 end-0 z-index-20 p-2">
+                                  <button class="btn btn-quick-add" onclick="checkstock({{item.id}})"><i class="ri-add-line me-2"></i> Quick Add</button>
+                              </div>
                         </div>
                        
                         {% if item.price > item.offer_price %}
@@ -95,13 +102,60 @@
                     <!--/ Card Product-->
                 </div>
                 {% endfor %} {% endif %}  
-            </div>   
+            </div> 
+            <script>
+              function getCookie(name) {
+                const value = `; ${document.cookie}`;
+                const parts = value.split(`; ${name}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+            }
+              function checkstock(variationId){
+                const csrfToken = getCookie('csrftoken');
+                var variationId = variationId
+                const url = `/add_cart/${variationId}/1/`;
+                const body = JSON.stringify({
+                    product_id: variationId,
+                    quantity : 1,
+                });
+                fetch('/quantity_check', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/json'
+                    },
+                    body: body
+                })
+                .then(response => response.json())
+                    .then(data => {
+                        // Handle the response from the server
+                        if (data.inStock) {
+                          
+                          fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': csrfToken,
+                                'Content-Type': 'application/json'
+                            },
+                            body: body
+                        })
+                            alert("The Item added successfully")
+                        } else {
+                            // If the stock is not available, display an error message or take appropriate action
+                            alert('The requested quantity exceeds the available stock.');
+                        }
+                    })
+                    .catch(error => {
+                        // Handle any error that occurs during the request
+                        console.error('Error:', error);
+                    });
+
+            }
+            </script>  
     <input type="hidden" id="total_pages" value="{{total_pages}}">
     <input type="hidden" id="curr" value="{{curr}}">
-    <form action="{{ request.path }}" method="post" id="paginatorform">
-      {% csrf_token %}
+
       <input type="hidden" id="paginator" name="page">
-    </form>
+ 
     </div>
     <script>
       function wishlist() {
@@ -120,6 +174,8 @@
                 <br>
                 
         </div>
+        <input type="hidden" id="total_pages" value="{{total_pages}}">
+        <input type="hidden" id="curr" value="{{curr}}">
         <div id="pagination-2" class="d-flex justify-content-center text-center"></div>
         
         
@@ -238,7 +294,7 @@
                 const page = parseInt(event.target.textContent);
                 //sendPageNumberToServer(page);
                 document.getElementById('paginator').value = page;
-                document.getElementById('paginatorform').submit();
+                handleFilter(page)
                 
               }
             });
@@ -331,6 +387,7 @@
       <div>
 
         <!-- Price Filter -->
+        {% comment %} <form action="{% url 'store:products' %}" method="get" id="price-filter-form"> {% endcomment %}
         <div class="py-4 widget-filter widget-filter-price border-top">
           <a class="small text-body text-decoration-none text-secondary-hover transition-all transition-all fs-6 fw-bolder d-block collapse-icon-chevron"
             data-bs-toggle="collapse" href="#filter-modal-price" role="button" aria-expanded="true"
@@ -341,12 +398,12 @@
             <div class="filter-price mt-6"></div>
             <div class="d-flex justify-content-between align-items-center mt-7">
               <div class="input-group mb-0 me-2 border">
-                <span class="input-group-text bg-transparent fs-7 p-2 text-muted border-0">$</span>
-                <input type="number" min="00" max="1000" step="1" class="filter-min form-control-sm border flex-grow-1 text-muted border-0">
+                <span class="input-group-text bg-transparent fs-7 p-2 text-muted border-0">₹</span>
+                <input type="number" min="00" max="10000" step="1" class="filter-min form-control-sm border flex-grow-1 text-muted border-0">
               </div>
               <div class="input-group mb-0 ms-2 border">
-                <span class="input-group-text bg-transparent fs-7 p-2 text-muted border-0">$</span>
-                <input type="number" min="00" max="1000" step="1" class="filter-max form-control-sm flex-grow-1 text-muted border-0">
+                <span class="input-group-text bg-transparent fs-7 p-2 text-muted border-0">₹</span>
+                <input type="number" min="00" max="10000" step="1" class="filter-max form-control-sm flex-grow-1 text-muted border-0">
               </div>
             </div>
           </div>
@@ -371,7 +428,7 @@
               <div class="filter-options" data-pixr-simplebar>
                 {% for cat in categories %}
                 <div class="form-group form-check-custom mb-1">
-                  <input type="checkbox" class="form-check-input filter-category" id="filter-brands-modal-{{forloop.counter}}">
+                  <input type="checkbox" class="form-check-input filter-category" value="{{cat.category_name}}" id="filter-brands-modal-{{forloop.counter}}">
                   <label class="form-check-label fw-normal text-body flex-grow-1 d-flex align-items-center"
                     for="filter-brands-modal-{{forloop.counter}}">{{cat.category_name}}<span
                       class="text-muted ms-1 fs-9">(21)</span></label>
@@ -393,19 +450,19 @@
           <div id="filter-modal-sizes" class="collapse show">
             <div class="filter-options mt-3">
               <div class="form-group d-inline-block mr-2 mb-2 form-check-bg form-check-custom">
-                <input type="checkbox" class="form-check-bg-input filter-size" id="filter-sizes-modal-0">
+                <input type="checkbox" class="form-check-bg-input filter-size" id="filter-sizes-modal-0" value="S">
                 <label class="form-check-label fw-normal" for="filter-sizes-modal-0">Small</label>
               </div>
               <div class="form-group d-inline-block mr-2 mb-2 form-check-bg form-check-custom">
-                <input type="checkbox" class="form-check-bg-input filter-size" id="filter-sizes-modal-1">
+                <input type="checkbox" class="form-check-bg-input filter-size" id="filter-sizes-modal-1" value="M">
                 <label class="form-check-label fw-normal" for="filter-sizes-modal-1">Medium</label>
               </div>
               <div class="form-group d-inline-block mr-2 mb-2 form-check-bg form-check-custom">
-                <input type="checkbox" class="form-check-bg-input filter-size" id="filter-sizes-modal-2">
+                <input type="checkbox" class="form-check-bg-input filter-size" id="filter-sizes-modal-2" value="L">
                 <label class="form-check-label fw-normal" for="filter-sizes-modal-2">Large</label>
               </div>
               <div class="form-group d-inline-block mr-2 mb-2 form-check-bg form-check-custom">
-                <input type="checkbox" class="form-check-bg-input filter-size" id="filter-sizes-modal-3">
+                <input type="checkbox" class="form-check-bg-input filter-size" id="filter-sizes-modal-3" value="XL">
                 <label class="form-check-label fw-normal" for="filter-sizes-modal-3">Extra Large</label>
               </div>
             </div>
@@ -425,7 +482,7 @@
             <div class="filter-options mt-3">
               {% for tag in tags %}
               <div class="form-group d-inline-block mr-2 mb-2 form-check-bg form-check-custom">
-                <input type="checkbox" class="form-check-bg-input filter-colour" id="filter-tags-modal-{{forloop.counter}}">
+                <input type="checkbox" class="form-check-bg-input filter-tags" value="{{tag.tag_name}}" id="filter-tags-modal-{{forloop.counter}}">
                 <label class="form-check-label fw-normal" for="filter-tags-modal-{{forloop.counter}}">{{tag.tag_name}}</label>
               </div>
               {% endfor %}
@@ -438,45 +495,131 @@
 
       <!-- Filter Button-->
       <div class="border-top pt-3">
-        <a href="#" class="btn btn-dark mt-2 d-block hover-lift-sm hover-boxshadow" data-bs-dismiss="offcanvas" aria-label="Close">Done</a>
+        <button class="btn btn-dark mt-2 d-block hover-lift-sm hover-boxshadow" id="filter-submit-btn" type="submit" data-bs-dismiss="offcanvas" onclick="handleFilter(1)" aria-label="Close">Done</button>
+   
+      
       </div>
       <!-- /Filter Button-->
+    {% comment %} </form> {% endcomment %}
     </div>
   </div>
 </div>
 
 <script>
-  // JavaScript
-  // Add event listener to the "Done" button
-  const doneButton = document.querySelector('.btn-dark');
-  doneButton.addEventListener('click', handleFilter);
+  function getCookie(name) {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+}
+  //document.getElementById('filter-submit-btn').addEventListener('click', handleFilter(1));
 
-  function handleFilter() {
-    // Get the selected filters
+  function handleFilter(page) {
     const minPrice = document.querySelector('.filter-min').value;
     const maxPrice = document.querySelector('.filter-max').value;
-    const selectedCategories = document.querySelectorAll('.filter-category:checked');
-    const selectedSizes = document.querySelectorAll('.filter-size:checked');
-    const selectedColours = document.querySelectorAll('.filter-colour:checked');
+    const selectedCategories = Array.from(document.querySelectorAll('.filter-category:checked')).map(category => category.value);
+    const selectedSizes = Array.from(document.querySelectorAll('.filter-size:checked')).map(size => size.value);
+    const selectedTags = Array.from(document.querySelectorAll('.filter-tags:checked')).map(colour => colour.value);
+    const searchContent = "{{ searchContent }}";
+    const sortSelect = document.getElementById('sortselect');
+    const selectedSortOption = sortSelect.value;
 
-    // Prepare the filter data to be sent to the server or used for client-side filtering
+
+    // Prepare the filter data to be sent to the server
     const filterData = {
       minPrice: minPrice,
       maxPrice: maxPrice,
-      categories: Array.from(selectedCategories).map(category => category.value),
-      sizes: Array.from(selectedSizes).map(size => size.value),
-      colours: Array.from(selectedColours).map(colour => colour.value)
+      categories: selectedCategories,
+      sizes: selectedSizes,
+      tags: selectedTags,
+      searchContent:searchContent,
+      page:page,
+      sort : selectedSortOption,
     };
+    // Send the filter data to the server using an AJAX request
+    const csrfToken = getCookie('csrftoken');
+    const url = '/products/'; 
+    const body = JSON.stringify(filterData);
 
-    // Perform the filtering operation using the filterData
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': csrfToken,
+        'Content-Type': 'application/json'
+      },
+      body: body
+    })
+    .then(response => response.json())
+    .then(data => {
+      alert("data.searchContent" )
+      // Replace the product list with new data
+      const productContainer = document.getElementById('product-list-container');
+      const issearch = document.getElementById('issearch');
+      if (data.searchContent === '') {
+        issearch.innerHTML = '';
+      } else {
+        issearch.innerHTML = '';
+        issearch.innerHTML = `<h3>Showing results for ${data.searchContent}</h3><br>`;
+      }
 
-    // Example: Print the filterData to the console
-    console.log(filterData);
+      productContainer.innerHTML = ''; 
+      
+      
+      // Iterate over the filtered items and add them to the container
+      data.filtered_items.forEach(item => {
+        const productItem = createProductItem(item);
+        productContainer.insertAdjacentHTML('beforeend', productItem);
+      });
+      pagination.destroy();
+      pagination = new Pagination(document.querySelector("#pagination-2"), {
+        curr: data.curr,
+        slots: 8,
+        total: data.total_pages,
+        
+      });
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+
+
   }
+  function createProductItem(item) {
+    return `
+      <div class="col-12 col-sm-6 col-lg-4">
+        <div class="card border border-transparent position-relative overflow-hidden h-100 transparent">
+            <div class="card-img position-relative">
+              ${item.price > item.offer_price ? '<div class="card-badges"><span class="badge badge-card"><span class="f-w-2 f-h-2 bg-danger rounded-circle d-block me-1"></span> Sale</span></div>' : ''}
+              <a href="/add_wishlist/${item.id}"><span class="position-absolute top-0 end-0 p-2 z-index-20 text-muted"><i class="ri-heart-line"></i></span></a>
+              <a href="/product/${item.slug}/${item.size}">
+                <picture class="position-relative overflow-hidden d-block bg-light">
+                  <img class="w-100 img-fluid position-relative z-index-10" title="" src="${item.image}" alt="" style="width: 375px; height: 325px;">
+                </picture>
+              </a>
+              <div class="position-absolute start-0 bottom-0 end-0 z-index-20 p-2">
+                <button class="btn btn-quick-add" onclick="checkstock(${item.id})"><i class="ri-add-line me-2"></i> Quick Add</button>
+              </div>
+            </div>
+            ${item.price > item.offer_price ? `
+            <div class="card-body px-0">
+              <a href="/product/${item.slug}/${item.size}" class="text-decoration-none">${item.name}</a>
+              <small class="text-muted d-block">size: ${item.size}</small>
+              <p class="mt-2 mb-0 small"><s class="text-muted">${item.price}</s> <span class="text-danger">${item.offer_price}</span></p>
+            </div>` : `
+            <div class="card-body px-0">
+              <a href="/product/${item.slug}/${item.size}" class="text-decoration-none">${item.name}</a>
+              <small class="text-muted d-block">size: ${item.size}</small>
+              <p class="mt-2 mb-0 small"><span class="text">${item.price}</span></p>
+            </div>`}
+        </div>
+      </div>
+    `;
+}
+
+  
 </script>
+
 
     
     {% endblock main %}
 
     <!-- Footer --> 
- 

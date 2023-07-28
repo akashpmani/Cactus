@@ -18,48 +18,126 @@
     <link href="{% static 'ac_counts/css/main.css' %}" rel="stylesheet" type="text/css" />
 </head>
 <body>
-    <main>      
+    
+<style>
+    .error-text {
+      color: red  !important
+    }
+  </style>
+    <main>     
+        {% if messages %}
+        <div class="container mt-4">
+          {% for message in messages %}
+            <script>
+              window.onload = function() {
+                alert("{{ message }}");
+              };
+            </script>
+          {% endfor %}
+        </div>
+      {% endif %}
+       
         <section class="content-main mt-80 mb-80">
             <div class="card mx-auto card-login">
                 <div class="card-body">
                     <h4 class="card-title mb-4">Create an Account</h4>
-                    <form action="{% url 'accounts:signup'%}" method="post">
-                        {% csrf_token %} <div class="mb-3">
-                        <label class="form-label">Username</label>
-                        <input class="form-control" placeholder="Username" type="text" name="username">
-                    </div> <!-- form-group// -->
-                        <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <input class="form-control" placeholder="Your email" type="text" name="email">
-                        </div> <!-- form-group// -->
-                        <div class="mb-3">                          
-                            <div class="row gx-2">
-                                <label class="form-label">Phone</label>                               
-                                 <div class="col-3"> <input class="form-control" placeholder="Code" type="text" onkeyup="combinePhone()" value="+91" name="code"> </div>
-                                <div class="col-9"> <input class="form-control" placeholder="Phone" type="text" onkeyup="combinePhone()" name="ph"> </div> 
-                                <input type="hidden" name="phone" id="full_phone">
-                            </div>
-                            <script>
-                                function combinePhone() {
-                                    var code = document.getElementsByName("code")[0].value;
-                                    var phone = document.getElementsByName("ph")[0].value;
-                                    var full_phone = code + phone;
-                                    document.getElementById("full_phone").value = full_phone;
-                                }
-                                </script>
-                        </div> <!-- form-group// -->                    
-                        <div class="mb-3">
-                            <label class="form-label">Create password</label>
-                            <input class="form-control" placeholder="Password" type="password" name="password1">
-                        </div> <!-- form-group// -->
-                         <!-- form-group// -->
-                        <div class="mb-3">
-                            <p class="small text-center text-muted">By signing up, you confirm that you’ve read and accepted our User Notice and Privacy Policy.</p>
-                        </div> <!-- form-group  .// -->
-                        <div class="mb-4">
-                            <button type="submit" class="btn btn-primary w-100"> Signup </button>
-                        </div> <!-- form-group// -->
-                    </form> 
+                   <!-- accounts/signup.html -->
+
+<form action="{% url 'accounts:signup' %}" method="post" onsubmit="return validateForm()">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label class="form-label">Username</label>
+      <input class="form-control" placeholder="Username" type="text" name="username" id="username">
+      <small class="form-text text-muted error-text" id="username_error"></small>
+    </div> <!-- form-group// -->
+    <div class="mb-3">
+      <label class="form-label">Email</label>
+      <input class="form-control" placeholder="Your email" type="text" name="email" id="email">
+      <small class="form-text error-text  text-muted" id="email_error"></small>
+    </div> <!-- form-group// -->
+    <div class="mb-3">
+      <div class="row gx-2">
+        <label class="form-label">Phone</label>
+        <div class="col-3"> <input class="form-control" placeholder="Code" type="text" name="code" id="code" onkeyup="combinePhone()"> </div>
+        <div class="col-9"> <input class="form-control" placeholder="Phone" type="text" name="ph" id="phone" onkeyup="combinePhone()"> </div>
+        <input type="hidden" name="phone" id="full_phone">
+        <small class="form-text error-text text-muted" id="phone_error"></small>
+      </div>
+      <script>
+        function combinePhone() {
+          var code = document.getElementById("code").value;
+          var phone = document.getElementById("phone").value;
+          var full_phone = code + phone;
+          document.getElementById("full_phone").value = full_phone;
+        }
+      </script>
+    </div> <!-- form-group// -->
+    <div class="mb-3">
+      <label class="form-label">Create password</label>
+      <input class="form-control" placeholder="Password" type="password" name="password1" id="password1">
+      <small class="form-text text-muted error-text" id="password_error"></small>
+    </div> <!-- form-group// -->
+    <div class="mb-3">
+      <p class="small text-center text-muted">By signing up, you confirm that you’ve read and accepted our User Notice and Privacy Policy.</p>
+    </div> <!-- form-group  .// -->
+    <div class="mb-4">
+      <button type="submit" class="btn btn-primary w-100"> Signup </button>
+    </div> <!-- form-group// -->
+  </form>
+  
+  <script>
+    function validateForm() {
+      const username = document.getElementById("username").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const fullPhone = document.getElementById("full_phone").value.trim();
+      const password1 = document.getElementById("password1").value;
+  
+      let isValid = true;
+  
+      if (username === "") {
+        document.getElementById("username_error").textContent = "Please enter a username.";
+        isValid = false;
+      } else {
+        document.getElementById("username_error").textContent = "";
+      }
+  
+      if (email === "") {
+        document.getElementById("email_error").textContent = "Please enter your email.";
+        isValid = false;
+      } else {
+        const emailPattern = /^[\w.-]+@[a-zA-Z\d.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailPattern.test(email)) {
+          document.getElementById("email_error").textContent = "Please enter a valid email address.";
+          isValid = false;
+        } else {
+          document.getElementById("email_error").textContent = "";
+        }
+      }
+  
+      if (fullPhone === "") {
+        document.getElementById("phone_error").textContent = "Please enter your phone number.";
+        isValid = false;
+      } else {
+        const phonePattern = /^\+?\d{6,}$/;
+        if (!phonePattern.test(fullPhone)) {
+          document.getElementById("phone_error").textContent = "Please enter a valid phone number.";
+          isValid = false;
+        } else {
+          document.getElementById("phone_error").textContent = "";
+        }
+      }
+  
+      if (password1 === "") {
+        document.getElementById("password_error").textContent = "Please enter a password.";
+        isValid = false;
+      } else {
+        document.getElementById("password_error").textContent = "";
+      }
+  
+      return isValid;
+    }
+  </script>
+  
                     <p class="text-center mb-2">Already have an account? <a href="{% url 'accounts:signin' %}">Sign in now</a></p>
                 </div>
             </div>

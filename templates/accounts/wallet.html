@@ -1,0 +1,347 @@
+{% extends 'products/base.html' %}
+{% load static %}
+
+{% block main %}
+
+
+    <!--====== Google Font ======-->
+  <!-- Custom Google Fonts-->
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Roboto:wght@300;400;700&display=auto"
+    rel="stylesheet">
+
+    <!--====== Vendor Css ======-->
+    <link rel="stylesheet" href="{% static 'profile/vendor.css' %}">
+
+    <!--====== Utility-Spacing ======-->
+    <link rel="stylesheet" href="{% static 'profile/utility.css' %}">
+
+    <!--====== App ======-->
+    <link rel="stylesheet" href="{% static 'profile/app.css' %}">
+
+    <!--====== Main App ======-->
+    <body class="config">
+
+      
+    
+          <!--====== App Content ======-->
+          <div class="app-content">
+
+            <!--====== Section 1 ======-->
+            <div class="u-s-p-y-60">
+
+                <!--====== Section Content ======-->
+                <div class="section__content">
+                    <div class="container">
+                        <div class="breadcrumb">
+                            <div class="breadcrumb__wrap">
+                                <ul class="breadcrumb__list">
+                                    <li class="has-separator">
+
+                                        <a href="index.html">Home</a></li>
+                                    <li class="is-marked">
+
+                                        <a href="dash-manage-order.html">My Account</a></li>
+                                </ul>
+                            </div>
+                            <button class="logout-button btn btn--e-brand-b-2">Logout</button>
+                              
+                            <style>
+                                    .logout-button {
+                                    margin-left: auto;
+                                  }           
+                            </style> 
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--====== End - Section 1 ======-->
+
+
+            <!--====== Section 2 ======-->
+            <div class="u-s-p-b-60">
+
+                <!--====== Section Content ======-->
+                <div class="section__content">
+                    <div class="dash">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-lg-3 col-md-12">
+
+                                    <!--====== Dashboard Features ======-->
+                                    <div class="dash__box dash__box--bg-white dash__box--shadow u-s-m-b-30">
+                                        <div class="dash__pad-1">
+
+                                            <span class="dash__text u-s-m-b-16">Hello, John Doe</span>
+                                            <ul class="dash__f-list">
+                                                <li>
+
+                                                    <a  href="{% url 'accounts:profile' %}">Manage My Account</a></li>
+                                                <li>
+
+                                                    <a href="{% url 'accounts:my_profile' %}">My Profile</a></li>
+                                                <li>
+
+                                                    <a href="{% url 'accounts:addressbook' %}">Address Book</a></li>
+                                                <li>
+
+                                                    <a class="dash-active" href="{% url 'accounts:mywallet' %}">Wallet</a></li>
+                                                <li>
+
+                                                    <a href="{% url 'accounts:myorders' %}">My Orders</a></li>
+                                                <li>
+
+                                                    <a href="dash-payment-option.html">My Payment Options</a></li>
+                                                <li>
+
+                                                    <a href="{% url 'accounts:returnedorders' %}">My Returns & Cancellations</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="dash__box dash__box--bg-white dash__box--shadow dash__box--w">
+                                        <div class="dash__pad-1">
+                                            <ul class="dash__w-list">
+                                                <li>
+                                                    <div class="dash__w-wrap">
+
+                                                        <span class="dash__w-icon dash__w-icon-style-1"><i class="fas fa-cart-arrow-down"></i></span>
+
+                                                        <span class="dash__w-text">4</span>
+
+                                                        <span class="dash__w-name">Orders Placed</span></div>
+                                                </li>
+                                                <li>
+                                                    <div class="dash__w-wrap">
+
+                                                        <span class="dash__w-icon dash__w-icon-style-2"><i class="fas fa-times"></i></span>
+
+                                                        <span class="dash__w-text">0</span>
+
+                                                        <span class="dash__w-name">Cancel Orders</span></div>
+                                                </li>
+                                                <li>
+                                                    <div class="dash__w-wrap">
+
+                                                        <span class="dash__w-icon dash__w-icon-style-3"><i class="far fa-heart"></i></span>
+
+                                                        <span class="dash__w-text">0</span>
+
+                                                        <span class="dash__w-name">Wishlist</span></div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <!--====== End - Dashboard Features ======-->
+                                </div>
+                                <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+                                <div class="col-lg-9 col-md-12" >
+                                   
+                              
+                                        <div class="row mt-5 br-rounded shadow ">
+                                         
+                                      
+                                          <div class="column-right">
+                                            <div class="balances__header">
+                                              <h1 class="balances__title">Spikes Balance <img width="50" height="50" src="https://img.icons8.com/water-color/50/western.png" alt="western"/></h1>
+                                              <span class="balances__amount">
+                                                <img width="25" height="25" src="https://img.icons8.com/water-color/50/western.png" alt="western"/>{{wallet.balance}} 
+                                              </span>
+                                            </div>
+                                      
+                                            <div class="transactions">
+                                                {% for tran in transaction %}
+                                                {% if tran.transaction_type == 'credit' %}  
+                                                <div class="transaction --minus" style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border: 1px solid #E3E3E3; border-radius: 4px; margin-bottom: 10px;">
+                                                    <div class="transaction__icon" style="border: 1px solid #E3E3E3; border-radius: 50%; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center;">
+                                                      <i class="material-icons"  style="font-size: 16px; color: chartreuse;">add</i>
+                                                    </div>
+                                                    <div style="flex: 1; margin-left: 20px;">
+                                                      <p class="transaction__desc" style="font-size: 16px; font-weight: 700; margin-bottom: 5px;">{{tran.description}}</p>
+                                                    </div>
+                                                    <div style="flex: 1; margin-left: 20px;">
+                                                        
+                                                        <span class="transaction__details" style="font-size: 12px; color: #999999;">{{tran.date}}</span>
+                                                      </div>
+                                                    <span class="transaction__amount" style="font-size: 16px; font-weight: 700; color: chartreuse;">
+                                                        <img width="25" height="25" src="https://img.icons8.com/water-color/50/western.png" alt="western"/>{{tran.amount}}
+                                                    </span>
+                                                  </div>
+                                                  {% else %}
+                                                  <div class="transaction --minus" style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border: 1px solid #E3E3E3; border-radius: 4px; margin-bottom: 10px;">
+                                                    <div class="transaction__icon" style="border: 1px solid #E3E3E3; border-radius: 50%; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center;">
+                                                      <i class="material-icons" style="font-size: 16px; color: red;">remove</i>
+                                                    </div>
+                                                    <div style="flex: 1; margin-left: 20px;">
+                                                      <p class="transaction__desc" style="font-size: 16px; font-weight: 700; margin-bottom: 5px;">{{tran.description}}</p>
+                                                    </div>
+                                                    <div style="flex: 1; margin-left: 20px;">
+                                                        
+                                                        <span class="transaction__details" style="font-size: 12px; color: #999999;">{{tran.date}}</span>
+                                                      </div>
+                                                    <span class="transaction__amount" style="font-size: 16px; font-weight: 700; color: red;">
+                                                        <img width="25" height="25" src="https://img.icons8.com/water-color/50/western.png" alt="western"/>{{tran.amount}}
+                                                    </span>
+                                                  </div>
+                                                  {% endif %}
+                                                  {% endfor %}
+                                                  
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      
+
+                                    
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--====== End - Section Content ======-->
+            </div>
+            <!--====== End - Section 2 ======-->
+        </div>
+        <!--====== End - App Content ======-->
+
+
+    <!--====== Google Analytics: change UA-XXXXX-Y to be your site's ID ======-->
+    <script>
+        window.ga = function() {
+            ga.q.push(arguments)
+        };
+        ga.q = [];
+        ga.l = +new Date;
+        ga('create', 'UA-XXXXX-Y', 'auto');
+        ga('send', 'pageview')
+    </script>
+    <script src="https://www.google-analytics.com/analytics.js" async defer></script>
+
+    <!--====== Vendor Js ======-->
+    <script src="js/vendor.js"></script>
+
+    <!--====== jQuery Shopnav plugin ======-->
+    <script src="js/jquery.shopnav.js"></script>
+
+    <!--====== App ======-->
+    <script src="js/app.js"></script>
+
+    <!--====== Noscript ======-->
+    <noscript>
+        <div class="app-setting">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="app-setting__wrap">
+                            <h1 class="app-setting__h1">JavaScript is disabled in your browser.</h1>
+
+                            <span class="app-setting__text">Please enable JavaScript in your browser or upgrade to a JavaScript-capable browser.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </noscript>
+
+
+
+</body>
+<script>
+    cancelorder{
+        
+    }
+</script>
+<style>
+    
+   
+    
+    .balances__header {
+      border-bottom: solid 1px var(--border);
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      margin: 30px;
+      margin-bottom: 0;
+      padding-bottom: 30px;
+    }
+    
+    .balances__amount {
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 30px;
+    }
+    
+    .balances__amount::before {
+      content: "";
+    }
+    
+    .balances__amount > span {
+      font-size: 0.7em;
+      line-height: 20px;
+      position: relative;
+      top: -7px;
+    }
+    
+    .transaction {
+      align-items: center;
+      display: flex;
+      flex-direction: row;
+      margin: 20px 0;
+    }
+    
+    .transactions__s {
+      padding: 10px 30px;
+      max-height: 350px;
+      overflow-y: scroll;
+    }
+    
+    .transaction__icon {
+      align-items: center;
+      border: solid 1px var(--border);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+    }
+    
+    .transaction__icon > i.material-icons {
+      font-size: 14px;
+    }
+    
+    .transaction__desc {
+      flex: 1;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 30px;
+      padding: 0 30px;
+    }
+    
+    .transaction__details {
+      color: var(--copy-secondary);
+      display: block;
+      font-size: 12px;
+      line-height: 20px;
+      font-weight: 400;
+    }
+    
+    .transaction__amount {
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 20px;
+    }
+    
+    .transaction__amount::before {
+      content: "";
+    }
+    
+   
+    
+    .transaction__amount > span {
+      font-size: 0.7em;
+      line-height: 20px;
+      position: relative;
+      top: -5px;
+    }
+    
+</style>
+{% endblock main %}

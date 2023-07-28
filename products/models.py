@@ -138,7 +138,7 @@ class Product_item(models.Model):
         if not self.image:
             self.image = self.product.image
         super(Product_item, self).save(*args, **kwargs)
-        if not self.offer_price == 0:
+        if self.offer_price == 0:
             self.offer_price = self.price
         super(Product_item, self).save(*args, **kwargs)
         

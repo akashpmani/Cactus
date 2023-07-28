@@ -84,7 +84,7 @@
                                                     <a href="{% url 'accounts:addressbook' %}">Address Book</a></li>
                                                 <li>
 
-                                                    <a href="dash-track-order.html">Track Order</a></li>
+                                                    <a href="{% url 'accounts:mywallet' %}">Wallet</a></li>
                                                 <li>
 
                                                     <a href="{% url 'accounts:myorders' %}">My Orders</a></li>
@@ -196,6 +196,7 @@
                                             </div>
                                         </div>
                                     </div>
+                                    {% if orders %}
                                     <div class="dash__box dash__box--shadow dash__box--bg-white dash__box--radius">
                                         <h2 class="dash__h2 u-s-p-xy-20">RECENT ORDERS</h2>
                                         <div class="dash__table-wrap gl-scroll">
@@ -210,6 +211,7 @@
                                                 </thead>
                                                 
                                                 <tbody>
+                                                    
                                                     {% for ord in orders %}
                                                     <tr>
                                                         <td>{{ord.order_number}}</td>
@@ -233,6 +235,7 @@
                                             </table>
                                         </div>
                                     </div>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>

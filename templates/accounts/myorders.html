@@ -76,7 +76,7 @@
                                                     <a href="{% url 'accounts:addressbook' %}">Address Book</a></li>
                                                 <li>
 
-                                                    <a href="dash-track-order.html">Track Order</a></li>
+                                                    <a href="{% url 'accounts:mywallet' %}">Wallet</a></li>
                                                 <li>
 
                                                     <a class="dash-active" href="{% url 'accounts:myorders' %}">My Orders</a></li>
@@ -130,18 +130,33 @@
                                             <h1 class="dash__h1 u-s-m-b-14">My Orders</h1>
 
                                             <span class="dash__text u-s-m-b-30">Here you can see all products that have been delivered.</span>
-                                            <form class="m-order u-s-m-b-30">
+                                            <form action="{% url 'accounts:myorders' %}" method="post" class="m-order u-s-m-b-30" id="my-order-form">
+                                                {% csrf_token %}
                                                 <div class="m-order__select-wrapper">
-
-                                                    <label class="u-s-m-r-8" for="my-order-sort">Show:</label><select class="select-box select-box--primary-style" id="my-order-sort">
-                                                        <option selected>Last 5 orders</option>
-                                                        <option>Last 15 days</option>
-                                                        <option>Last 30 days</option>
-                                                        <option>Last 6 months</option>
-                                                        <option>Orders placed in 2018</option>
-                                                        <option>All Orders</option>
-                                                    </select></div>
+                                                    <label class="u-s-m-r-8" for="my-order-sort">Show:</label>
+                                                    <select class="select-box select-box--primary-style" id="my-order-sort" name="status">
+                                                        <option selected value="">All Orders</option>
+                                                        <option value="Confirmed">Confirmed</option>
+                                                        <option value="shipping">Shipped</option>
+                                                        <option value="Delivered">Delivered</option>
+                                                        <option value="Cancelled">Cancelled</option>
+                                                        <option value="Returned">Returned</option>
+                                                    </select>
+                                                </div>
                                             </form>
+                                            
+                                            <script>
+                                                // Get the form and select element
+                                                const myOrderForm = document.getElementById('my-order-form');
+                                                const myOrderSort = document.getElementById('my-order-sort');
+                                            
+                                                // Add event listener to the select element
+                                                myOrderSort.addEventListener('change', function() {
+                                                    // Submit the form when the select option is changed
+                                                    myOrderForm.submit();
+                                                });
+                                            </script>
+                                            
                                             <div class="dash__box dash__box--shadow dash__box--bg-white dash__box--radius">
                                                 <h2 class="dash__h2 u-s-p-xy-20">YOUR ORDERS</h2>
                                                 <div class="dash__table-wrap gl-scroll">

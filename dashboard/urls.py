@@ -31,4 +31,9 @@ urlpatterns = [
     path('changestatus/<int:id>/', views.changestatus, name='changestatus'),
     path('change_user_status/<str:name>/', views.change_user_status, name='change_user_status'),
     path('change_order_status/<int:id>/', views.change_order_status, name='change_order_status'),
+    path('coupons', views.coupons, name='coupons'),
+    path('add_coupons', views.add_coupons, name='add_coupons'),
+    path('activate_coupon/<int:id>/', views.activate_coupon, name='activate_coupon'),
+    path('disable_coupon/<int:id>/', views.disable_coupon, name='disable_coupon'),
+    path('sales-report-pdf/', views.SalesReportPDFView.as_view(), name='sales_report_pdf'),
 ]

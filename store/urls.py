@@ -28,9 +28,11 @@ urlpatterns = [
     path('get_added',views.get_added,name="get_added"),
     path('update_cart_quantity/',views.update_cart_quantity,name="update_cart_quantity"),
     path('decrease_cart_quantity/',views.decrease_cart_quantity,name="decrease_cart_quantity"),
+    path('decrease_cart_quantity_os/',views.decrease_cart_quantity_os,name="decrease_cart_quantity_os"),
     path('check_quantity',views.check_quantity_cart,name="check_quantity_cart"),
     path('quantity_check',views.quantity_check,name="quantity_check"),
-    
+    path('apply_coupon',views.apply_coupon,name="apply_coupon"),
+   
     
     
     path('checkout_signin/', views.checkout_signin, name='checkout_signin'),

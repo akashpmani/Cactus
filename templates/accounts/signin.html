@@ -22,30 +22,65 @@
 
 <body>
     <main>
+        {% if messages %}
+        <div class="container mt-4">
+          {% for message in messages %}
+            <script>
+              window.onload = function() {
+                alert("{{ message }}");
+              };
+            </script>
+          {% endfor %}
+        </div>
+      {% endif %}
+      
+
       
         <section class="content-main mt-80 mb-80">
             <div class="card mx-auto card-login">
                 <div class="card-body">
                     <h4 class="card-title mb-4">Sign in</h4>
-                    <form action="{% url 'accounts:signin'%}" method="post">
-                        {% csrf_token %} <div class="mb-3">
+                    <form action="{% url 'accounts:signin' %}" method="post" onsubmit="return validateForm()">
+                        {% csrf_token %}
                         <div class="mb-3">
+                          <div class="mb-3">
                             <input class="form-control" placeholder="Username or email or Phone" type="text" name="login_cred">
-                        </div> <!-- form-group// -->
-                        <div class="mb-3">
+                          </div> <!-- form-group// -->
+                          <div class="mb-3">
                             <input class="form-control" placeholder="Password" type="password" name="password">
-                        </div> <!-- form-group// -->
-                        <div class="mb-3">
-                            <a href="#" class="float-end font-sm text-muted">Forgot password?</a>
+                          </div> <!-- form-group// -->
+                          <div class="mb-3">
+                            <a href="{% url 'accounts:forgotpassword' %}" class="float-end font-sm text-muted">Forgot password?</a>
                             <label class="form-check">
-                                <input type="checkbox" class="form-check-input" checked="">
-                                <span class="form-check-label">Remember</span>
+                              <input type="checkbox" class="form-check-input" checked="">
+                              <span class="form-check-label">Remember</span>
                             </label>
-                        </div> <!-- form-group form-check .// -->
-                        <div class="mb-4">
+                          </div> <!-- form-group form-check .// -->
+                          <div class="mb-4">
                             <button type="submit" class="btn btn-primary w-100"> Login </button>
-                        </div> <!-- form-group// -->
-                    </form>
+                          </div> <!-- form-group// -->
+                        </div>
+                      </form>
+                      <script>
+                        function validateForm() {
+                          const loginCred = document.getElementsByName('login_cred')[0].value.trim();
+                          const password = document.getElementsByName('password')[0].value.trim();
+                      
+                          if (loginCred === '') {
+                            alert('Please enter your Username, Email, or Phone.');
+                            return false;
+                          }
+                      
+                          if (password === '') {
+                            alert('Please enter your password.');
+                            return false;
+                          }
+                      
+                          // If all fields are valid, the form will be submitted.
+                          // You can add further validation checks if needed.
+                          return true;
+                        }
+                      </script>
                     <p class="text-center small text-muted mb-15">or sign up with</p>
                     <div class="d-grid gap-3 mb-4">
                         <a href="{% url 'accounts:signinotp' %}" class="btn w-100 btn-light font-sm">

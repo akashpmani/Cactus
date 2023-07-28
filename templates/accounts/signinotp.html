@@ -22,20 +22,52 @@
 
 <body>
     <main>
+        {% if messages %}
+        <div class="container mt-4">
+          {% for message in messages %}
+            <script>
+              window.onload = function() {
+                alert("{{ message }}");
+              };
+            </script>
+          {% endfor %}
+        </div>
+      {% endif %}
       
         <section class="content-main mt-80 mb-80">
             <div class="card mx-auto card-login">
                 <div class="card-body">
                     <h4 class="card-title mb-4">Sign in</h4>
-                    <form action="{% url 'accounts:signinotp'%}" method="post">
-                        {% csrf_token %} <div class="mb-3">
-                        <div class="mb-3">
-                            <input class="form-control" placeholder="Username or email or Phone" type="text" name="login_cred">
-                        </div> <!-- form-group// -->
-                        <div class="mb-4">
-                            <button type="submit" class="btn btn-primary w-100"> Login </button>
-                        </div> <!-- form-group// -->
-                    </form>
+                    
+<form action="{% url 'accounts:signinotp' %}" method="post" onsubmit="return validateForm()">
+    {% csrf_token %}
+    <div class="mb-3">
+      <div class="mb-3">
+        <input class="form-control" placeholder="Username or email or Phone" type="text" name="login_cred" id="login_cred">
+        <small class="form-text text-muted" id="login_cred_error"></small>
+      </div> <!-- form-group// -->
+      <div class="mb-4">
+        <button type="submit" class="btn btn-primary w-100"> Login </button>
+      </div> <!-- form-group// -->
+    </div>
+  </form>
+  
+  <script>
+    function validateForm() {
+      const loginCredInput = document.getElementById('login_cred');
+      const loginCredValue = loginCredInput.value.trim();
+      const loginCredError = document.getElementById('login_cred_error');
+  
+      if (loginCredValue === '') {
+        loginCredError.textContent = 'Please enter your Username, Email, or Phone.';
+        loginCredError.style.color = 'red';
+        return false;
+      } else {
+        loginCredError.textContent = '';
+        return true;
+      }
+    }
+  </script>
                     <p class="text-center small text-muted mb-15">or sign up with</p>
                     <div class="d-grid gap-3 mb-4">
                         <a href="{% url 'accounts:signin' %}" class="btn w-100 btn-light font-sm">

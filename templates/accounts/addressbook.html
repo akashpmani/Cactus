@@ -82,7 +82,7 @@
                                                 <a class="dash-active" href="{% url 'accounts:addressbook' %}">Address Book</a></li>
                                             <li>
 
-                                                <a href="dash-track-order.html">Track Order</a></li>
+                                                <a href="{% url 'accounts:mywallet' %}">Wallet</a></li>
                                             <li>
 
                                                 <a href="{% url 'accounts:myorders' %}">My Orders</a></li>
@@ -141,6 +141,7 @@
                                 <div class="dash__box dash__box--shadow dash__box--bg-white dash__box--radius u-s-m-b-30">
                                     <div class="dash__table-2-wrap gl-scroll">
                                         <table class="dash__table-2">
+                                            {% if address %}
                                             <thead>
                                                 <tr>
                                                     <th>Action</th>
@@ -153,6 +154,7 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
+                                                
                                                 {% for add in address %}
                                                 <tr>
                                                     <td>
@@ -172,7 +174,12 @@
                                                     </td>
                                                 </tr>
                                                 {% endfor %}
+                                               
                                             </tbody>
+                                            {% else %}
+                                            <tr></tr>
+                                            <td>there is no address added</td>
+                                            {% endif %}
                                         </table>
                                     </div>
                                 </div>

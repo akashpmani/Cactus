@@ -85,7 +85,7 @@
                                                     <a href="{% url 'accounts:addressbook' %}">Address Book</a></li>
                                                 <li>
 
-                                                    <a href="dash-track-order.html">Track Order</a></li>
+                                                    <a href="{% url 'accounts:mywallet' %}">Wallet</a></li>
                                                 <li>
 
                                                     <a href="{% url 'accounts:myorders' %}">My Orders</a></li>
@@ -159,14 +159,22 @@
                                                         <span class="manage-o__text">Package 1</span></div>
                                                 </div>
                                                 <div class="dash-l-r">
-                                                    {% if order.status == "Delivered" or order.status == "Returned" %}
-                                                    <div class="manage-o__text u-c-secondary">Delivered on {{order.deliverd_at}}</div>
+                                                    {% if order.status == "Delivered" or order.status == "Cancelled" or order.status == "Returned"  %}
+                                                        {% if order.status == "Delivered"%}
+                                                            <div class="manage-o__text u-c-secondary">Delivered on {{order.deliverd_at}}</div>
+                                                            {% if return_status %}
+                                                                <button class="address-book-edit btn--e-transparent-platinum-b-2" onclick="returnorder({{order.id}})">return</button>
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    {% elif order.status == "Return initiated" %}
+                                                        <div class="manage-o__text u-c-secondary">Delivered on {{order.deliverd_at}}</div>
+                                                        <button class="address-book-edit btn--e-transparent-platinum-b-2" onclick="cancelreturn({{order.id}})">Cancel Return</button>
                                                     {% else %}
-                                                    <a class="address-book-edit btn--e-transparent-platinum-b-2" onclick="cancelorder()">Cancel</a></td>
+                                                        <button class="address-book-edit btn--e-transparent-platinum-b-2" onclick="cancelorder({{order.id}})">Cancel</button>
                                                     {% endif %}
-                                                    <div class="manage-o__icon"><i class="fas fa-truck u-s-m-r-5"></i>
+                                                    {% comment %} <div class="manage-o__icon"><i class="fas fa-truck u-s-m-r-5"></i>
 
-                                                        <span class="manage-o__text">Standard</span></div>
+                                                      </div> {% endcomment %}
                                                 </div>
                                                 {% if order.status == "Confirmed"%}
                                                 <div class="manage-o__timeline">
@@ -263,6 +271,47 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                                {% elif order.status == "Return initiated" %}
+                                                <div class="manage-o__timeline">
+                                                    <div class="timeline-row">
+                                                        <div class="col-lg-3 u-s-m-b-30">
+                                                            <div class="timeline-step">
+                                                                <div class="timeline-l-i timeline-l-i--finish">
+
+                                                                    <span class="timeline-circle"></span></div>
+
+                                                                <span class="timeline-text">Processing</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-3 u-s-m-b-30">
+                                                            <div class="timeline-step">
+                                                                <div class="timeline-l-i timeline-l-i--finish">
+
+                                                                    <span class="timeline-circle"></span></div>
+
+                                                                <span class="timeline-text">Shipped</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-3 u-s-m-b-30">
+                                                            <div class="timeline-step">
+                                                                <div class="timeline-l-i timeline-l-i--finish">
+
+                                                                    <span class="timeline-circle"></span></div>
+
+                                                                <span class="timeline-text">Delivered</span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-lg-3 u-s-m-b-30">
+                                                            <div class="timeline-step">
+                                                                <div class="timeline-l-i timeline-l-i">
+
+                                                                    <span class="timeline-circle"></span></div>
+
+                                                                <span class="timeline-text">Return initiated</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                                 {% elif order.status == "Cancelled"%}
                                                 <div class="manage-o__timeline">
                                                     <div class="timeline-row">
@@ -322,21 +371,11 @@
                                             <div class="dash__box dash__box--bg-white dash__box--shadow u-s-m-b-30">
                                                 <div class="dash__pad-3">
                                                     <h2 class="dash__h2 u-s-m-b-8">Shipping Address</h2>
-                                                    <h2 class="dash__h2 u-s-m-b-8">John Doe</h2>
+                                                    <h2 class="dash__h2 u-s-m-b-8">{{address.first_name}} {{address.last_name}}</h2>
 
-                                                    <span class="dash__text-2">4247 Ashford Drive Virginia - VA-20006 - USA</span>
+                                                    <span class="dash__text-2">{{address.address_line_1}} - {{address.address_line_2}} - {{address.city}}</span>
 
-                                                    <span class="dash__text-2">(+0) 900901904</span>
-                                                </div>
-                                            </div>
-                                            <div class="dash__box dash__box--bg-white dash__box--shadow dash__box--w">
-                                                <div class="dash__pad-3">
-                                                    <h2 class="dash__h2 u-s-m-b-8">Billing Address</h2>
-                                                    <h2 class="dash__h2 u-s-m-b-8">John Doe</h2>
-
-                                                    <span class="dash__text-2">4247 Ashford Drive Virginia - VA-20006 - USA</span>
-
-                                                    <span class="dash__text-2">(+0) 900901904</span>
+                                                    <span class="dash__text-2">{{address.phone}}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -346,18 +385,18 @@
                                                     <h2 class="dash__h2 u-s-m-b-8">Total Summary</h2>
                                                     <div class="dash-l-r u-s-m-b-8">
                                                         <div class="manage-o__text-2 u-c-secondary">Subtotal</div>
-                                                        <div class="manage-o__text-2 u-c-secondary">$16.00</div>
+                                                        <div class="manage-o__text-2 u-c-secondary">{{net}}</div>
                                                     </div>
                                                     <div class="dash-l-r u-s-m-b-8">
-                                                        <div class="manage-o__text-2 u-c-secondary">Shipping Fee</div>
-                                                        <div class="manage-o__text-2 u-c-secondary">$16.00</div>
+                                                        <div class="manage-o__text-2 u-c-secondary">Tax</div>
+                                                        <div class="manage-o__text-2 u-c-secondary">{{order.tax}}</div>
                                                     </div>
                                                     <div class="dash-l-r u-s-m-b-8">
                                                         <div class="manage-o__text-2 u-c-secondary">Total</div>
-                                                        <div class="manage-o__text-2 u-c-secondary">$30.00</div>
+                                                        <div class="manage-o__text-2 u-c-secondary">{{order.order_total}}</div>
                                                     </div>
 
-                                                    <span class="dash__text-2">Paid by Cash on Delivery</span>
+                                                    <span class="dash__text-2">Paid by {{order.payment.payment_method}}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -415,10 +454,114 @@
 
 
 </body>
+{% comment %} <!-- Add an element with the onclick attribute to trigger the cancelorder() function -->
+<button onclick="cancelorder()">Cancel Order</button> {% endcomment %}
 <script>
-    cancelorder{
-        
+    function cancelorder(id) {
+      // Put your code here to handle the cancellation logic
+  
+      // For example, use AJAX to send a request to the server to cancel the order
+      var cancelConfirmation = confirm("Are you sure you want to cancel this order?");
+      if (cancelConfirmation) {
+        $.ajax({
+          method: "get",
+          url: "/payment/cancelorder",
+          data: { order_id: id },
+          success: function(response) {
+            if(response.canceled){
+                alert('Your order has been cancelled.');
+                location.reload();
+            }
+            else{
+                alert('some thing went wrong.');
+            }
+
+          },
+          error: function(xhr, status, error) {
+            // Handle the error case here
+            console.error("Error canceling order:", error);
+          }
+        });
+  
+        // For this example, let's just log a message to the console
+        console.log("Order cancellation initiated");
+      } else {
+        // If the user cancels, do nothing or handle as needed
+        console.log("Order cancellation canceled by the user");
+      }
     }
-</script>
+  </script>
+  <script>
+    function returnorder(id) {
+      // Put your code here to handle the cancellation logic
+  
+      // For example, use AJAX to send a request to the server to cancel the order
+      var cancelConfirmation = confirm("Are you sure you want to return this order?");
+      if (cancelConfirmation) {
+        $.ajax({
+          method: "get",
+          url: "/payment/returnorder",
+          data: { order_id: id },
+          success: function(response) {
+            if(response.return){
+                alert(response.return);
+                location.reload();
+            }
+            else{
+                alert('some thing went wrong.');
+            }
+
+          },
+          error: function(xhr, status, error) {
+            // Handle the error case here
+            console.error("Error canceling order:", error);
+          }
+        });
+  
+        // For this example, let's just log a message to the console
+        console.log("Order cancellation initiated");
+      } else {
+        // If the user cancels, do nothing or handle as needed
+        console.log("Order cancellation canceled by the user");
+      }
+    }
+  </script>
+
+  <script>
+    function cancelreturn(id) {
+      // Put your code here to handle the cancellation logic
+  
+      // For example, use AJAX to send a request to the server to cancel the order
+      var cancelConfirmation = confirm("Are you sure you want to cancel the return of this order?");
+      if (cancelConfirmation) {
+        $.ajax({
+          method: "get",
+          url: "/payment/cancelreturn",
+          data: { order_id: id },
+          success: function(response) {
+            if(response.return){
+                alert(response.return);
+                location.reload();
+            }
+            else{
+                alert('some thing went wrong.');
+            }
+
+          },
+          error: function(xhr, status, error) {
+            // Handle the error case here
+            console.error("Error canceling order:", error);
+          }
+        });
+  
+        // For this example, let's just log a message to the console
+        console.log("Order cancellation initiated");
+      } else {
+        // If the user cancels, do nothing or handle as needed
+        console.log("Order cancellation canceled by the user");
+      }
+    }
+  </script>
+
 
 {% endblock main %}

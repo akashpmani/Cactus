@@ -82,24 +82,24 @@
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <div class="d-flex justify-content-start align-items-center">
                                         <span class="text-muted small me-2 f-w-36 fw-bolder">Contact</span>
-                                        <span class="small">test@email.com</span>
+                                        <span class="small">{{address.first_name}}  {{address.last_name}}</span>
                                     </div>
-                                    <a href="./checkout.html" class="text-muted small" role="button">Change</a>
+                                    <a href="{% url 'store:checkout' %}" class="text-muted small" role="button">Change</a>
                                 </li>
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <div class="d-flex justify-content-start align-items-center">
                                         <span class="text-muted small me-2 f-w-36 fw-bolder">Deliver To</span>
-                                        <span class="small">123 Street, London, SM3 5TY, United Kingdom</span>
+                                        <span class="small">{{address.address_line_1}}</span>
                                     </div>
-                                    <a href="./checkout-shipping.html" class="text-muted small" role="button">Change</a>
+                                    <a href="{% url 'store:checkout' %}" class="text-muted small" role="button">Change</a>
                                 </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {% comment %} <li class="list-group-item d-flex justify-content-between align-items-center">
                                     <div class="d-flex justify-content-start align-items-center">
                                         <span class="text-muted small me-2 f-w-36 fw-bolder">Method</span>
                                         <span class="small">UPS Priority Delivery</span>
                                     </div>
                                     <a href="./checkout-shipping.html" class="text-muted small" role="button">Change</a>
-                                </li>
+                                </li> {% endcomment %}
                             </ul><!-- / Checkout Information Summary-->
                             
                             <!-- Checkout Panel Information-->
@@ -147,7 +147,7 @@
                                   <label class="form-check-label" for="checkoutPaymentPaypal">
                                     <span class="d-flex justify-content-between align-items-start">
                                       <span>
-                                        <span class="mb-0 fw-bolder d-block">PayPal</span>
+                                        <span class="mb-0 fw-bolder d-block">Pay Online</span>
                                       </span>
                                       <i class="ri-paypal-line"></i>
                                     </span>
@@ -240,13 +240,13 @@
                     </div>
                 </div>
                 <div class="col-12 col-lg-5 bg-light pt-lg-10 aside-checkout pb-5 pb-lg-0 my-5 my-lg-0">
-                    <div class="p-4 py-lg-0 pe-lg-0 ps-lg-5">
-                        <div class="pb-3">
-                        
-                        <div class="row mx-0 py-4 g-0 border-bottom">
-                          {% for data in product_data %} 
-                            <div class="col-2 position-relative">
-                              <span class="checkout-item-qty">{{data.quantity}}</span>
+                  <div class="p-4 py-lg-0 pe-lg-0 ps-lg-5">
+                      <div class="pb-3">
+                         {% for data in  product_data%}
+                          <!-- Cart Item-->
+                          <div class="row mx-0 py-4 g-0 border-bottom">
+                              <div class="col-2 position-relative">
+                                      <span class="checkout-item-qty">{{data.quantity}}</span>
                                   <picture class="d-block border">
                                       <img class="img-fluid" src="{{data.image.url}}" alt="HTML Bootstrap Template by Pixel Rocket">
                                   </picture>
@@ -254,75 +254,193 @@
                               <div class="col-9 offset-1">
                                   <div>
                                       <h6 class="justify-content-between d-flex align-items-start mb-2">
-                                        {{data.name}}
+                                          {{data.name}}
                                           <i class="ri-close-line ms-3"></i>
                                       </h6>
                                       <span class="d-block text-muted fw-bolder text-uppercase fs-9">Size: {{data.size}} / Qty: {{data.quantity}}</span>
                                   </div>
-                                  <p class="fw-bolder text-end text-muted m-0">₹{{data.price}} X {{ data.quantity }} = {{ data.total_price }}</p>
+                                  <p class="fw-bolder text-end text-muted m-0">₹{{data.price}} X {{ data.quantity }} = ₹{{ data.total_price }} </p>
                               </div>
-                              {% endfor %}
-                          </div>    <!-- / Cart Item-->
-                          
-                        
-                          
-                        <div class="py-4 border-bottom">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <p class="m-0 fw-bolder fs-6">Subtotal</p>
-                                <p class="m-0 fs-6 fw-bolder">$422.99</p>
-                            </div>
-                            <div class="d-flex justify-content-between align-items-center ">
-                                <p class="m-0 fw-bolder fs-6">Shipping</p>
-                                <p class="m-0 fs-6 fw-bolder">$8.95</p>
-                            </div>
+                          </div>  
+                          <!-- / Cart Item-->{% endfor %}
+
+                      </div>
+                      <div class="py-4 border-bottom">
+                          <div class="d-flex justify-content-between align-items-center mb-2">
+                              <p class="m-0 fw-bolder fs-6">Subtotal</p>
+                              <p class="m-0 fs-6 fw-bolder">₹{{tax.net}}</p>
+                          </div>
+                          <div class="d-flex justify-content-between align-items-center ">
+                            <p class="m-0 fw-bolder fs-6">Tax</p>
+                            <p class="m-0 fs-6 fw-bolder">₹{{tax.tax}}</p>
                         </div>
-                        <div class="py-4 border-bottom">
-                            <div class="d-flex justify-content-between">
-                                <div>
-                                    <p class="m-0 fw-bold fs-5">Grand Total</p>
-                                    <span class="text-muted small">Inc $45.89 sales tax</span>
-                                </div>
-                                <p class="m-0 fs-5 fw-bold">$422.99</p>
-                            </div>
+                        <div  class="d-flex justify-content-between align-items-center d-none" id="spikediv">
+                          <p class="m-0 fw-bolder fs-6">Spikes Discount <img width="20" height="20" src="https://img.icons8.com/water-color/50/western.png" alt="western"/></p>
+                          <p class="m-0 fs-6 fw-bolder" id="spikesreduction">- ₹{{wallet.balance}}</p>
                         </div>
-                        <div class="py-4">
-                          <div class="input-group mb-0">
-                            <input type="text" class="form-control" id="couponInput" placeholder="Enter your coupon code">
-                            <input type="hidden" name="" id="couponval">
-                            <button class="btn btn-dark btn-sm px-4" id="applyButton">Apply</button>
-                        </div>                        
+                        <div hidden class="d-flex justify-content-between align-items-center d-none " id="copdiv">
+                          <p class="m-0 fw-bolder fs-6">Coupon discount</p>
+                          <p class="m-0 fs-6 fw-bolder">- ₹<span id="couponreduction"></span></p>
+                        </div>
+                      </div>
+                      <br>
+                      {% if wallet.balance > 0 %}
+                      <div class="form-check form-group form-check-custom form-radio-custom mb-3">
+                          <input class="form-check-input" type="checkbox" name="spikes" id="spikes" onclick="updateGrandTotal()">
+                          <label class="form-check-label" for="spikes">
+                              <span class="d-flex justify-content-between align-items-start">
+                                  <span>
+                                      <span class="mb-0 fw-bolder d-block">Use Spikes  <img width="20" height="20" src="https://img.icons8.com/water-color/50/western.png" alt="western"/>  you have {{wallet.balance}} spikes remaining</span>
+                                  </span>
+                              </span>
+                          </label>
+                      </div>
+                      {% endif %}
+                      <div class="py-4 border-bottom">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <p class="m-0 fw-bold fs-5">Grand Total</p>
+                            </div>
+                            <p class="m-0 fs-5 fw-bold" id="grand-total">₹{{ tax.total }}</p>
                         </div>
                     </div>
-                </div>
+                    
+                    <div class="py-4">
+                      <div class="input-group mb-0">
+                          <input type="text" class="form-control" value="" id="coupon-input" placeholder="Enter your coupon code">
+                          <button class="btn btn-dark btn-sm px-4" id="apply-coupon-btn">Apply</button>
+                          <button class="btn btn-danger btn-sm px-1" id="clear-coupon-btn">Clear Coupon</button>
+                          <input type="hidden" name="cop" id="couponcode">
+                      </div>
+                  </div>
+                  <p hidden id="cop_info"></p>
+                  </div>
+              </div>
             </div>
         </div>
         <!-- /Page Content -->
-        <script>
-          $(document).ready(function() {
-            $('#applyButton').click(function() {
-                var couponCode = $('#couponInput').val();
-                if (couponCode.trim() === '') {
-                    console.log("Coupon code is empty");
-                    return;
-                }
-                $.ajax({
-                    url: '/payment/check_coupon',
-                    type: 'GET',
-                    data: {
-                        'coupon_code': couponCode
-                    },
-                    success: function(response) {
-                        console.log(response);
-                        // Update the hidden input with the response data
-                        $('#couponval').val(response.code); // Assuming the response has a 'data' attribute
-                    },
-                    error: function(xhr, errmsg, err) {
-                        console.log("");
-                    }
-                });
-            });
-        });        
-        </script>
+ <!-- /Page Content -->
+<script>
+  var couponApplied = false;
+  var discount = 0
+  $(document).ready(function() {
+    var originalTotal; // Variable to store the original total before applying any coupons
+    // Variable to keep track of whether the coupon has been applied or not
+
+    // Save the original total
+    originalTotal = {{tax.total}};
+
+    // Attach click event to the "Apply" button
+    $("#apply-coupon-btn").on("click", function() {
+      // Get the entered coupon code
+      var couponCode = $("#coupon-input").val();
+      var grandTotalElement = document.getElementById('grand-total');
+      var originaltotal = originalTotal;
+
+      // Make the AJAX request with the coupon code and the grand total
+      $.ajax({
+        method: "get",
+        url: "/apply_coupon",
+        data: {
+          coupon: couponCode,
+          total: originaltotal,
+        },
+        success: function(response) {
+          // Handle the successful response here
+          console.log("Coupon applied successfully:", response);
+          if (response.success) {
+            couponApplied = true; // Set the couponApplied flag to true
+            
+            discount = originalTotal - response.total
+            var checkbox = document.getElementById('spikes');
+            // Update the displayed grand total with the discounted price
+            var discountedPrice =  checkbox.checked ? response.total - {{ wallet.balance }} : response.total;
+            grandTotalElement.textContent = '₹' + discountedPrice.toFixed(2);
+
+            // Show messages in the hidden <p> element
+            var copInfoElement = document.getElementById('cop_info');
+            copInfoElement.textContent = "Coupon applied successfully!";
+            copInfoElement.style.color = "green";
+            copInfoElement.style.display = "block"; // Make the element visible
+            var couponreduction = document.getElementById('couponreduction');
+            couponreduction.innerHTML = `${discount}`
+            $('#copdiv').removeClass('d-none');
+            var hiddenInput = document.getElementById('couponcode');
+            hiddenInput.value = couponCode;
+            alert(couponCode)
+
+          } else if (response.failed) {
+            // Show a message to the user that the coupon cannot be applied
+            discount = 0
+            alert(response.failed);
+          } else {
+            // Show a generic error message
+            discount = 0
+            alert("An error occurred while applying the coupon. Please try again later.");
+          }
+        },
+        error: function(xhr, status, error) {
+          // Handle errors here
+          console.error("Error applying coupon:", error);
+          // Show an error message to the user
+          alert("An error occurred while applying the coupon. Please try again later.");
+        }
+      });
+    });
+
+    // Attach click event to the "Clear Coupon" button
+    $("#clear-coupon-btn").on("click", function() {
+      if (couponApplied) {
+        discount = 0
+        $('#copdiv').addClass('d-none');
+        couponApplied = false; // Set the couponApplied flag to false
+        updateGrandTotal(); // Update the grand total
+        // Clear the coupon info message
+        var copInfoElement = document.getElementById('cop_info');
+        copInfoElement.textContent = "";
+        copInfoElement.style.display = "none"; // Hide the element
+        var couponreduction = document.getElementById('couponreduction');
+            couponreduction.innerHTML = ` `
+            var hiddenInput = document.getElementById('couponcode');
+            hiddenInput.value = "";
+      } else {
+        // If no coupon is applied, show a message to the user
+        alert("No coupon applied.");
+      }
+    });
+  });
+
+  // Define a global variable to store the original grand total
+  var originalGrandTotal = parseFloat("{{ tax.total }}".replace("₹", ""));
+
+  function updateGrandTotal() {
+  
+    // Get the checkbox and the grand total element
+    var checkbox = document.getElementById('spikes');
+    var grandTotalElement = document.getElementById('grand-total');
+   
+
+    // Calculate the discounted grand total if the coupon is applied
+    var discountedGrandTotal = couponApplied ? originalGrandTotal-discount : originalGrandTotal;
+    alert(discountedGrandTotal)
+    // Calculate the updated grand total based on the checkbox status
+    var updatedGrandTotal = checkbox.checked ? discountedGrandTotal - {{ wallet.balance }} : discountedGrandTotal;
+    alert(updatedGrandTotal)
+    // Update the displayed grand total
+    grandTotalElement.textContent = '₹' + updatedGrandTotal.toFixed(2);
+    checkbox.checked ? $('#spikediv').removeClass('d-none') : $('#spikediv').addClass('d-none');
+ 
+    // Show an alert when the price has been reduced
+    if (checkbox.checked) {
+      alert("{{ wallet.balance }} Spikes will be used with this purchase, you will have a flat {{ wallet.balance }} off on this order");
+    }
+  }
+</script>
+<!-- Rest of your HTML content -->
+
+
+      
+      
     </section>
     <!-- / Main Section-->
     <form action="">
@@ -392,14 +510,171 @@
 <script>
   document.getElementById('rzp-button1').onclick = function(e) {
     e.preventDefault();
-    var hiddenValue = document.getElementById('couponval').value;
-    var data = {
-      hidden_value: hiddenValue
-    };
+    var checkbox = document.getElementById('spikes');
+    var wallet = checkbox.checked ? true : false;
+    var hiddenInput = document.getElementById('couponcode');
+    var code = hiddenInput.value
     $.ajax({
       method: "get",
       url: "/payment/payment_details",
-      data: data,
+      data: {
+        code : code,
+        wallet: wallet,
+      },
+      success: function(response) {
+        var total = parseInt(response.total) * 100;
+        var name = response.name;
+        var email = response.email;
+        var phone = parseInt(response.phone);
+        var order_id = response.order_number;
+        var options = {
+          "key": 'rzp_test_8Pb1f6KGthfeQt', // Enter the Key ID generated from the Dashboard
+          "amount": total, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+          "currency": "INR",
+          "name": "CACTUS", // Your business name
+          "description": "Thank you for buying from us",
+          "image": "",
+          //"order_id": order_id,
+          "handler": function(response_razor) {
+            var token = $("[name='csrfmiddlewaretoken']").val();
+            data = {
+              "payment_mode": "razorpay",
+              "payment_id": response_razor.razorpay_payment_id,
+              "order_id": order_id,
+              "status": "success",
+              "spike_use":response.spike_use,
+              "spike_discount" : response.spike_discount,
+              "coupon_use" : response.coupon_use,
+              "coupon_discount" : response.coupon_discount,
+              "coupon_code" : response.coupon_code,
+              csrfmiddlewaretoken: token,
+            };
+            console.log(response_razor.razorpay_payment_id)
+            console.log(order_id)
+            
+            $.ajax({
+              method: "post",
+              url: "/payment/payment",
+              data: data,
+              success: function(response_success) {
+                console.log("Payment success:", response_success);
+                var orderNumber = response_success.order_number;
+                var transactionID = response_success.transID;
+                var orderData = {
+                  payment_id: transactionID,
+                  order_number: orderNumber,
+                  csrfmiddlewaretoken: token
+                };
+                // Construct the redirect URL with parameters
+                var redirectURL = '/payment/order-success?order_number=' + orderNumber + '&payment_id=' + transactionID;
+                // Redirect the user to the URL
+                window.location.href = redirectURL;
+              },
+              error: function(xhr, status, error) {
+                console.error("Payment error:", error);
+                // Handle the error case here
+              }
+            });
+          },
+          "prefill": { // We recommend using the prefill parameter to auto-fill customer's contact information, especially their phone number
+            "name": name, // Your customer's name
+            "email": email,
+            "contact": phone // Provide the customer's phone number for better conversion rates
+          },
+          "notes": {
+            "address": "Razorpay Corporate Office"
+          },
+          "theme": {
+            "color": "#3399cc"
+          }
+        };
+        var rzp1 = new Razorpay(options);
+        rzp1.on('payment.failed', function(response) {
+          alert(response.error.code);
+          alert(response.error.description);
+          alert(response.error.source);
+          alert(response.error.step);
+          alert(response.error.reason);
+          alert(response.error.metadata.order_id);
+          alert(response.error.metadata.payment_id);
+        });
+        rzp1.open();
+      }
+    });
+  };
+</script>
+
+
+<script>
+  document.getElementById('completeOrderBtncod').onclick = function(e) {
+    e.preventDefault();
+    var checkbox = document.getElementById('spikes');
+    var wallet = checkbox.checked ? true : false;
+    var hiddenInput = document.getElementById('couponcode');
+    var code = hiddenInput.value
+    $.ajax({
+      method: "get",
+      url: "/payment/payment_details",
+      data: {
+        code: code,
+        wallet: wallet,
+      },
+      success: function(response) {
+        var token = $("[name='csrfmiddlewaretoken']").val();
+        data = {
+          "payment_mode": "cod",
+          "payment_id":response.order_number ,
+          "order_id": response.order_number,
+          "status": "pending",
+          "spike_use": response.spike_use,
+          "spike_discount": response.spike_discount,
+          "coupon_use": response.coupon_use,
+          "coupon_discount": response.coupon_discount,
+          "coupon_code": response.coupon_code,
+          csrfmiddlewaretoken: token,
+        };
+
+        $.ajax({
+          method: "post",
+          url: "/payment/payment",
+          data: data,
+          success: function(response_success) {
+            console.log("Payment success:", response_success);
+            var orderNumber = response_success.order_number;
+            var transactionID = response_success.transID;
+            var orderData = {
+              payment_id: transactionID,
+              order_number: orderNumber,
+              csrfmiddlewaretoken: token
+            };
+            // Construct the redirect URL with parameters
+            var redirectURL = '/payment/order-success?order_number=' + orderNumber + '&payment_id=' + transactionID;
+            // Redirect the user to the URL
+            window.location.href = redirectURL;
+          },
+          error: function(xhr, status, error) {
+            console.error("Payment error:", error);
+            // Handle the error case here
+          }
+        });
+      }
+    });
+  };
+</script>
+
+
+<script>
+  document.getElementById('rzp-ff').onclick = function(e) {
+    e.preventDefault();
+
+    $.ajax({
+      method: "get",
+      url: "/payment/payment_details",
+      data: {
+        wallet: $("#spikes").is(":checked"), // true if checkbox is checked, false otherwise
+        coupon: $("#coupon-input").val() // Get the value of the coupon input field, if available
+      },
+     alert(wallet)
       success: function(response) {
         var total = parseInt(response.total) * 100;
         var name = response.name;
@@ -477,8 +752,6 @@
     });
   };
 </script>
-
-
   
   
 

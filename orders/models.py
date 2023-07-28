@@ -1,3 +1,4 @@
+from datetime import timedelta, timezone
 from django.db import models
 from accounts.models import AddressBook,CartItem,Profile,User_Accounts
 from products.models import Product_item,Products_Table
@@ -10,7 +11,12 @@ class Payment(models.Model):
     amount_paid = models.CharField(max_length=50)
     status      = models.CharField(max_length=100)
     created_at  = models.DateTimeField(auto_now_add=True)
-    
+    spike_use = models.BooleanField(default=False)
+    spike_discount = models.PositiveBigIntegerField(default = 0)
+    coupon_use = models.BooleanField(default = False)
+    coupon_discount = models.PositiveIntegerField(default=0)
+    coupon_code = models.CharField(max_length=50,default='')
+     
     def __str__(self):
         return self.payment_id
     
@@ -21,7 +27,8 @@ class Order(models.Model):
         ('shipping','shipping'),
         ('Delivered','Delivered'),
         ('Cancelled','Cancelled'),
-        ('Returned','Returned')
+        ('Return initiated','Return initiated'),
+        ('Returned','Returned'),
     )
     
     user    = models.ForeignKey(User_Accounts, on_delete=models.SET_NULL,null=True)
@@ -37,6 +44,7 @@ class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deliverd_at = models.DateTimeField(null=True)
+    returned_at = models.DateTimeField(null=True)
     
     def full_name(self):
         return f'{self.first_name} {self.last_name}'
@@ -46,6 +54,11 @@ class Order(models.Model):
     
     def __str__(self):
         return self.first_name
+    def can_return_products(self):
+        if self.delivered_at:
+            current_date = timezone.now()
+            return self.delivered_at + timedelta(days=3) >= current_date
+        return False
     
 class OrderProduct(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
