@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include, re_path
 from . import views
-
+from .views import custom_404_view
 
 app_name = 'store'
 
@@ -41,3 +41,4 @@ urlpatterns = [
     path('checkout_signinotp/', views.checkout_signinotp, name='checkout_signinotp'),
     path('checkout_signinotp_verification/', views.checkout_signinotp_verification, name='checkout_signinotp_verification'),
 ]
+handler404 = custom_404_view
