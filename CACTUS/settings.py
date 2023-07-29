@@ -24,9 +24,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-1p5p(yf4qplc4wj!oi7tvtdzqk!!et6i)_yo3=kh(+fsm_5z@%'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['.vercel.app']
+ALLOWED_HOSTS = []
 
 # Application definition
 
@@ -92,10 +92,10 @@ WSGI_APPLICATION = 'CACTUS.wsgi.application'
 DATABASES={
    'default':{
       'ENGINE':'django.db.backends.postgresql_psycopg2',
-      'NAME':'CACTUS',
-      'USER':'postgres',
-      'PASSWORD':'5011',
-      'HOST':'localhost',
+      'NAME':'cactus',
+      'USER':'cactus_sql',
+      'PASSWORD':'cactus5011',
+      'HOST':'database-1.caxdujmqycpc.ap-south-1.rds.amazonaws.com',
       'PORT':'5432',
    }
 }
