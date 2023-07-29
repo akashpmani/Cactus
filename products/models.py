@@ -196,7 +196,7 @@ class classfiedProducts(models.Model):
     def delete(self, *args, **kwargs):
         product_item = Product_item.objects.filter(product = self.product)
         for item in product_item:
-            item.offer_price = None
+            item.offer_price = item.price
             item.save()
         
         super().delete(*args, **kwargs)

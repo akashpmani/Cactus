@@ -346,22 +346,6 @@
         var image = document.getElementById('imageupload');
         var cropper, reader, file;
         // Get CSRF token from the cookie
-        function getCSRFToken() {
-          var name = 'csrftoken';
-          var cookieValue = null;
-          if (document.cookie && document.cookie !== '') {
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-              var cookie = cookies[i].trim();
-              if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-              }
-            }
-          }
-          return cookieValue;
-        }
-      
         $("body").on("change", ".uploadimage", function(e) {
           var files = e.target.files;
           var done = function(url) {

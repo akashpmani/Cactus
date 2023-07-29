@@ -36,4 +36,5 @@ urlpatterns = [
     path('activate_coupon/<int:id>/', views.activate_coupon, name='activate_coupon'),
     path('disable_coupon/<int:id>/', views.disable_coupon, name='disable_coupon'),
     path('sales-report-pdf/', views.SalesReportPDFView.as_view(), name='sales_report_pdf'),
+    path('sales/', views.sales,name= 'sales'),
 ]

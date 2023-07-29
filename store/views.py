@@ -1160,3 +1160,6 @@ def apply_coupon(request):
                 return JsonResponse({'error': 'Invalid coupon code'})
 
     return JsonResponse({'error': 'Invalid request'})
+
+def custom_404_view(request, exception):
+    return render(request, '404.html', status=404)

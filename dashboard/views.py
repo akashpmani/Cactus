@@ -605,3 +605,7 @@ class SalesReportPDFView(View):
         response.write(pdf)
 
         return response
+    
+    
+def sales(request):
+    return render (request,'dashboard/sales.html')
