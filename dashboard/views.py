@@ -28,6 +28,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from datetime import date
 from django.db.models import Sum
 from reportlab.pdfgen import canvas
+from dashboard.models import CarouselItem
 
 # Create your views here.
 def get_month_name(month):
@@ -463,7 +464,7 @@ def changethumbnail(request,id):
             product = Products_Table.objects.get(id = id)
             product.image = image_file
             product.save()
-        except IntegrityError:
+        except :
             return JsonResponse({'success': False, 'error': 'Value too long for image field.'})
         return JsonResponse({'success': True})
     return JsonResponse({'success': False})
@@ -609,3 +610,49 @@ class SalesReportPDFView(View):
     
 def sales(request):
     return render (request,'dashboard/sales.html')
+
+
+def carosal(request):
+    if request.method == 'POST':
+        main_text = request.POST.get('main')
+        print(main_text)
+        main_text_left = request.POST.get('mainleft')
+        sub_text = request.POST.get('subtext')
+        about = request.POST.get('About')
+        image = request.FILES.get('image')
+        print(main_text_left)
+        print(sub_text)
+        print(main_text)
+        if main_text and main_text_left and sub_text and about and image:
+            CarouselItem.objects.create(
+                main_text=main_text,
+                main_text_1=main_text_left,
+                sub_text=sub_text,
+                about=about,
+                image=image
+            )
+            message = "Form submitted successfully!"
+        else:
+            message = "Please fill in all the required fields."
+        carosals = CarouselItem.objects.filter()
+        return render(request, 'dashboard/coustomize.html', {'message': message,'carosals':carosals})
+    carosals = CarouselItem.objects.filter()
+    return render(request,'dashboard/coustomize.html',{'carosals':carosals})
+
+
+
+def cursol_stat(request,cid):
+
+    c = CarouselItem.objects.get(id = int(cid))
+    try:
+        if c.active:
+            c.active = False
+        else :
+            c.active = True
+        
+        messages.success(request, "Status changed successfully!")
+        c.save()
+    except:
+        messages.success(request, "something went wrong!")
+    return redirect('dashboard:carosal')
+    

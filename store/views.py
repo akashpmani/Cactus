@@ -21,7 +21,7 @@ from django.contrib.auth import logout
 from django.contrib.auth.hashers import check_password
 from accounts import verify
 from django.db.models import Q
-from dashboard.models import Verify_coupon,Coupon
+from dashboard.models import Verify_coupon,Coupon,CarouselItem
 import random
 from django.db.models import F
 # Create your views here.
@@ -41,6 +41,7 @@ def home(request):
     categories = Category.objects.all()
     tags = Product_Tags.objects.all()
     classification = ProductClassification.objects.all()
+    carosal = CarouselItem.objects.filter(active = True)
     random_products = Product_item.objects.filter(offer_price__lt=F('price'), is_active=True).order_by('?')[:4]
     
     context = {
@@ -48,6 +49,7 @@ def home(request):
         'tags': tags,
         'classification': classification,
         'random_products': random_products,
+        'carosal':carosal,
     }
     
     context.update(cart_items(request))

@@ -31,3 +31,15 @@ class Verify_coupon(models.Model):
     coupon = models.OneToOneField(Coupon, on_delete=models.CASCADE)
     user = models.ForeignKey(User_Accounts, on_delete=models.CASCADE,null=True)
     uses = models.PositiveIntegerField(default=0)
+
+class CarouselItem(models.Model):
+    image = models.ImageField(upload_to='Carousel/')
+    sub_text = models.CharField(max_length=100,null=True)
+    about = models.CharField(max_length=100,null=True)
+    main_text = models.CharField(max_length=100,null=True)
+    main_text_1 = models.CharField(max_length=100,null=True)
+    link = models.URLField(null=True)  # Add the 'link' field for storing the URL
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.text

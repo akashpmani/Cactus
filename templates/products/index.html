@@ -31,27 +31,29 @@
                 }
               }'>
               <div class="swiper-wrapper">
-            
+            {% for car in carosal %}
                 <!-- Slide-->
+                {% if car.active %}
                 <div class="swiper-slide position-relative h-100 w-100">
                   <div class="w-100 h-100 overflow-hidden position-absolute z-index-1 top-0 start-0 end-0 bottom-0">
                     <div class="w-100 h-100 bg-img-cover bg-pos-center-center overflow-hidden" data-swiper-parallax="-100"
-                      style=" will-change: transform; background-image: url({% static 'products/assets/images/banners/b1.jpg' %})">
+                      style=" will-change: transform; background-image: url({{car.image.url}})">
                     </div>
                   </div>
                   <div
                     class="container position-relative z-index-10 d-flex h-100 align-items-start flex-column justify-content-center">
-                    <p class="title-small text-white opacity-75 mb-0" data-swiper-parallax="-100">Everything You Need</p>
+                    <p class="title-small text-white opacity-75 mb-0" data-swiper-parallax="-100">{{car.about}}</p>
                     <h2 class="display-3 tracking-wide fw-bold text-uppercase tracking-wide text-white" data-swiper-parallax="100">
-                      <span class="text-outline-light">Summer</span> Essentials</h2>
+                      <span class="text-outline-light">{{car.main_text_1}}</span> {{car.main_text}}</h2>
                     <div data-swiper-parallax-y="-25">
-                      <a href="./category.html" class="btn btn-psuedo text-white" role="button">Shop New Arrivals</a>
+                      <a href="./category.html" class="btn btn-psuedo text-white" role="button">{{car.sub_text}}</a>
                     </div>
                   </div>
                 </div>
                 <!-- /Slide-->
-            
-                <!-- Slide-->
+                {% endif %}
+                {% endfor %}
+                {% comment %} <!-- Slide-->
                 <div class="swiper-slide position-relative h-100 w-100">
                   <div class="w-100 h-100 overflow-hidden position-absolute z-index-1 top-0 start-0 end-0 bottom-0">
                     <div class="w-100 h-100 bg-img-cover bg-pos-center-center overflow-hidden" data-swiper-parallax="-100"
@@ -87,7 +89,7 @@
                     </div>
                   </div>
                 </div>
-                <!-- /Slide-->
+                <!-- /Slide--> {% endcomment %}
             
                 <!--Slide-->
                 <div class="swiper-slide position-relative h-100 w-100">

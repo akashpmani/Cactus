@@ -37,4 +37,6 @@ urlpatterns = [
     path('disable_coupon/<int:id>/', views.disable_coupon, name='disable_coupon'),
     path('sales-report-pdf/', views.SalesReportPDFView.as_view(), name='sales_report_pdf'),
     path('sales/', views.sales,name= 'sales'),
+    path('carosal', views.carosal, name='carosal'),
+    path('cursol_stat/<int:cid>/', views.cursol_stat, name='cursol_stat'),
 ]
