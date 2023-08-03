@@ -36,7 +36,13 @@ urlpatterns = [
     path('activate_coupon/<int:id>/', views.activate_coupon, name='activate_coupon'),
     path('disable_coupon/<int:id>/', views.disable_coupon, name='disable_coupon'),
     path('sales-report-pdf/', views.SalesReportPDFView.as_view(), name='sales_report_pdf'),
-    path('sales/', views.sales,name= 'sales'),
+    
     path('carosal', views.carosal, name='carosal'),
     path('cursol_stat/<int:cid>/', views.cursol_stat, name='cursol_stat'),
+    
+    path('sales/', views.sales,name= 'sale'),
+    path('sales_status/<int:id>/', views.sales_status,name= 'sales_status'),
+    path('sales_delete/<int:id>/', views.sales_delete,name= 'sales_delete'),
+    path('sales_edit/<int:id>/', views.sales_edit,name= 'sales_edit'),
+    path('add_sale', views.add_sale,name= 'add_sale'),
 ]

@@ -30,10 +30,14 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
 import requests
 from store.views import _cart_id
+from store.views import catcom
 # from .helpers import delete_expired_otp
 # Create your views here.
 
 account_manager = AccountsManager()
+
+def is_superuser(user):
+    return user.is_superuser
 
 def signup(request):
     if request.method == 'POST':
@@ -58,7 +62,7 @@ def signup(request):
             for field_name, errors in signupform.errors.items():
                 for error in errors:
                     messages.error(request, f"{field_name}: {error}")
-            return redirect('accounts:signup')
+            return redirect('accounts:signin')
 
     form = CustomerRegisterForm()
     return render(request, 'accounts/signup.html', {'form': form})
@@ -94,8 +98,10 @@ def signin(request):
                                 new_cart_item.save()
                 except Cart.DoesNotExist:
                     pass
-
-                return redirect("store:home")
+                if request.user.is_superuser:
+                    return redirect("dashboard:dashboard")
+                else:
+                    return redirect("store:home")
             else:
                 messages.error(request, 'Invalid login credentials')
                 return render(request, 'accounts/signin.html', {'form': loginform})
@@ -154,7 +160,10 @@ def otp(request):
                                 new_cart_item.save()
                 except:
                     pass
-                return redirect("store:home")
+                if request.user.is_superuser:
+                    return redirect("dashboard:dashboard")
+                else:
+                    return redirect("store:home")
             else:
 
                 error_msg = "Invalid OTP. Please try again later."
@@ -190,6 +199,7 @@ def profile(request):
             'addressform' : addressform, 
             'orders' : orders,   
         }
+        context.update(catcom(request))
         try:
             if Profile.objects.filter(user = user).exists:
                 profile = Profile.objects.get(user = user)
@@ -226,12 +236,16 @@ def edit_address(request,id):
             form.save()
         else:
             print(form.errors)
-    return redirect('accounts:profile')
+            context = {}
+            context.update(catcom(request))
+    return redirect('accounts:profile',context)
 
 def delete_address(request,id):
     address =  AddressBook.objects.get(id = id)
     address.delete()
-    return redirect('accounts:addressbook')
+    context = {}
+    context.update(catcom(request))
+    return redirect('accounts:addressbook',context)
     
 def add_address(request):
     if request.method == 'POST':
@@ -240,10 +254,11 @@ def add_address(request):
             address = form.save(commit=False)
             address.user = request.user 
             address.save()
-            print("jajasdkajsdkajsdkajskdjaskdj")
         else:
             print(form.errors)
-        return redirect('accounts:profile')
+        context = {}
+        context.update(catcom(request))
+        return redirect('accounts:profile',context)
     
 
 def update_password(request):    
@@ -259,14 +274,15 @@ def update_password(request):
         new_password = request.POST.get('newPassword')
         print(new_password)
         if user and check_password(old_password, user.password):
-            print("yeasss")
+
             user.password = make_password(new_password)
             user.save()
             return JsonResponse({'message': 'Password update successful'})
         else:
-            print("oombi")
             return JsonResponse({'message': 'invalid credentials'})
-    return render(request , 'accounts/changepass.html')
+    context = {}
+    context.update(catcom(request))
+    return render(request , 'accounts/changepass.html',context)
 
 
 
@@ -276,6 +292,7 @@ def my_profile(request):
     context = {
         'user':user
         }
+    context.update(catcom(request))
     try:
         if Profile.objects.filter(user = user).exists:
             profile = Profile.objects.get(user = user)
@@ -311,7 +328,7 @@ def addressbook(request):
         'address' : address
         
     }
-    
+    context.update(catcom(request))
     return render(request , 'accounts/addressbook.html',context)    
 
 def updateaddress(request):
@@ -324,6 +341,7 @@ def updateaddress(request):
         'addressform' : addressform, 
   
     }
+    context.update(catcom(request))
     return render(request , 'accounts/addaddress.html',context)
 
 def myorders(request):
@@ -340,7 +358,7 @@ def myorders(request):
     context = {
         'orders':orders
     }
-    
+    context.update(catcom(request))
     return render(request , 'accounts/myorders.html',context)
 from django.shortcuts import get_object_or_404
 
@@ -364,6 +382,7 @@ def manage_order(request, id):
         'net': order.order_total - order.tax if order else 0,
         'return_status': return_status
     }
+    context.update(catcom(request))
     return render(request, 'accounts/manageorder.html', context)
 
 
@@ -372,6 +391,7 @@ def returnedorders(request):
     context = {
         'orders':orders
     }
+    context.update(catcom(request))
     return render(request , 'accounts/returnedorders.html')
 
 
@@ -388,6 +408,7 @@ def wallet(request):
         'wallet' : wallet,
         'transaction' : transaction
     }  
+    context.update(catcom(request))
     return render(request , 'accounts/wallet.html',context) 
     
     

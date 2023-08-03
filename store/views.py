@@ -292,14 +292,16 @@ def profile(request):
 
 def cart(request):
     current_user = request.user
+    total = 0
+    product_data = []
+    
     try:
         if request.user.is_authenticated:
             cart_items = CartItem.objects.filter(user = request.user)
         else:
             cart = Cart.objects.get(cart_id=_cart_id(request))
             cart_items = CartItem.objects.filter(cart=cart.id)
-        total = 0
-        product_data = []
+ 
         for item in cart_items:
             if item.quantity > item.product.quantity:
                 item.in_stock = False
@@ -331,21 +333,27 @@ def cart(request):
                 'in_stock' : in_stock
             }
             product_data.append(product_dict)
-        tax = round(total * 0.2, 3)
-        g_total = total + tax
+        tax_t = round(total * 0.2, 3)
+        g_total = total + tax_t
         tax = {
             'cart_items' : cart_items,
             'net' : total,
             'total': g_total,
-            'tax': tax,
+            'tax': tax_t,
         }
     except Cart.DoesNotExist:
-        pass
+        tax = {
+            'cart_items' : None,
+            'net' : None,
+            'total': None,
+            'tax': None,
+        }
 
     context = {
         'product_data': product_data,
         'tax': tax,
     }
+    context.update(catcom(request))
     return render(request,"products/cart.html",context)
 
 def cart_items2(request, total=0, quantity=0, cart_items=None):
@@ -406,7 +414,7 @@ def cart_items2(request, total=0, quantity=0, cart_items=None):
         'product_data': product_data,
         'tax': tax,
     }
-
+    context.update(catcom(request))
     return context
 
 
@@ -1165,3 +1173,12 @@ def apply_coupon(request):
 
 def custom_404_view(request, exception):
     return render(request, '404.html', status=404)
+
+def catcom(request):
+    categories = Category.objects.all()
+    tags = Product_Tags.objects.all()
+    context = {
+        'categories':categories,
+        'tags' : tags
+    }
+    return context

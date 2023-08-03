@@ -29,6 +29,15 @@ from datetime import date
 from django.db.models import Sum
 from reportlab.pdfgen import canvas
 from dashboard.models import CarouselItem
+from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import login_required
+from store . views import address_components
+
+def is_superuser(request):
+    user = request.user
+    if user.is_superuser:
+        return True
+    return False
 
 # Create your views here.
 def get_month_name(month):
@@ -48,8 +57,10 @@ def get_month_name(month):
     }
     return months_in_english[month]
 
-
+@login_required(login_url='accounts:signin')
 def dashboard(request):
+    if not is_superuser(request):
+        return redirect('store:home')
     orders = Order.objects.filter(status = "Delivered")
     total_rev = 0
     total_this = 0
@@ -89,12 +100,16 @@ def dashboard(request):
     }
     return render(request, 'dashboard/index.html',context)
 
-
+@login_required(login_url='accounts:signin')
 def usermanager(request):
+    if not is_superuser(request):
+        return redirect('store:home')
     return render(request, 'users.html')
 
-
+@login_required(login_url='accounts:signin')
 def products(request):
+    if not is_superuser(request):
+        return redirect('store:home')
     search = request.POST.get('search')
     category = request.POST.get('category')
     categories = Category.objects.all()
@@ -126,8 +141,10 @@ def products(request):
 
     return render(request, 'dashboard/page-products-grid.html', context)
 
-
+@login_required(login_url='accounts:signin')
 def addproduct(request):
+    if not is_superuser(request):
+        return redirect('store:home')
   
     # print(Products_Table.objects.filter(producttag__tag__tag_name='hello'))
     categories = Category.objects.filter(is_child=True)
@@ -140,8 +157,10 @@ def addproduct(request):
                'categories': categories, 'tags': tags, 'products': products, 'tagform': product_tags_form, 'size_choice': size_choice,}
     return render(request, 'dashboard/addproducts.html', context)
 
-
+@login_required(login_url='accounts:signin')
 def addnewproduct(request):
+    if not is_superuser(request):
+        return redirect('store:home')
     if request.method == 'POST':
         form = ProductsTableForm(request.POST, request.FILES)
         formtag = ProductTagForm(request.POST)
@@ -165,7 +184,10 @@ def addnewproduct(request):
             print(formtag.errors)
     return redirect('dashboard:addproduct')
 
+@login_required(login_url='accounts:signin')
 def addproductitems(request):
+    if not is_superuser(request):
+        return redirect('store:home')
     if request.method == 'POST':
         form = ProductItemForm(request.POST)
         if form.is_valid():
@@ -185,8 +207,10 @@ def addproductitems(request):
     return redirect('dashboard:pro')
 
         
-
+@login_required(login_url='accounts:signin')
 def orders(request):
+    if not is_superuser(request):
+        return redirect('store:home')
     orders_list = Order.objects.filter(is_ordered=True).exclude(status="New").order_by('-created_at')
     context = {
         'orders' : orders_list,
@@ -196,6 +220,8 @@ def orders(request):
 from accounts.models import Wallet,Transaction
 
 def change_order_status(request, id):
+    if not is_superuser(request):
+        return redirect('store:home')
     order_ = Order.objects.get(order_number = id)
     status = request.POST.get('status')
     print(status)
@@ -227,8 +253,10 @@ def change_order_status(request, id):
 
     return redirect('dashboard:orders')
 
-
+@login_required(login_url='accounts:signin')
 def tagsandcategory(request):
+    if not is_superuser(request):
+        return redirect('store:home')
     categories = Category.objects.all()
     category_form = CategoryForm()
     tag_form = ProductsTags()
@@ -236,8 +264,10 @@ def tagsandcategory(request):
                'tag_form': tag_form, 'categories': categories}
     return render(request, 'addcategory.html', context)
 
-
+@login_required(login_url='accounts:signin')
 def addcategory(request):
+    if not is_superuser(request):
+        return redirect('store:home')
 
     if request.method == 'POST':
         form = CategoryForm(request.POST)
@@ -257,8 +287,10 @@ def addcategory(request):
                 'categories': categories}
     return render(request, 'dashboard/addcategory.html', context)
 
-
+@login_required(login_url='accounts:signin')
 def addtags(request):
+    if not is_superuser(request):
+        return redirect('store:home')
     if request.method == 'POST':
         form = ProductsTags(request.POST)
         if form.is_valid():
@@ -278,8 +310,10 @@ def addtags(request):
                'tag_form': tag_form,}
     return render(request, 'dashboard/addtags.html', context)
 
-
+@login_required(login_url='accounts:signin')
 def edit_category(request, category_id):
+    if not is_superuser(request):
+        return redirect('store:home')
     category = get_object_or_404(Category, id=category_id)
     print(category)
     if request.method == 'POST':
@@ -296,7 +330,10 @@ def edit_category(request, category_id):
     
     return redirect('dashboard:addcategory')
 
+@login_required(login_url='accounts:signin')
 def delete_category(request, category_id):
+    if not is_superuser(request):
+        return redirect('store:home')
     print("reachedd delete")
     category = get_object_or_404(Category, id=category_id)
     print(category)
@@ -304,8 +341,11 @@ def delete_category(request, category_id):
         category.delete()
         return redirect('dashboard:addcategory')  # Replace 'category_list' with the URL name of your category list view
     return redirect('dashboard:addcategory')
-    
+
+@login_required(login_url='accounts:signin')   
 def edit_tags(request, tag_id):
+    if not is_superuser(request):
+        return redirect('store:home')
     tag = get_object_or_404(Product_Tags, id=tag_id)
 
     if request.method == 'POST':
@@ -322,7 +362,10 @@ def edit_tags(request, tag_id):
     
     return redirect('dashboard:addtags')
 
+@login_required(login_url='accounts:signin')
 def delete_tags(request, tag_id):
+    if not is_superuser(request):
+        return redirect('store:home')
     print("reachedd delete")
     tag = get_object_or_404(Product_Tags, id=tag_id)
 
@@ -331,8 +374,10 @@ def delete_tags(request, tag_id):
         return redirect('dashboard:addtags')  # Replace 'category_list' with the URL name of your category list view
     return redirect('dashboard:addtags')
 
-
+@login_required(login_url='accounts:signin')
 def delete_product(request, id):
+    if not is_superuser(request):
+        return redirect('store:home')
     try:
         product = Products_Table.objects.get(id=id)
         product_items = Product_item.objects.filter(product = product)
@@ -347,7 +392,10 @@ def delete_product(request, id):
 
     return redirect('dashboard:products')
 
+@login_required(login_url='accounts:signin')
 def changestatus(request, id):
+    if not is_superuser(request):
+        return redirect('store:home')
     try:
         product = Products_Table.objects.get(id=id)
         if product.is_active:
@@ -362,8 +410,10 @@ def changestatus(request, id):
 
     return redirect('dashboard:products')
 
-
+@login_required(login_url='accounts:signin')
 def status(request, id):
+    if not is_superuser(request):
+        return redirect('store:home')
     try:
         product = Products_Table.objects.get(id=id)
         if product.is_active:
@@ -379,7 +429,10 @@ def status(request, id):
 
     return redirect('dashboard:products')
 
+@login_required(login_url='accounts:signin')
 def productdetails(request,id):
+    if not is_superuser(request):
+        return redirect('store:home')
     product = Products_Table.objects.get(id = id)
     variations = Product_item.objects.filter(product = product)
     images = Product_images.objects.filter(product = product)
@@ -398,7 +451,10 @@ def productdetails(request,id):
 
     return render(request, 'dashboard/page-seller-detail.html',context)
 
+@login_required(login_url='accounts:signin')
 def update_product_item(request, product_item_id):
+    if not is_superuser(request):
+        return redirect('store:home')
     print("yererf")
     product_item = Product_item.objects.get(id=product_item_id)
     if request.method == 'POST':
@@ -417,7 +473,10 @@ def update_product_item(request, product_item_id):
 
 
 
+@login_required(login_url='accounts:signin')
 def pro(request):
+    if not is_superuser(request):
+        return redirect('store:home')
     products = Products_Table.objects.all()
     context = {
          'products':products,
@@ -426,7 +485,10 @@ def pro(request):
     return render(request, 'dashboard/page-products-grid.html',context)
 
 
+@login_required(login_url='accounts:signin')
 def deleteimage(request,id,image_id):
+    if not is_superuser(request):
+        return redirect('store:home')
     product = Products_Table.objects.get(id = id)
     image = Product_images.objects.get(product = product , id = image_id)
     image.delete()
@@ -434,7 +496,10 @@ def deleteimage(request,id,image_id):
     return HttpResponseRedirect(referring_page)
 
 
+@login_required(login_url='accounts:signin')
 def upload_image(request,id):
+    if not is_superuser(request):
+        return redirect('store:home')
     if request.method == 'POST':
         image_data = request.POST.get('image')
         product = Products_Table.objects.get(id = id)
@@ -453,7 +518,10 @@ def upload_image(request,id):
     
     return JsonResponse({'success': False})
 
+@login_required(login_url='accounts:signin')
 def changethumbnail(request,id):
+    if not is_superuser(request):
+        return redirect('store:home')
     if request.method == 'POST':
         image_data = request.POST.get('image')
         format, imgstr = image_data.split(';base64,')
@@ -499,14 +567,20 @@ def changethumbnail(request,id):
 #         return render(request,'dashboard/users',context)
 #     return redirect('signin')
 
+@login_required(login_url='accounts:signin')
 def users(request):
+    if not is_superuser(request):
+        return redirect('store:home')
     users = User_Accounts.objects.filter(is_superuser=False).order_by('id').reverse()
     context = {
         'users': users,
     }
     return render(request,'dashboard/users.html',context)
 
+@login_required(login_url='accounts:signin')
 def userdetails(request,id):
+    if not is_superuser(request):
+        return redirect('store:home')
     user = User_Accounts.objects.get(id = id)
     # context = {
     #     'user' : user,
@@ -516,7 +590,10 @@ def userdetails(request,id):
     
 
 
+@login_required(login_url='accounts:signin')
 def change_user_status(request, name):
+    if not is_superuser(request):
+        return redirect('store:home')
     user = User_Accounts.objects.get(username=name)
     status = request.POST.get('status')
     print(user)
@@ -528,8 +605,11 @@ def change_user_status(request, name):
     print(user.account_status)
     return redirect('dashboard:users')
 
- 
+
+@login_required(login_url='accounts:signin') 
 def coupons(request):
+    if not is_superuser(request):
+        return redirect('store:home')
     coupon = Coupon.objects.all().order_by('-created_at')
     context = {
         'coupon': coupon,
@@ -537,7 +617,10 @@ def coupons(request):
     
     return render(request, 'dashboard/coupon.html',context)
 
+@login_required(login_url='accounts:signin')
 def add_coupons(request):
+    if not is_superuser(request):
+        return redirect('store:home')
     if request.method == "POST":
         form = CouponForm(request.POST, request.FILES)
         if form.is_valid():
@@ -555,7 +638,10 @@ def add_coupons(request):
     }
     return render(request, 'dashboard/add_coupon.html', context)
 
+@login_required(login_url='accounts:signin')
 def activate_coupon(request, id):
+    if not is_superuser(request):
+        return redirect('store:home')
     if request.method == 'POST':
         pi = Coupon.objects.get(id=id)
         pi.active = True
@@ -563,7 +649,10 @@ def activate_coupon(request, id):
         messages.success(request, 'Coupon activated successfully.')
     return redirect('dashboard:coupons')
 
+@login_required(login_url='accounts:signin')
 def disable_coupon(request, id):
+    if not is_superuser(request):
+        return redirect('store:home')
     if request.method == 'POST':
         pi = Coupon.objects.get(id=id)
         pi.active = False
@@ -573,7 +662,10 @@ def disable_coupon(request, id):
 
 
 class SalesReportPDFView(View):
+    @login_required(login_url='accounts:signin')
     def get(self, request, *args, **kwargs):
+        if not is_superuser(request):
+            return redirect('store:home')
         total_users = len(User_Accounts.objects.all())
         new_orders = len(Order.objects.all().exclude(status="new"))
         revenue_total = 0
@@ -606,13 +698,12 @@ class SalesReportPDFView(View):
         response.write(pdf)
 
         return response
-    
-    
-def sales(request):
-    return render (request,'dashboard/sales.html')
 
 
+@login_required(login_url='accounts:signin')
 def carosal(request):
+    if not is_superuser(request):
+        return redirect('store:home')
     if request.method == 'POST':
         main_text = request.POST.get('main')
         print(main_text)
@@ -640,8 +731,10 @@ def carosal(request):
     return render(request,'dashboard/coustomize.html',{'carosals':carosals})
 
 
-
+@login_required(login_url='accounts:signin')
 def cursol_stat(request,cid):
+    if not is_superuser(request):
+        return redirect('store:home')
 
     c = CarouselItem.objects.get(id = int(cid))
     try:
@@ -656,3 +749,81 @@ def cursol_stat(request,cid):
         messages.success(request, "something went wrong!")
     return redirect('dashboard:carosal')
     
+    
+from products.models import classfiedProducts,ProductClassification
+@login_required(login_url='accounts:signin')  
+def sales(request):
+    if not is_superuser(request):
+        return redirect('store:home')
+    types_ = ProductClassification.objects.all()
+    context = {
+        'type' : types_
+    }
+    return render (request,'dashboard/sales.html',context)
+
+
+@login_required(login_url='accounts:signin')  
+def sales_status(request,id):
+    if not is_superuser(request):
+        return redirect('store:home')
+    c = ProductClassification.objects.get(id = int(id))
+    try:
+        if c.active:
+            c.active = False
+        else :
+            c.active = True
+        
+        messages.success(request, "Status changed successfully!")
+        c.save()
+    except:
+        messages.success(request, "something went wrong!")
+    return redirect('dashboard:sale')
+    
+
+@login_required(login_url='accounts:signin')  
+def sales_delete(request,id):
+    if not is_superuser(request):
+        return redirect('store:home')
+    c = ProductClassification.objects.get(id = int(id))
+    c.delete()
+    messages.success(request, "something went wrong!")
+    return redirect('dashboard:sale')
+    
+    
+@login_required(login_url='accounts:signin')  
+def sales_edit(request,id):
+    if not is_superuser(request):
+        return redirect('store:home')
+    classification = ProductClassification.objects.get(id = id)
+    class_products = classfiedProducts.objects.filter(classification=classification)
+    products = Products_Table.objects.all()
+    cproduct = []
+    for p in class_products:
+        cproduct.append(p.product)
+    context = {
+        'cpro' :cproduct ,
+        'products' :products,
+        'classification' :classification
+        
+    }
+    return render(request,'dashboard/salesinfo.html',context)
+
+@login_required(login_url='accounts:signin')
+def add_sale(request):
+    if not is_superuser(request):
+        return redirect('store:home')
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        tagline = request.POST.get('tagline')
+        image = request.FILES.get('image')
+
+        if title and tagline and image:
+            ProductClassification.objects.create(
+                title=title,
+                tagline=tagline,
+                photo=image
+            )
+            message = "Form submitted successfully!"
+        else:
+            message = "Please fill in all the required fields."
+    return redirect('dashboard:sale')
