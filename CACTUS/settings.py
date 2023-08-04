@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'products',
     'accounts',
     'cropperjs',
-    "phonenumber_field",
     'orders',
     'payment',
 ]
