@@ -797,13 +797,16 @@ def sales_edit(request,id):
     classification = ProductClassification.objects.get(id = id)
     class_products = classfiedProducts.objects.filter(classification=classification)
     products = Products_Table.objects.all()
+    plants = Products_Table.objects.all().exclude(is_active = False)
     cproduct = []
     for p in class_products:
         cproduct.append(p.product)
     context = {
         'cpro' :cproduct ,
         'products' :products,
-        'classification' :classification
+        'classification' :classification,
+        'products' :class_products,
+        'plants':plants
         
     }
     return render(request,'dashboard/salesinfo.html',context)
@@ -827,3 +830,10 @@ def add_sale(request):
         else:
             message = "Please fill in all the required fields."
     return redirect('dashboard:sale')
+
+
+@login_required(login_url='accounts:signin')
+def add_plants_to_sale(request):
+    if not is_superuser(request):
+        return redirect('store:home')
+    

@@ -118,24 +118,10 @@
             <div class="card mb-4">
                 <header class="card-header">
                     <div class="row gx-3">
-                        <div class="col-lg-4 col-md-6 me-auto">
-                            <input type="text" placeholder="Search..." class="form-control" />
-                        </div>
-                        <div class="col-lg-2 col-md-3 col-6">
-                            <select class="form-select">
-                                <option>Status</option>
-                                <option>Active</option>
-                                <option>Disabled</option>
-                                <option>Show all</option>
-                            </select>
-                        </div>
-                        <div class="col-lg-2 col-md-3 col-6">
-                            <select class="form-select">
-                                <option>Show 20</option>
-                                <option>Show 30</option>
-                                <option>Show 40</option>
-                            </select>
-                        </div>
+                       
+                        <div class="col-6">
+                        <a href="#open-modal" class="btn btn-md rounded font-sm">Add Products + </a>  
+                    </div>
                     </div>
                 </header>
                 <!-- card-header end// -->
@@ -144,11 +130,7 @@
                         <table class="table table-hover">
                             <thead>
                                 <tr>
-                                    <th>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" value="" />
-                                        </div>
-                                    </th>
+                                   
                                     <th>#ID</th>
                                     <th>Product</th>
                                     <th>Offer </th>
@@ -156,28 +138,17 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for c in cpro  %}
+                                {% for c in products  %}
                                 <tr>
-                                   <td>
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" value="" />
-                                        </div>
-                                    </td> 
-                                    <td>{{c.id}}</td>
-                                    <td><b>{{c.name}}</b></td>
+                                
+                                    <td>{{c.product.id}}</td>
+                                    <td><b>{{c.product.name}}</b></td>
                                 
                                   
-                                    <td>{{classification.offer}} %</td>
+                                    <td>{{c.offer}} %</td>
                                     <td class="text-end">
                                         <a href="#" class="btn btn-md rounded font-sm">Detail</a>
-                                        <div class="dropdown">
-                                            <a href="#" data-bs-toggle="dropdown" class="btn btn-light rounded btn-sm font-sm"> <i class="material-icons md-more_horiz"></i> </a>
-                                            <div class="dropdown-menu">
-                                                <a class="dropdown-item" href="#">View detail</a>
-                                                <a class="dropdown-item" href="#">Edit info</a>
-                                                <a class="dropdown-item text-danger" href="#">Delete</a>
-                                            </div>
-                                        </div> <!-- dropdown //end -->
+                                        
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -216,6 +187,261 @@
                     </div>
                 </footer>
     </main>
+  
+<div id="open-modal" class="modal-window">
+    <div>
+      <a href="#" title="Close" class="modal-close">Close</a>
+      <h4>Add Products to {{classification.title}}!</h4>
+      <br>
+      <div class="modal-content m-auto">
+
+        <input type="text" id="searchInput" placeholder="Search for plants...">
+        <form id="addProductsForm">
+          {% for plant in plants %}
+            <label class="m-auto p-1">
+              <input type="checkbox" name="selectedPlants" value="{{ plant.id }}"> {{ plant.name }}
+            </label>
+          {% endfor %}
+        </div>
+          <div class="form-group">
+            <label for="title">Discount</label>
+            <input type="number" class="form-control" id="mainleft" name="tagline" required>
+          </div>
+          
+        </form>
+   
+      <br>
+      <button type="button" id="addSelectedBtn">Add Selected</button>
+    </div>
+  </div>
+
+
+<!-- Include jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    document.getElementById("mainleft").addEventListener("input", function() {
+      var maxDiscount = 100;
+      var discountInput = parseFloat(this.value);
+      
+      if (isNaN(discountInput)) {
+        this.value = ''; // Reset to empty if the input is not a valid number
+      } else if (discountInput > maxDiscount) {
+        this.value = maxDiscount; // Limit the input to the maximum discount value
+      }
+    });
+  </script>
+  
+
+  <script>
+    document.getElementById("mainleft").addEventListener("input", function() {
+      var maxDiscount = 100;
+      var discountInput = parseFloat(this.value);
+  
+      if (isNaN(discountInput)) {
+        this.value = ''; // Reset to empty if the input is not a valid number
+      } else if (discountInput > maxDiscount) {
+        this.value = maxDiscount + '%'; // Limit the input to the maximum discount value with percentage symbol
+      } else {
+        this.value = discountInput + '%'; // Append the percentage symbol to the valid input value
+      }
+    });
+  </script>
+  
+
+
+<!-- Your existing JavaScript code (if any) -->
+<script>
+  $(document).ready(function() {
+    // Function to handle the "Add Selected" button click event
+    $("#addSelectedBtn").click(function() {
+      // Get the form data and filter selected plants
+      const sale = {{classification.id}}
+      const selectedPlants = $("input[name='selectedPlants']:checked").map(function() {
+        return $(this).val();
+      }).get();
+
+      // Ajax request to send the selected plants to the backend
+      $.ajax({
+        url: "{% url 'dashboard:add_plants_to_sale' %}",  // Replace with the actual URL to handle the request on the backend
+        method: "POST",
+        data: { selectedPlants: selectedPlants,
+        sale : sale
+       },
+        dataType: "json",
+        success: function(response) {
+          // Handle the response from the backend (if needed)
+          console.log("Selected plants added to the table!");
+        },
+        error: function(xhr, status, error) {
+          // Handle any error that occurs during the request
+          console.error(error);
+        }
+      });
+    });
+  });
+</script>
+{% comment %} <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $(document).ready(function() {
+    // Function to handle the search functionality
+    $("#searchInput").on("keyup", function() {
+      var value = $(this).val().toLowerCase();
+      $("#addProductsForm label").filter(function() {
+        $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1);
+      });
+    });
+
+    // Function to show the modal
+    $("#openModalBtn").click(function() {
+      $("#open-modal").fadeIn();
+    });
+
+    // Function to close the modal
+    $(".modal-close").click(function() {
+      $("#open-modal").fadeOut();
+    });
+
+    // Function to handle the "Add Selected" button click event
+    $("#addSelectedBtn").click(function() {
+      // Get the form data and filter selected plants
+      const selectedPlants = $("input[name='selectedPlants']:checked").map(function() {
+        return $(this).val();
+      }).get();
+
+      // ... (your existing AJAX code to handle adding the selected plants to the table)
+    });
+  });
+</script> {% endcomment %}
+<style>
+   
+  
+  
+    .modal-content {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+  
+    .modal-content label {
+      display: block;
+      margin-bottom: 10px;
+    }
+  
+    #addSelectedBtn {
+      background-color: #007bff;
+      color: #fff;
+      padding: 10px 15px;
+      border: none;
+      cursor: pointer;
+    }
+  
+    #addSelectedBtn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+  
+ 
+<style>
+
+  
+    #addSelectedBtn {
+      background-color: #007bff;
+      color: #fff;
+      padding: 10px 15px;
+      border: none;
+      cursor: pointer;
+    }
+  
+    #addSelectedBtn:hover {
+      background-color: #0056b3;
+    }
+  </style> 
+  
+
+      <style>
+        .modal-window {
+            position: fixed;
+            background-color: rgba(255, 255, 255, .5);
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 999;
+            visibility: hidden;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s;
+            &:target {
+              visibility: visible;
+              opacity: 1;
+              pointer-events: auto;
+            }
+            & > div {
+              width: 400px;
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              padding: 2em;
+              background: white;
+            }
+            header {
+              font-weight: bold;
+            }
+            h1 {
+              font-size: 150%;
+              margin: 0 0 15px;
+            }
+          }
+          
+          .modal-close {
+            color: #aaa;
+            line-height: 50px;
+            font-size: 80%;
+            position: absolute;
+            right: 0;
+            text-align: center;
+            top: 0;
+            width: 70px;
+            text-decoration: none;
+            &:hover {
+              color: black;
+            }
+          }
+          
+          /* Demo Styles */
+         
+       
+          
+          .modal-window {
+            & > div {
+              border-radius: 1rem;
+            }
+          }
+          
+          .modal-window div:not(:last-of-type) {
+            margin-bottom: 15px;
+          }
+          
+          .logo {
+            max-width: 150px;
+            display: block;
+          }
+          
+          small {
+            color: lightgray;
+          }
+          
+          .btn {
+            background-color: white;
+            padding: 1em 1.5em;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            i {
+              padding-right: 0.3em;
+            }
+          }
+          
+      </style>
             <script src="assets/js/vendors/jquery-3.6.0.min.js"></script>
             <script src="assets/js/vendors/bootstrap.bundle.min.js"></script>
             <script src="assets/js/vendors/select2.min.js"></script>
