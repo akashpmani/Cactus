@@ -11,6 +11,7 @@ urlpatterns = [
     path('samp',views.samp, name='samp'),
     path('order_complete',views.order_complete, name='order_complete'),
     path('order-success',views.order_success,name = 'order_success'),
+     path('download_invoice/<str:order_id>/', views.download_invoice, name='download_invoice'),
     
     
     path('cancelorder',views.cancelorder, name='cancelorder'),

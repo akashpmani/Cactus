@@ -14,6 +14,9 @@ from django.template.loader import render_to_string
 from django.core.mail import EmailMessage,send_mail
 from django.conf import settings
 from dashboard.models import Coupon,Verify_coupon
+from django.http import HttpResponse
+from django.template.loader import get_template
+from .helpers import save_pdf
 # Create your views here.
 
 
@@ -85,11 +88,11 @@ def payment(request):
         coupon_code = request.POST.get('coupon_code')
         try:
             coupon = Coupon.objects.get(code=coupon_code)
-            print(coupon)
+
             try:
                 verify_use = Verify_coupon.objects.get(user=request.user, coupon=coupon)
                 verify_use.uses += 1
-            except Verify_coupon.DoesNotExist:
+            except:
                 verify_use = Verify_coupon.objects.create(user=request.user, coupon=coupon, uses=1)
             verify_use.save()
         except Coupon.DoesNotExist:
@@ -171,12 +174,14 @@ def order_complete(request):
         
         payment = Payment.objects.get(payment_id=transID)
         order.save()
+        discount = ( subtotal * .2 ) - order.order_total 
         context = {
             'order':order,
             'ordered_product':ordered_product,
             'transID':payment.payment_id,
             'payment':payment,
-            'subtotal':subtotal
+            'subtotal':subtotal,
+            'discount' : discount
         }
         return render(request, 'products/ordersuccessfull.html',context)      
     except(Payment.DoesNotExist,Order.DoesNotExist):
@@ -264,3 +269,40 @@ def cancelreturn(request):
     response_data = {'return': 'Order return Canceled successfully '}
     return JsonResponse(response_data)
     
+    
+    
+from django.http import HttpResponse
+from .helpers import save_pdf
+
+def download_invoice(request,order_id):
+    try:
+        order = Order.objects.get(order_number=order_id, is_ordered= True)
+        order.status = 'Confirmed'
+        ordered_product = OrderProduct.objects.filter(order_id= order.id)
+        subtotal =0
+        for item in ordered_product:
+            subtotal += item.product_price*item.quantity
+        payment = Payment.objects.get(payment_id=order.payment)
+        order.save()
+        address = AddressBook.objects.get(id = order.address.id)
+        params = {
+            'order':order,
+            'ordered_product':ordered_product,
+            'transID':payment.payment_id,
+            'payment':payment,
+            'subtotal':subtotal,
+            'address' : address,
+        }
+        file_name, success = save_pdf(params)
+        
+    except(Payment.DoesNotExist,Order.DoesNotExist):
+        return redirect('store:home')
+    
+    if success:
+        with open(str(settings.BASE_DIR) + f"/media/pdf/{file_name}.pdf", 'rb') as pdf_file:
+            response = HttpResponse(pdf_file.read(), content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{file_name}.pdf"'
+            return response
+    else:
+
+        return HttpResponse("Error generating PDF", status=500)

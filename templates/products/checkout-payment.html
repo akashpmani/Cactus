@@ -295,7 +295,19 @@
                               </span>
                           </label>
                       </div>
+                      {% else %}
+                      <div class="form-check form-group form-check-custom form-radio-custom mb-3" hidden>
+                        <input class="form-check-input" type="checkbox" name="spikes" id="spikes" onclick="updateGrandTotal()">
+                        <label class="form-check-label" for="spikes">
+                            <span class="d-flex justify-content-between align-items-start">
+                                <span>
+                                    <span class="mb-0 fw-bolder d-block">Use Spikes  <img width="20" height="20" src="https://img.icons8.com/water-color/50/western.png" alt="western"/>  you have {{wallet.balance}} spikes remaining</span>
+                                </span>
+                            </span>
+                        </label>
+                    </div>
                       {% endif %}
+
                       <div class="py-4 border-bottom">
                         <div class="d-flex justify-content-between">
                             <div>
@@ -367,7 +379,7 @@
             $('#copdiv').removeClass('d-none');
             var hiddenInput = document.getElementById('couponcode');
             hiddenInput.value = couponCode;
-            alert(couponCode)
+            alert(`${couponCode} coupon applied! You will receive ${discount} Rupees in your order.`);
 
           } else if (response.failed) {
             // Show a message to the user that the coupon cannot be applied
@@ -609,7 +621,10 @@
   document.getElementById('completeOrderBtncod').onclick = function(e) {
     e.preventDefault();
     var checkbox = document.getElementById('spikes');
+    let checkState = $(checkbox).is(":checked") ? "true" : "false";
+    console.log(checkState);
     var wallet = checkbox.checked ? true : false;
+    console.log(wallet);
     var hiddenInput = document.getElementById('couponcode');
     var code = hiddenInput.value
     $.ajax({

@@ -1,0 +1,294 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Invoice Template Design</title>
+{% comment %} 
+    <link rel="stylesheet" href="{% static 'ac_counts/invoice.css'%}" />
+    <link rel="stylesheet" type="text/css" href="/static/ac_counts/invoice.css"> {% endcomment %}
+
+</head>
+{% comment %} <body>
+<style>
+
+*{
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	font-family: 'Lato', sans-serif;
+}
+
+body{
+	background: #3d3d3d;
+	padding: 50px;
+	color: #3d3d3d;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 14px;
+}
+
+.bold{
+	font-weight: 900;
+}
+
+.light{
+	font-weight: 100;
+}
+
+.wrapper{
+	background: #fff;
+	padding: 30px;
+}
+
+.invoice_wrapper{
+	border: 3px solid #0000ff;
+	width: 700px;
+	max-width: 100%;
+}
+
+.invoice_wrapper .header .logo_invoice_wrap,
+.invoice_wrapper .header .bill_total_wrap{
+	display: flex;
+	justify-content: space-between;
+	padding: 30px;
+}
+
+.invoice_wrapper .header .logo_sec{
+	display: flex;
+	align-items: center;
+}
+
+.invoice_wrapper .header .logo_sec .title_wrap{
+	margin-left: 5px;
+}
+
+.invoice_wrapper .header .logo_sec .title_wrap .title{
+	text-transform: uppercase;
+	font-size: 18px;
+	color:#0000ff;
+}
+
+.invoice_wrapper .header .logo_sec .title_wrap .sub_title{
+	font-size: 12px;
+}
+
+.invoice_wrapper .header .invoice_sec,
+.invoice_wrapper .header .bill_total_wrap .total_wrap{
+	text-align: right;
+}
+
+.invoice_wrapper .header .invoice_sec .invoice{
+	font-size: 28px;
+	color: #0000ff;
+}
+
+.invoice_wrapper .header .invoice_sec .invoice_no,
+.invoice_wrapper .header .invoice_sec .date{
+	display: flex;
+	width: 100%;
+}
+
+.invoice_wrapper .header .invoice_sec .invoice_no span:first-child,
+.invoice_wrapper .header .invoice_sec .date span:first-child{
+	width: 70px;
+	text-align: left;
+}
+
+.invoice_wrapper .header .invoice_sec .invoice_no span:last-child,
+.invoice_wrapper .header .invoice_sec .date span:last-child{
+	width: calc(100% - 70px);
+}
+
+.invoice_wrapper .header .bill_total_wrap .total_wrap .price,
+.invoice_wrapper .header .bill_total_wrap .bill_sec .name{
+	color: #0000ff;
+	font-size: 20px;
+}
+
+.invoice_wrapper .body .main_table .table_header{
+	background: #0000ff;
+}
+
+.invoice_wrapper .body .main_table .table_header .row{
+	color:#fff;
+	font-size: 18px;
+	border-bottom: 0px;	
+}
+
+.invoice_wrapper .body .main_table .row{
+	display: flex;
+	border-bottom: 1px solid #3d3d3d;
+}
+
+.invoice_wrapper .body .main_table .row .col{
+	padding: 10px;
+}
+.invoice_wrapper .body .main_table .row .col_no{width: 5%;}
+.invoice_wrapper .body .main_table .row .col_des{width: 45%;}
+.invoice_wrapper .body .main_table .row .col_price{width: 20%; text-align: center;}
+.invoice_wrapper .body .main_table .row .col_qty{width: 10%; text-align: center;}
+.invoice_wrapper .body .main_table .row .col_total{width: 20%; text-align: right;}
+
+.invoice_wrapper .body .paymethod_grandtotal_wrap{
+	display: flex;
+	justify-content: space-between;
+	padding: 5px 0 30px;
+	align-items: flex-end;
+}
+
+.invoice_wrapper .body .paymethod_grandtotal_wrap .paymethod_sec{
+	padding-left: 30px;
+}
+
+.invoice_wrapper .body .paymethod_grandtotal_wrap .grandtotal_sec{
+	width: 30%;
+}
+
+.invoice_wrapper .body .paymethod_grandtotal_wrap .grandtotal_sec p{
+	display: flex;
+	width: 100%;
+	padding-bottom: 5px;
+}
+
+.invoice_wrapper .body .paymethod_grandtotal_wrap .grandtotal_sec p span{
+	padding: 0 10px;
+}
+
+.invoice_wrapper .body .paymethod_grandtotal_wrap .grandtotal_sec p span:first-child{
+	width: 60%;
+}
+
+.invoice_wrapper .body .paymethod_grandtotal_wrap .grandtotal_sec p span:last-child{
+	width: 40%;
+	text-align: right;
+}
+
+.invoice_wrapper .body .paymethod_grandtotal_wrap .grandtotal_sec p:last-child span{
+	background: #0000ff;
+	padding: 10px;
+	color: #fff;
+}
+
+.invoice_wrapper .footer{
+	padding: 30px;
+}
+
+.invoice_wrapper .footer > p{
+	color: #0000ff;
+	text-decoration: underline;
+	font-size: 18px;
+	padding-bottom: 5px;
+}
+
+.invoice_wrapper .footer .terms .tc{
+	font-size: 16px;
+}
+    </style> {% endcomment %}
+
+<div class="wrapper">
+    <div class="invoice_wrapper">
+        <div class="header">
+            <div class="logo_invoice_wrap">
+                <div class="logo_sec">
+                  
+                    <div class="title_wrap">
+                        <p class="title bold">Cactus Plants</p>
+                        <p class="sub_title"> Plants</p>
+                    </div>
+                </div>
+                <div class="invoice_sec">
+                    <p class="invoice bold">INVOICE</p>
+                    <p class="invoice_no">
+                        <span class="bold">Invoice</span>
+                        <span>#{{order.order_number}}</span>
+                    </p>
+                    <p class="date">
+                        <span class="bold">Date</span>
+                        <span>{{order.created_at}}</span>
+                    </p>
+                </div>
+            </div>
+            <div class="bill_total_wrap">
+                <div class="bill_sec">
+                    <p>Bill To</p> 
+                        <p class="bold name">Alex Deo</p>
+                    <span>
+                        {{address.first_name}} {{address.last_name}}<br>
+                        {{address.address_line_1}},{{address.address_line_2}} <br>
+                        {{address.city}}, {{address.state}}, {{address.country}}
+                        
+                    </span>
+                </div>
+                <div class="total_wrap">
+                    <p>Total </p>
+                        <p class="bold price">₹ {{payment.amount_paid}}</p>
+                </div>
+            </div>
+        </div>
+        <div class="body">
+            <div class="main_table">
+                <div class="table_header">
+                    <div class="row">
+                       
+                        <div class="col col_des">ITEM</div>
+                        <div class="col col_qty">QTY</div>
+                        <div class="col col_total">TOTAL</div>
+                    </div>
+                </div>
+                {%  for item in ordered_product %}
+                <div class="table_body">
+                    <div class="row">
+                        <div class="col col_des">
+                            <p class="bold">{{item.product.product.name}}</p>
+                            
+                        </div>
+                       
+                        <div class="col col_qty">
+                            <p>{{item.quantity}}</p>
+                        </div>
+                        <div class="col col_total">
+                            <p>₹ {{item.product_price}}</p>
+                        </div>
+                    </div>
+                
+                </div>
+                {% endfor %}
+            </div>
+            <div class="paymethod_grandtotal_wrap">
+                <div class="paymethod_sec">
+                    <p class="bold">Payment Method</p>
+                    <p>{{payment.payment_method}}</p>
+                </div>
+                <div class="grandtotal_sec">
+                    <p class="bold">
+                        <span>SUB TOTAL</span>
+                        <span>₹ {{subtotal}}</span>
+                    </p>
+                    <p>
+                        <span>Tax Gst 2%</span>
+                        <span>₹ {{subtotal}}</span>
+                    </p>
+                    <p>
+                        <span>Discount</span>
+                        <span>-₹ {{discount}}</span>
+                    </p>
+                        <p class="bold">
+                        <span>Grand Total</span>
+                        <span>₹ {{payment.amount_paid}}</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="footer">
+            <p>Thank you and Best Wishes</p>
+            <div class="terms">
+                <p class="tc bold">Terms & Coditions</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>

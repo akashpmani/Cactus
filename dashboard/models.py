@@ -28,7 +28,7 @@ class Coupon(models.Model):
         super(Coupon, self).save(*args, **kwargs)
 
 class Verify_coupon(models.Model):
-    coupon = models.OneToOneField(Coupon, on_delete=models.CASCADE)
+    coupon = models.ForeignKey(Coupon, on_delete=models.CASCADE)
     user = models.ForeignKey(User_Accounts, on_delete=models.CASCADE,null=True)
     uses = models.PositiveIntegerField(default=0)
 

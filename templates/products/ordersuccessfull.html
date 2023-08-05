@@ -6,8 +6,11 @@
     <center><i class="fa fa-check-circle" style="font-size: 72px;margin-bottom: 20px;color: #28A745;"></i></center>
     <h2 class="text-center">Order Successful</h2>
 	<br>
-	<div class="text-center">
-		<a href="{% url 'store:products' %}" class="btn btn-success">Shop more</a>
+	<div class="text-center m-auto">
+		<a href="{% url 'store:products' %}" class="btn btn-success m-auto">Shop more</a>    <a href="{% url 'payment:download_invoice' order.order_number %}" class="btn btn-success">download invoice</a>
+	</div> 
+    <div class="text-center">
+		
 	</div>
 </div>
 
@@ -83,10 +86,14 @@
                                                 <th colspan="2" class="text-right">Tax:</th>
                                                 <th class="text-center">₹ {{order.tax}}</th>
                                             </tr>
+                                            <tr>
+                                                <th colspan="2" class="text-right">Discount:</th>
+                                                <th class="text-center">₹ {{discount}}</th>
+                                            </tr>
                                             
                                             <tr>
                                                 <th colspan="2" class="text-right">Grand Total:</th>
-                                                <th class="text-center">₹ {{order.order_total}}</th>
+                                                <th class="text-center">₹ {{payment.amount_paid}}</th>
                                             </tr> 
                                         </tfoot>
                                     </table>
