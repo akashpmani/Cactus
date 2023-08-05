@@ -248,6 +248,7 @@ def cancelorder(request):
             trans.save()
     if order.payment.payment_method =="razorpay":
         total =  order.order_total
+        total -= order.payment.coupon_discount
         wallet = Wallet.objects.get(user = request.user)
         wallet.balance += total
         wallet.save()
