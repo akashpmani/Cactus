@@ -18,6 +18,7 @@ from django.contrib import admin
 from django.urls import path,include, re_path
 from django.conf import settings
 from django.conf.urls.static import static  
+# from dashboard.views import custom_404
 
 
 urlpatterns = [
@@ -26,6 +27,5 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('', include('store.urls')),
     path('payment/', include('payment.urls')),
-
-
 ]+static(settings.MEDIA_URL , document_root = settings.MEDIA_ROOT)
+# handler404 = custom_404

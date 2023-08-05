@@ -33,7 +33,8 @@ from dashboard.models import CarouselItem
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.decorators import login_required
 from store . views import address_components
-
+# def custom_404(request , exception):
+#     return render(request,'404.html',status=404)
 def is_superuser(request):
     user = request.user
     if user.is_superuser:
