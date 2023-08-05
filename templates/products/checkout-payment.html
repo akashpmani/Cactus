@@ -681,13 +681,21 @@
 <script>
   document.getElementById('rzp-ff').onclick = function(e) {
     e.preventDefault();
-
+    var checkbox = document.getElementById('spikes');
+    let checkState = $(checkbox).is(":checked") ? "true" : "false";
+    console.log(checkState);
+    var wallet = checkbox.checked ? true : false;
+    console.log(wallet);
+    alert(wallet)
+    var hiddenInput = document.getElementById('couponcode');
+    var code = hiddenInput.value
+    console.log(wallet)
     $.ajax({
       method: "get",
       url: "/payment/payment_details",
       data: {
-        wallet: $("#spikes").is(":checked"), // true if checkbox is checked, false otherwise
-        coupon: $("#coupon-input").val() // Get the value of the coupon input field, if available
+        code: code,
+        wallet: wallet,
       },
      alert(wallet)
       success: function(response) {

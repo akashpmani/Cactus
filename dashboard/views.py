@@ -253,6 +253,11 @@ def change_order_status(request, id):
             wallet = Wallet.objects.create(user = user , balance = 100 )
             Transaction.objects.create(user = user , amount = 100 , transaction_type = 'credit' , description = 'Login Bounus')
         total =  order_.order_total
+        total -= order_.payment.coupon_discount
+
+        trans = Transaction.objects.create(user = request.user , amount = discount , transaction_type = 'credit' ,
+                    description = 'Refund for cancelled order ref number'+str(order_.order_number))
+        trans.save()
         Transaction.objects.create(user = user , amount = total , transaction_type = 'credit' , description = 'Refund for returned order')
         
     elif status == "Cancelled" :
@@ -264,7 +269,7 @@ def change_order_status(request, id):
                 wallet.balance += discount
                 if discount > 0:
                     trans = Transaction.objects.create(user = request.user , amount = discount , transaction_type = 'credit' ,
-                                description = 'Refund for cancelled order ref number'+str(order.order_number))
+                                description = 'Refund for cancelled order ref number'+str(order_.order_number))
                 trans.save()
         if order_.payment.payment_method =="razorpay":
             total =  order_.order_total

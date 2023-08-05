@@ -29,6 +29,7 @@ def payment_details(request):
     address_id = request.session['address_id']
     address = AddressBook.objects.get(id = address_id)
     wallet = request.GET.get('wallet')
+    print(type(wallet))
     coupon_code = request.GET.get('code')
     spike_use = False
     spike_discount = 0
@@ -36,7 +37,7 @@ def payment_details(request):
     coupon_discount = 0
     
     
-    if coupon_code:
+    if coupon_code == 'true':
             try:
                 coupon = Coupon.objects.get(code=coupon_code)
                 coupon_discount = min((total_price/100)*coupon.discount,coupon.max_discount)
@@ -46,7 +47,7 @@ def payment_details(request):
                 coupon_code = coupon_code
             except Coupon.DoesNotExist:
                 pass
-    if wallet:
+    if wallet == 'true':
         wal = Wallet.objects.get(user = request.user)
         total_price -= wal.balance
         spike_use = True
@@ -73,7 +74,6 @@ def payment_details(request):
 def payment(request):
     order = Order.objects.get(user= request.user, is_ordered = False , order_number = request.POST.get('order_id'))
     if request.POST.get('spike_use') == 'true':
-        print("hooorrrraaa")
         spiked = True
         wal = Wallet.objects.get(user = request.user)
         Transaction.objects.create(user = request.user , amount = wal.balance , transaction_type = 'debit' ,
@@ -82,7 +82,6 @@ def payment(request):
         wal.save()
     else:
         spiked  = False
-        
     if request.POST.get('coupon_use') == 'true':
         coped = True
         coupon_code = request.POST.get('coupon_code')
@@ -251,6 +250,10 @@ def cancelorder(request):
         total -= order.payment.coupon_discount
         wallet = Wallet.objects.get(user = request.user)
         wallet.balance += total
+        print(total)
+        print(total)
+        print(wallet.balance)
+        print(wallet.balance)
         wallet.save()
         Transaction.objects.create(user = request.user , amount = total , transaction_type = 'credit' , description = 'Refund for Cancelled order')
 
