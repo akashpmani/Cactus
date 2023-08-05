@@ -247,6 +247,32 @@ def change_order_status(request, id):
         
     elif status == "Returned" :
         order_.returned_at = timezone.now()
+        try:
+            wallet = Wallet.objects.get(user = user)
+        except:
+            wallet = Wallet.objects.create(user = user , balance = 100 )
+            Transaction.objects.create(user = user , amount = 100 , transaction_type = 'credit' , description = 'Login Bounus')
+        total =  order_.order_total
+        Transaction.objects.create(user = user , amount = total , transaction_type = 'credit' , description = 'Refund for returned order')
+        
+    elif status == "Cancelled" :
+        if order_.payment.payment_method =="cod":
+            spike = order_.payment.spike_use
+            if spike:
+                discount = order_.payment.spike_discount
+                wallet = Wallet.objects.get(user = request.user)
+                wallet.balance += discount
+                if discount > 0:
+                    trans = Transaction.objects.create(user = request.user , amount = discount , transaction_type = 'credit' ,
+                                description = 'Refund for cancelled order ref number'+str(order.order_number))
+                trans.save()
+        if order_.payment.payment_method =="razorpay":
+            total =  order_.order_total
+            wallet = Wallet.objects.get(user = request.user)
+            wallet.balance += total
+            wallet.save()
+            Transaction.objects.create(user = user , amount = total , transaction_type = 'credit' , description = 'Refund for Cancelled order')
+            
     else:
         order_.deliverd_at = None
     if status:

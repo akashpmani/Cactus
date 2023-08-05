@@ -236,15 +236,22 @@ def cancelorder(request):
 
     order = Order.objects.get(id = order_id)
     spike = order.payment.spike_use
-    print(spike)
-    if spike:
-        discount = order.payment.spike_discount
-
+    if order.payment.payment_method =="cod":
+        if spike:
+            discount = order.payment.spike_discount
+            wallet = Wallet.objects.get(user = request.user)
+            wallet.balance += discount
+            wallet.save()
+            if discount > 0:
+                trans = Transaction.objects.create(user = request.user , amount = discount , transaction_type = 'credit' ,
+                            description = 'Refund for cancelled order ref number'+str(order.order_number))
+            trans.save()
+    if order.payment.payment_method =="razorpay":
+        total =  order.order_total
         wallet = Wallet.objects.get(user = request.user)
-        wallet.balance += discount
-        trans = Transaction.objects.create(user = request.user , amount = discount , transaction_type = 'credit' ,
-                    description = 'Refund for cancelled order ref number'+str(order.order_number))
-        trans.save()
+        wallet.balance += total
+        wallet.save()
+        Transaction.objects.create(user = request.user , amount = total , transaction_type = 'credit' , description = 'Refund for Cancelled order')
 
     order.status = 'Cancelled'
     order.save()
