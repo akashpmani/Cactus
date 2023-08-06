@@ -1,15 +1,22 @@
-{% load static %}
+{% comment %} {% load static %}
 <!DOCTYPE html>
 <html>
 <head>
     <title>Invoice Template Design</title>
-{% comment %} 
+
     <link rel="stylesheet" href="{% static 'ac_counts/invoice.css'%}" />
-    <link rel="stylesheet" type="text/css" href="/static/ac_counts/invoice.css"> {% endcomment %}
+    <link rel="stylesheet" type="text/css" href="/static/ac_counts/invoice.css">
 
 </head>
-{% comment %} <body>
-<style>
+<body>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Lato:wght@100;400;900&display=swap');
+
+:root {
+  --primary: #0000ff;
+  --secondary: #3d3d3d; 
+  --white: #fff;
+}
 
 *{
 	margin: 0;
@@ -111,7 +118,7 @@ body{
 }
 
 .invoice_wrapper .body .main_table .table_header .row{
-	color:#fff;
+	color: var(--white);
 	font-size: 18px;
 	border-bottom: 0px;	
 }
@@ -184,7 +191,7 @@ body{
 .invoice_wrapper .footer .terms .tc{
 	font-size: 16px;
 }
-    </style> {% endcomment %}
+    </style>
 
 <div class="wrapper">
     <div class="invoice_wrapper">
@@ -290,5 +297,125 @@ body{
 </div>
 
 
+</body>
+</html> {% endcomment %}
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+
+    <title>Invoice</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .invoice-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .invoice-details {
+            margin-bottom: 20px;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .items-table th,
+        .items-table td {
+            padding: 8px;
+            border: 1px solid #ccc;
+        }
+
+        .total {
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="title_wrap">
+        <p class="title bold">Cactus Plants</p>
+        <p class="sub_title"> Plants</p>
+    </div>
+    <div class="invoice-header">
+        <h1>Invoice</h1>
+    </div>
+    <div class="invoice-details">
+        <div style="display: flex; justify-content: space-between;">
+            <div>
+                <p class="invoice_no">
+                    <span class="bold">Invoice Number: </span>
+                    <span>#{{ order.order_number }}</span>
+                </p>
+                <p class="date">
+                    <span class="bold">Date:</span>
+                    <span>{{ order.created_at }}</span>
+                </p>
+                <p>Customer: {{address.first_name}} {{address.last_name}}</p>
+            </div>
+            <div class="bill_sec">
+                <p>Shipping To</p> 
+                    <p class="bold name">{{address.first_name}} {{address.last_name}}</p>
+                <span>
+                    {{address.address_line_1}},{{address.address_line_2}} <br>
+                    {{address.city}}, {{address.state}}, {{address.country}}
+                    
+                </span>
+            </div>
+        </div>
+    </div>
+    
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th>Item</th>
+               
+                <th>Quantity</th>
+                <th>Unit Price</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            {%  for item in ordered_product %}
+            <tr>
+                <td>{{item.product.product.name}}</td>
+
+                <td>{{item.quantity}}</td>
+                <td>₹ {{item.product_price}}</td>
+                
+            </tr>
+            {% endfor %}
+            <script>
+                // This script calculates the total and updates the corresponding <span> element.
+                document.addEventListener("DOMContentLoaded", function() {
+                    var totalCells = document.querySelectorAll(".total-value");
+                    totalCells.forEach(function(cell) {
+                        var quantity = parseFloat(cell.parentNode.previousElementSibling.previousElementSibling.textContent);
+                        var price = parseFloat(cell.parentNode.previousElementSibling.textContent.substring(2)); // Removing the '₹ ' from the price
+                        var total = quantity * price;
+                        cell.textContent = "₹ " + total.toFixed(2);
+                        console.log(cell.textContent)
+                    });
+                });
+            </script>
+          
+        </tbody>
+    </table>
+    <div class="total">
+        <p><strong>Net Amount inc TAX: ₹ {{subtotal}}</strong></p>
+    </div>
+    <div class="total">
+        <p><strong>Total Discout: -₹ {{discount}}</strong></p>
+    </div>
+    <div class="total">
+        <p><strong>Total Amount: ₹ {{payment.amount_paid}}</strong></p>
+    </div>
 </body>
 </html>

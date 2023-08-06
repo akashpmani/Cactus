@@ -693,12 +693,27 @@ def disable_coupon(request, id):
         messages.success(request, 'Coupon disabled successfully.')
     return redirect('dashboard:coupons')
 
+from io import BytesIO
+import uuid
+from django.http import HttpResponse
+from django.template.loader import get_template
+import xhtml2pdf.pisa as pisa
+from django.conf import settings
 
 class SalesReportPDFView(View):
-    @login_required(login_url='accounts:signin')
+    def save_pdf(self,params:dict):
+        template = get_template("sales_report.html")
+        html = template.render(params)
+        response = BytesIO()
+        pdf =pisa.pisaDocument(BytesIO(html.encode('UTF-8')),response)
+        
+        if not pdf.err:
+            return HttpResponse(response.getvalue(), content_type='application/pdf'),True
+        return '',None
+    # @login_required(login_url='accounts:signin')
     def get(self, request, *args, **kwargs):
-        if not is_superuser(request):
-            return redirect('store:home')
+        # if not is_superuser(request):
+        #     return redirect('store:home')
         total_users = len(User_Accounts.objects.all())
         new_orders = len(Order.objects.all().exclude(status="new"))
         revenue_total = 0
@@ -713,24 +728,29 @@ class SalesReportPDFView(View):
         )
         month_len = len(delivered_orders_this_month)
         revenue_this_month = delivered_orders_this_month.aggregate(Sum('order_total'))['order_total__sum']
-        response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="sales_report.pdf"'
-        buffer = BytesIO()
-        doc = SimpleDocTemplate(buffer, pagesize=letter)
-        styles = getSampleStyleSheet()
-        elements = []
-        elements.append(Paragraph("Sales Report", styles['Title']))
-        elements.append(Paragraph(f"Total Users: {total_users}", styles['Normal']))
-        elements.append(Paragraph(f"Total Orders: {new_orders}", styles['Normal']))
-        elements.append(Paragraph(f"Total Orders This month: {month_len}", styles['Normal']))
-        elements.append(Paragraph(f"Revenue Total: ₹{revenue_total}", styles['Normal']))
-        elements.append(Paragraph(f"Revenue Total This Month: ₹{revenue_this_month}", styles['Normal']))
-        doc.build(elements)
-        pdf = buffer.getvalue()
-        buffer.close()
-        response.write(pdf)
+        # response = HttpResponse(content_type='application/pdf')
+        # response['Content-Disposition'] = 'attachment; filename="sales_report.pdf"'
 
-        return response
+        # return response
+        params = {
+            'total_users' :total_users,
+            'new_orders' : new_orders,
+            'revenue_total' : revenue_total,
+            'd_month' :delivered_orders_this_month,
+            'd_month_len' : month_len,
+            'revenue_this_month' : revenue_this_month,
+             
+        }
+        file_name, success = self.save_pdf(params)
+        
+        if success:
+            response = HttpResponse(file_name, content_type='application/pdf')
+            response['Content-Disposition'] = 'attachment; filename="invoice.pdf"'
+            return response
+        else:
+            # Handle error case here, like displaying an error message to the user.
+            return HttpResponse("Failed to generate the invoice.", status=500)
+
 
 
 @login_required(login_url='accounts:signin')

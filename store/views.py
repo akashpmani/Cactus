@@ -393,6 +393,7 @@ def cart_items2(request, total=0, quantity=0, cart_items=None):
             product_data.append(product_dict)
         tax = round(total_price * 0.2, 3)
         total_price += tax
+        total_price = round(total_price,3)
        
         context = {
         'cart_items' : products,

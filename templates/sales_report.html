@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sales Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        main {
+            max-width: 600px;
+            margin: 0 auto;
+            border: 1px solid black;
+            padding: 30px;
+        }
+
+        h2 {
+            margin-bottom: 10px;
+        }
+
+        h3 {
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+
+        p {
+            margin: 5px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .invoice-total {
+            font-weight: bold;
+        }
+
+        .invoice-print {
+            font-size: 25px;
+            cursor: pointer;
+            border: 1.5px solid black;
+            border-radius: 50%;
+            padding: 10px;
+            float: right;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div>
+            <h2>CACTUS PLANTS</h2>
+           
+        </div>
+        <div>
+            <h2>Sales Report.</h2>
+            <p>
+                : Recent Orders<br>
+                
+            </p>
+        </div>
+       
+        <table>
+            <tr>
+                <th>USER</th>
+                <th>#NO</th>
+                <th>PRICE</th>
+                <th>DATE</th>
+            </tr>
+            {% for d in d_month %}
+            <tr>
+                <td>{{d.user}}</td>
+                <td>{{d.order_number}}</td>
+                <td>{{d.order_total}}</td>
+                <td>{{d.deliverd_at}}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td class='invoice-total'>{{revenue_this_month}}</td>
+            </tr>
+        </table>
+        <div>
+            <h3>Total user : {{total_users}}</h3>
+            <h3>Total orders : {{new_orders}}</h3>
+            <h3>Revenu Total : {{revenue_total}}</h3>
+            <h3>Total orders this month : {{d_month_len}}</h3>
+            <h3>Revenu This Month : {{revenue_this_month}}</h3>
+        </div>
+    </main>
+</body>
+</html>

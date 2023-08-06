@@ -297,6 +297,7 @@ def download_invoice(request,order_id):
         order.save()
         address = AddressBook.objects.get(id = order.address.id)
         params = {
+            
             'order':order,
             'ordered_product':ordered_product,
             'transID':payment.payment_id,
@@ -308,12 +309,11 @@ def download_invoice(request,order_id):
         
     except(Payment.DoesNotExist,Order.DoesNotExist):
         return redirect('store:home')
-    
+        
     if success:
-        with open(str(settings.BASE_DIR) + f"/media/pdf/{file_name}.pdf", 'rb') as pdf_file:
-            response = HttpResponse(pdf_file.read(), content_type='application/pdf')
-            response['Content-Disposition'] = f'attachment; filename="{file_name}.pdf"'
-            return response
+        response = HttpResponse(file_name, content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="invoice.pdf"'
+        return response
     else:
-
-        return HttpResponse("Error generating PDF", status=500)
+        # Handle error case here, like displaying an error message to the user.
+        return HttpResponse("Failed to generate the invoice.", status=500)
