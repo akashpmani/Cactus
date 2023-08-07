@@ -49,7 +49,7 @@
                         <span class="text">Orders</span>
                     </a>
                 </li>
-                <li class="menu-item active">
+                <li class="menu-item ">
                     <a class="menu-link" href="{% url 'dashboard:coupons' %}"> <i class="icon material-icons md-store"></i>
                         <span class="text">Coupons</span>
                     </a>
@@ -65,7 +65,7 @@
                         <a href="{% url 'dashboard:addtags' %}">Add Tags</a>
                     </div>
                 </li>
-                <li class="menu-item ">
+                <li class="menu-item active">
                     <a class="menu-link" href="{% url 'dashboard:sale' %}"> <i class="icon material-icons md-monetization_on"></i>
                         <span class="text">Sale</span>
                     </a>
@@ -108,8 +108,8 @@
         <section class="content-main">
             <div class="content-header">
                 <div>
-                    <h2 class="content-title card-title">Reviews</h2>
-                    <p>Lorem ipsum dolor sit amet.</p>
+                    <h2 class="content-title card-title">{{classification.title}}</h2>
+                    <p>Manage {{classification.title}} products here.</p>
                 </div>
                 <div>
                     <input type="text" placeholder="Search by name" class="form-control bg-white">
@@ -147,7 +147,7 @@
                                   
                                     <td>{{c.offer}} %</td>
                                     <td class="text-end">
-                                        <a href="#" class="btn btn-md rounded font-sm">Detail</a>
+                                        <a href="{% url 'dashboard:delete_sale_product' c.product.id classification.id %}" class="btn btn-md rounded font-sm">Delete</a>
                                         
                                     </td>
                                 </tr>
@@ -194,31 +194,35 @@
       <h4>Add Products to {{classification.title}}!</h4>
       <br>
       <div class="modal-content m-auto">
+      <input type="text" id="searchInput" placeholder="Search for plants...">
+    </div>
+      <div class="modal-content m-auto">
 
-        <input type="text" id="searchInput" placeholder="Search for plants...">
-        <form id="addProductsForm">
+        {% comment %} <input type="text" id="searchInput" placeholder="Search for plants..."> {% endcomment %}
+        {% comment %} <br> {% endcomment %}
+        <form  method="post" action="{% url 'dashboard:add_plants_to_sale' classification.id %}">
+          {% csrf_token %}
           {% for plant in plants %}
             <label class="m-auto p-1">
-              <input type="checkbox" name="selectedPlants" value="{{ plant.id }}"> {{ plant.name }}
+              <input  type="checkbox" name="selectedPlants" value="{{ plant.id }}"> {{ plant.name }}
             </label>
-          {% endfor %}
+          {% endfor %} 
         </div>
+        <hr>
           <div class="form-group">
             <label for="title">Discount</label>
-            <input type="number" class="form-control" id="mainleft" name="tagline" required>
+            <input type="number" class="form-control" id="mainleft" placeholder="Enter max discount in perscentage" name="discount" required>
           </div>
-          
-        </form>
-   
       <br>
-      <button type="button" id="addSelectedBtn">Add Selected</button>
+      <button   type="submit" >Add Selected</button>
+    </form>
     </div>
   </div>
 
 
 <!-- Include jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
+ <script>
     document.getElementById("mainleft").addEventListener("input", function() {
       var maxDiscount = 100;
       var discountInput = parseFloat(this.value);
@@ -232,7 +236,7 @@
   </script>
   
 
-  <script>
+  {% comment %} <script>
     document.getElementById("mainleft").addEventListener("input", function() {
       var maxDiscount = 100;
       var discountInput = parseFloat(this.value);
@@ -245,42 +249,40 @@
         this.value = discountInput + '%'; // Append the percentage symbol to the valid input value
       }
     });
-  </script>
-  
+  </script> {% endcomment %}
+  {% comment %} <script>
+    $(document).ready(function() {
 
-
-<!-- Your existing JavaScript code (if any) -->
-<script>
-  $(document).ready(function() {
-    // Function to handle the "Add Selected" button click event
-    $("#addSelectedBtn").click(function() {
-      // Get the form data and filter selected plants
-      const sale = {{classification.id}}
-      const selectedPlants = $("input[name='selectedPlants']:checked").map(function() {
-        return $(this).val();
-      }).get();
-
-      // Ajax request to send the selected plants to the backend
-      $.ajax({
-        url: "{% url 'dashboard:add_plants_to_sale' %}",  // Replace with the actual URL to handle the request on the backend
-        method: "POST",
-        data: { selectedPlants: selectedPlants,
-        sale : sale
-       },
-        dataType: "json",
-        success: function(response) {
-          // Handle the response from the backend (if needed)
-          console.log("Selected plants added to the table!");
-        },
-        error: function(xhr, status, error) {
-          // Handle any error that occurs during the request
-          console.error(error);
-        }
+      $("#addSelectedBtn").click(function() {
+        const sale = {{classification.id}};
+        const selectedCheckboxes = document.querySelectorAll("input[name='selectedPlants']:checked");
+        const selectedValues = [];
+        selectedCheckboxes.forEach(function(checkbox) {
+          selectedValues.push(checkbox.value);
+        });
+        console.log(selectedValues);
+        const csrfToken = $("input[name='csrfmiddlewaretoken']").val();
+        $.ajax({
+          url: "{% url 'dashboard:add_plants_to_sale' %}",  // Replace with the actual URL to handle the request on the backend
+          method: "POST",
+          data: {
+            selectedPlants:  selectedValues,
+            sale: sale,
+            csrfmiddlewaretoken: csrfToken
+          },
+          dataType: "json",
+          success: function(response) {
+            console.log("Response:", response);
+            console.log("Selected plants added to the table!");
+          },
+          error: function(xhr, status, error) {
+            console.error("Error:", error);
+          }
+        }); 
       });
     });
-  });
-</script>
-{% comment %} <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  </script> {% endcomment %}
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
   $(document).ready(function() {
     // Function to handle the search functionality
@@ -297,27 +299,18 @@
     });
 
     // Function to close the modal
-    $(".modal-close").click(function() {
+    $(document).on("click", ".modal-close", function() {
       $("#open-modal").fadeOut();
     });
-
-    // Function to handle the "Add Selected" button click event
-    $("#addSelectedBtn").click(function() {
-      // Get the form data and filter selected plants
-      const selectedPlants = $("input[name='selectedPlants']:checked").map(function() {
-        return $(this).val();
-      }).get();
-
-      // ... (your existing AJAX code to handle adding the selected plants to the table)
-    });
   });
-</script> {% endcomment %}
+</script>
+
 <style>
    
   
   
     .modal-content {
-      max-height: 400px;
+      max-height: 200px;
       overflow-y: auto;
     }
   

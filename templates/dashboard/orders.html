@@ -182,31 +182,48 @@
                         <h2 class="content-title card-title">Order List </h2>
                         <p>Lorem ipsum dolor sit amet.</p>
                     </div>
-                    <div>
-                        <input type="text" placeholder="Search order ID" class="form-control bg-white">
-                    </div>
+                  
                 </div>
                 <div class="card mb-4">
                     <header class="card-header">
                         <div class="row gx-3">
                             <div class="col-lg-4 col-md-6 me-auto">
-                                <input type="text" placeholder="Search..." class="form-control">
+                                <input type="text" placeholder="Search..." class="form-control" id="searchInput">
                             </div>
+                            <script>
+                                // Attach an event listener to the search input field
+                                document.getElementById('searchInput').addEventListener('input', function() {
+                                  const searchInput = this.value.trim().toLowerCase();
+                                  const rows = document.querySelectorAll('.table tbody tr');
+                                  let found = false; // Flag to keep track of whether matching orders are found
+                              
+                                  // Loop through the table rows and show/hide based on the search input
+                                  rows.forEach(function(row) {
+                                    const orderId = row.querySelector('td:first-child').textContent.trim().toLowerCase();
+                                    if (orderId.includes(searchInput)) {
+                                      row.style.display = 'table-row';
+                                      found = true;
+                                    } else {
+                                      row.style.display = 'none';
+                                    }
+                                  });
+                              
+                                  // Show/hide the "No results found" message
+                                  const noResultsMessage = document.getElementById('noResultsMessage');
+                                  noResultsMessage.style.display = found ? 'none' : 'block';
+                                });
+                              </script>
+                           
                             <div class="col-lg-2 col-6 col-md-3">
-                                <select class="form-select">
-                                    <option>Status</option>
-                                    <option>Active</option>
-                                    <option>Disabled</option>
-                                    <option>Show all</option>
+                                <select class="form-select" name="status" id="statusSelect">
+                                    <option value = "">Show all</option>
+                                    <option value="Confirmed" >Confirmed</option>
+                                    <option value="shipping" >shipping</option>
+                                    <option value="Delivered" >Delivered</option>
+                                    <option value="Cancelled" >Cancelled</option>
                                 </select>
                             </div>
-                            <div class="col-lg-2 col-6 col-md-3">
-                                <select class="form-select">
-                                    <option>Show 20</option>
-                                    <option>Show 30</option>
-                                    <option>Show 40</option>
-                                </select>
-                            </div>
+                        </form>
                         </div>
                     </header> <!-- card-header end// -->
                     <div class="card-body">
@@ -224,6 +241,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    <p id="noResultsMessage" style="display: none;">No results found</p>
                                     {% for order in orders %}
                                     <tr>
                                         <td>{{order.order_number}}</td>
@@ -272,18 +290,36 @@
                         </div> <!-- table-responsive //end -->
                     </div> <!-- card-body end// -->
                 </div> <!-- card end// -->
+               
                 <div class="pagination-area mt-15 mb-50">
                     <nav aria-label="Page navigation example">
-                        <ul class="pagination justify-content-start">
-                            <li class="page-item active"><a class="page-link" href="#">01</a></li>
-                            <li class="page-item"><a class="page-link" href="#">02</a></li>
-                            <li class="page-item"><a class="page-link" href="#">03</a></li>
-                            <li class="page-item"><a class="page-link dot" href="#">...</a></li>
-                            <li class="page-item"><a class="page-link" href="#">16</a></li>
-                            <li class="page-item"><a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a></li>
-                        </ul>
+                      <ul class="pagination justify-content-start">
+                        {% for i in total_pages %}
+                          <li class="page-item {% if i == curr %} active{% endif %}">
+                            <button class="page-link" onclick="sendform({{i}})" >{{ i }}</button>
+                          </li>
+                        {% endfor %}
+                        <form action="{% url 'dashboard:orders' %}" method="post" id = "pageForm">
+                            {% csrf_token %}
+                                <input type="hidden" id="pageInput" name="page" >
+                        </form>
+                        <script>
+                            function sendform(pageNumber) {
+                              // Set the value of the hidden input field in the form
+                              document.getElementById("pageInput").value = pageNumber;
+                          
+                              // Submit the form
+                              document.getElementById("pageForm").submit();
+                            }
+                          </script>
+                          
+                        <li class="page-item">
+                          <a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a>
+                        </li>
+                      </ul>
                     </nav>
-                </div>
+                  </div>
+                  
             </section>
             
         <footer class="main-footer font-xs">

@@ -61,7 +61,6 @@ def products(request):
         searchContent = request.GET.get('searchContent','')  
     except:
         pass
-    print(searchContent)
     matching_tags = Product_Tags.objects.filter(tag_name__icontains=searchContent)
     matching_product_ids = P_tags.objects.filter(tag__in=matching_tags).values_list('product__id', flat=True)
     product_items = Product_item.objects.filter(
@@ -143,6 +142,7 @@ def products(request):
     page_number = 1
     if request.method == 'POST':
         page_number = request.POST.get('page')
+        page_number = int(page_number)
     productFinal = paginator.get_page(page_number)
     total_pages = paginator.num_pages
     context = {

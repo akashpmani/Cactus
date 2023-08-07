@@ -214,8 +214,20 @@ def orders(request):
     if not is_superuser(request):
         return redirect('store:home')
     orders_list = Order.objects.filter(is_ordered=True).exclude(status="New").order_by('-created_at')
+    paginator = Paginator(orders_list,12)
+    page_number = 1
+    if request.method == 'POST':
+        page_number = request.POST.get('page')
+        # status = request.POST.get('status')
+        # if status:
+        #     orders_list = Order.objects.filter(is_ordered=True,status="status").order_by('-created_at') 
+        #     paginator = Paginator(orders_list,12) 
+    productFinal = paginator.get_page(page_number)
+    total_pages = range(1, paginator.num_pages + 1)
     context = {
-        'orders' : orders_list,
+        'orders' : productFinal,
+        'total_pages' :total_pages,
+        'curr' :page_number
     }
     
     return render(request, 'dashboard/orders.html',context)
@@ -884,9 +896,48 @@ def add_sale(request):
             message = "Please fill in all the required fields."
     return redirect('dashboard:sale')
 
-
+import json
 @login_required(login_url='accounts:signin')
-def add_plants_to_sale(request):
+def add_plants_to_sale(request,id):
     if not is_superuser(request):
         return redirect('store:home')
+    if request.method == 'POST':
+        sale = ProductClassification.objects.get(id = id)
+        offer = request.POST.get('discount')
+        selected_Plants = request.POST.getlist('selectedPlants')
+        for i in selected_Plants:
+            product = Products_Table.objects.get(id = int(i))
+            try:
+                temp = classfiedProducts.objects.create(classification = sale , product = product , offer = int(offer))
+                temp.save()
+            except:
+                pass
+            
+        
+    products = Products_Table.objects.all()
+    plants = Products_Table.objects.all().exclude(is_active = False)
+    class_products = classfiedProducts.objects.filter(classification=sale)
+    cproduct = []
+    for p in class_products:
+        cproduct.append(p.product)
+    context = {
+        'cpro' :cproduct ,
+        'products' :products,
+        'classification' :sale,
+        'products' :class_products,
+        'plants':plants
+        
+    }
+    return render(request,'dashboard/salesinfo.html',context)
+
+@login_required(login_url='accounts:signin')
+def delete_sale_product(request,p_id,s_id):
+    if not is_superuser(request):
+        return redirect('store:home')
+    item = classfiedProducts.objects.filter(product = p_id ,classification = s_id )
+    item.delete()
+    return redirect('dashboard:sales_edit', s_id)
+
+ 
+
     

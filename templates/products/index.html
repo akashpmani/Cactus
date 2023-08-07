@@ -127,7 +127,7 @@
                         {% for tag in tags %}
                           {% if tag.image %}
                             <div class="mx-3 mx-lg-5 f-w-24">
-                              <a class="d-block" href="{% url 'store:product_by_tags' tag.tag_name %}">
+                              <a class="d-block"href="{% url 'store:products' %}?searchContent={{tag.tag_name}}">
                                 <picture>
                                   <img class="img-fluid d-table mx-auto" src="{{ tag.image.url }}" alt="">
                                 </picture>
