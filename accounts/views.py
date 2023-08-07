@@ -58,12 +58,11 @@ def signup(request):
                         item.save()
             except Cart.DoesNotExist:
                 pass
+            return redirect('accounts:signin')
         else:
             for field_name, errors in signupform.errors.items():
                 for error in errors:
                     messages.error(request, f"{field_name}: {error}")
-            return redirect('accounts:signin')
-
     form = CustomerRegisterForm()
     return render(request, 'accounts/signup.html', {'form': form})
 
@@ -76,6 +75,10 @@ def signin(request):
             user = account_manager.authenticate(request, email=login_cred, phone=login_cred, username=login_cred, password=password)
 
             if user is not None:
+                if not user.account_status =='active':
+                    messages.error(request, 'Invalid login credentials')
+                    return render(request, 'accounts/signin.html', {'form': loginform})
+                    
                 auth_login(request, user)
 
                 try:

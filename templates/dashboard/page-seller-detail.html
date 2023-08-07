@@ -101,71 +101,7 @@
             </li> {% endcomment %}
         </ul>
             <hr>
-            <ul class="menu-aside">
-              <li class="menu-item ">
-                  <a class="menu-link" href="{% url 'dashboard:dashboard' %}"> <i class="icon material-icons md-home"></i>
-                      <span class="text">Dashboard</span>
-                  </a>
-              </li>
-              <li class="menu-item ">
-                  <a class="menu-link" href="{% url 'dashboard:products' %}"> <i class="icon material-icons md-shopping_bag"></i>
-                      <span class="text">Products</span>
-                  </a>
-                  
-              </li>
-              <li class="menu-item ">
-                  <a class="menu-link" href="{% url 'dashboard:orders' %}"> <i class="icon material-icons md-shopping_cart"></i>
-                      <span class="text">Orders</span>
-                  </a>
-              </li>
-              <li class="menu-item">
-                  <a class="menu-link" href="{% url 'dashboard:coupons' %}"> <i class="icon material-icons md-store"></i>
-                      <span class="text">Coupons</span>
-                  </a>
-
-              </li>
-              <li class="menu-item has-submenu active">
-                  <a class="menu-link" href="{% url 'dashboard:addproduct' %}"> <i class="icon material-icons md-add_box"></i>
-                      <span class="text">Add product</span>
-                  </a>
-                  <div class="submenu">
-                      <a href="{% url 'dashboard:addproduct' %}">Add product </a>
-                      <a href="{% url 'dashboard:addcategory' %}">Add Categories</a>
-                      <a href="{% url 'dashboard:addtags' %}">Add Tags</a>
-                  </div>
-              </li>
-              <li class="menu-item has-submenu">
-                  <a class="menu-link" href="page-transactions-1.html"> <i class="icon material-icons md-monetization_on"></i>
-                      <span class="text">Sale</span>
-                  </a>
-                  <div class="submenu">
-                      <a href="page-transactions-1.html">Transaction 1</a>
-                      <a href="page-transactions-2.html">Transaction 2</a>
-                  </div>
-              </li>
-              <li class="menu-item">
-                  <a class="menu-link" href="{% url 'dashboard:users' %}"> <i class="icon material-icons md-person"></i>
-                      <span class="text">User Management</span>
-                  </a>
-           
-              </li>
-              {% comment %} <li class="menu-item">
-                  <a class="menu-link" href="page-reviews.html"> <i class="icon material-icons md-comment"></i>
-                      <span class="text">Reviews</span>
-                  </a>
-              </li>
-              <li class="menu-item">
-                  <a class="menu-link" href="page-brands.html"> <i class="icon material-icons md-stars"></i>
-                      <span class="text">Brands</span> </a>
-              </li>
-              <li class="menu-item">
-                  <a class="menu-link" disabled href="#"> <i class="icon material-icons md-pie_chart"></i>
-                      <span class="text">Statistics</span>
-                  </a>
-              </li> {% endcomment %}
-          </ul>
-            <br>
-            <br>
+         
         </nav>
     </aside>
     <main class="main-wrap">
@@ -405,14 +341,14 @@
                     </div> <!-- card-body.// -->
                     <hr class="my-4">
                     <div class="row g-4">
-                        <div class="col-md-12 col-lg-4 col-xl-2">
+                        {% comment %} <div class="col-md-12 col-lg-4 col-xl-2">
                             <article class="box">
                                 <p class="mb-0 text-muted">Total sales:</p>
                                 <h5 class="text-success">238</h5>
                                 <p class="mb-0 text-muted">Revenue:</p>
                                 <h5 class="text-success mb-0">$2380</h5>
                             </article>
-                        </div> <!--  col.// -->
+                        </div> <!--  col.// --> {% endcomment %}
                         <form id="description_form" method="POST" action="/dashboard/update_description/{{ product.id }}/" enctype="multipart/form-data">
                         <div  class="col-sm-6 col-lg-5 col-xl-5">
                             <label class="form-label">Description</label>
@@ -450,7 +386,7 @@
                 <div class="card-body">
                     <article class="itemlist">
                         <div class="row align-items-center">
-                            <div class="col-lg-3 col-md-3  flex-grow-1">
+                            <div class="col-lg-3 col-md-3 flex-grow-1">
                                 <div class="itemside" href="#">
                                     <div class="info info-inline">
                                         <h6 class="mb-0">{{ item }}</h6>
@@ -459,48 +395,46 @@
                                         <h6 class="mb-0">{{ item.name }}</h6>
                                     </div>
                                     <div class="info info-inline">
-                                      {% if item.is_active %}
-                                      <span class="badge rounded-pill alert-success toggle-badge" data-product="{{ item.id }}">Active</span>
-                                      {% else %}
-                                      <span class="badge rounded-pill alert-warning toggle-badge" data-product="{{ item.id }}">Inactive</span>
-                                      {% endif %} 
+                                        {% if item.is_active %}
+                                        <span class="badge rounded-pill badge-success toggle-badge" data-product="{{ item.id }}">Active</span>
+                                        {% else %}
+                                        <span class="badge rounded-pill badge-warning toggle-badge" data-product="{{ item.id }}">Inactive</span>
+                                        {% endif %}
                                     </div>
                                     <div class="info info-inline">
                                         <h6 class="mb-0">Size- {{ item.size }}</h6>
                                     </div>
-                              
-                                    <form id="product-form{{ forloop.counter }}" action="{% url 'dashboard:update_product_item' item.id %}" method="post">
-                                        {% csrf_token %}
-                                        <div class="info info-inline">
-                                            <label for="id_price">Price:</label>
-                                            <input type="number" name="price" id="id_price{{ forloop.counter }}" value="{{ item.price }}">
-                                        </div>
-                                        <div class="info info-inline">
-                                            <label for="id_quantity">Quantity:</label>
-                                            <input type="number" name="quantity" id="id_quantity{{ forloop.counter }}" value="{{ item.quantity }}">
-                                        </div>
-                                       
-                                        <div class="info info-inline">
-                                            <input type="hidden" id="initial-price{{ forloop.counter }}" value="{{ item.price }}">
-                                        </div>
-                                        <div class="info info-inline">
-                                            <input type="hidden" id="initial-quantity{{ forloop.counter }}" value="{{ item.quantity }}">
-                                        </div>
-                                      
-                                    
                                 </div>
                             </div>
-                           
-                        <div class="col-lg-1 col-md-1 col-sm-1 col-1 col-status">
-                          <div class="info info-inline">
-                                <input type="hidden" name="status" id="product-status{{ forloop.counter }}" value="active">
-                                <button id="update-button{{ forloop.counter }}" type="submit" style="display: none;">Update</button>
-                          </div>
+                
+                            <div class="col-lg-3 col-md-3 col-sm-3 col-3">
+                                <form id="product-form{{ forloop.counter }}" action="{% url 'dashboard:update_product_item' item.id %}" method="post">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <label for="id_price{{ forloop.counter }}">Price:</label>
+                                        <input type="number" class="form-control" name="price" id="id_price{{ forloop.counter }}" value="{{ item.price }}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="id_quantity{{ forloop.counter }}">Quantity:</label>
+                                        <input type="number" class="form-control" name="quantity" id="id_quantity{{ forloop.counter }}" value="{{ item.quantity }}">
+                                    </div>
+                
+                                    <div class="form-group">
+                                        <input type="hidden" id="initial-price{{ forloop.counter }}" value="{{ item.price }}">
+                                        <input type="hidden" id="initial-quantity{{ forloop.counter }}" value="{{ item.quantity }}">
+                                    </div>
+                
+                                    <div class="form-group">
+                                        <input type="hidden" name="status" id="product-status{{ forloop.counter }}" value="active">
+                                        <button type="submit" class="btn btn-primary" id="update-button{{ forloop.counter }}">Update</button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
-                          </form>
-                  </div> <!-- row .// -->
-                </article> <!-- itemlist  .// -->
+                    </article>
                 </div>
+              
+                
             
                 <script>
                   document.addEventListener('DOMContentLoaded', function () {
@@ -568,19 +502,20 @@
               </div>
             
               <div class="row">
-                <div class="col-lg-6">
-                  <div class="mb-4">
-                    <label for="price" class="form-label">Price</label>
-                    <input type="number" placeholder="Price" class="form-control" id="price" name="price" />
-                  </div>
+                <div class="col-md-6">
+                    <div class="mb-4">
+                        <label for="price" class="form-label">Price</label>
+                        <input type="number" placeholder="Price" class="form-control" id="price" name="price" />
+                    </div>
                 </div>
-                <div class="col-lg-6">
-                  <div class="mb-4">
-                    <label for="quantity" class="form-label">Quantity</label>
-                    <input type="number" placeholder="Quantity" class="form-control" id="quantity" name="quantity" />
-                  </div>
+                <div class="col-md-6">
+                    <div class="mb-4">
+                        <label for="quantity" class="form-label">Quantity</label>
+                        <input type="number" placeholder="Quantity" class="form-control" id="quantity" name="quantity" />
+                    </div>
                 </div>
-              </div>
+            </div>
+            
             </div>
             </div>
               <div class="modal-footer">

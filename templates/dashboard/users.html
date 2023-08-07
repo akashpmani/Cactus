@@ -180,11 +180,11 @@
                 <div class="content-header">
                     <div>
                         <h2 class="content-title card-title">user list </h2>
-                        <p>Lorem ipsum dolor sit amet.</p>
+                        <p>Manage the users here.</p>
                     </div>
-                    <div>
+                    {% comment %} <div>
                         <input type="text" placeholder="Search order ID" class="form-control bg-white">
-                    </div>
+                    </div> {% endcomment %}
                 </div>
                 <div class="card mb-4">
                     <header class="card-header">
@@ -193,20 +193,19 @@
                                 <input type="text" placeholder="Search..." class="form-control">
                             </div>
                             <div class="col-lg-2 col-6 col-md-3">
-                                <select class="form-select">
-                                    <option>Status</option>
-                                    <option>Active</option>
-                                    <option>Disabled</option>
-                                    <option>Show all</option>
+                                <select class="form-status form-select" onchange="sendform(1)">
+                                    <option value="">Show all</option>
+                                    <option value="active">Active</option>
+                                    <option value="Block">Block</option>
                                 </select>
                             </div>
-                            <div class="col-lg-2 col-6 col-md-3">
+                            {% comment %} <div class="col-lg-2 col-6 col-md-3">
                                 <select class="form-select">
                                     <option>Show 20</option>
                                     <option>Show 30</option>
                                     <option>Show 40</option>
                                 </select>
-                            </div>
+                            </div> {% endcomment %}
                         </div>
                     </header> <!-- card-header end// -->
                     <div class="card-body">
@@ -260,7 +259,7 @@
                                                     {% else %}
                                                     <option value="active" class="text-info">active</option>
                                                     {% endif %}
-                                                    <option value="Suspend" class="text-warning">Suspend</option>
+                                                    {% comment %} <option value="Suspend" class="text-warning">Suspend</option> {% endcomment %}
 
                                                     
                                                     
@@ -290,11 +289,27 @@
                 <div class="pagination-area mt-15 mb-50">
                     <nav aria-label="Page navigation example">
                         <ul class="pagination justify-content-start">
-                            <li class="page-item active"><a class="page-link" href="#">01</a></li>
-                            <li class="page-item"><a class="page-link" href="#">02</a></li>
-                            <li class="page-item"><a class="page-link" href="#">03</a></li>
-                            <li class="page-item"><a class="page-link dot" href="#">...</a></li>
-                            <li class="page-item"><a class="page-link" href="#">16</a></li>
+                            {% for i in total_pages %}
+                            <li class="page-item {% if i == curr %} active{% endif %}">
+                              <button class="page-link" onclick="sendform({{i}})" >{{ i }}</button>
+                            </li>
+                          {% endfor %}
+                          <form action="{% url 'dashboard:users' %}" method="post" id = "pageForm">
+                              {% csrf_token %}
+                                  <input type="hidden" id="pageInput" name="page" >
+                                  <input type="hidden" id="pagestatus" name="status" value="{{status}}" name="page" >
+                          </form>
+                          <script>
+                              function sendform(pageNumber) {
+                                // Set the value of the hidden input field in the form
+                                var selectedValue = document.querySelector('.form-status').value;
+                                document.getElementById("pageInput").value = pageNumber;
+                                document.getElementById("pagestatus").value = selectedValue;
+                              
+
+                                document.getElementById("pageForm").submit();
+                              }
+                            </script>
                             <li class="page-item"><a class="page-link" href="#"><i class="material-icons md-chevron_right"></i></a></li>
                         </ul>
                     </nav>

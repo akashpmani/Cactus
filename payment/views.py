@@ -253,10 +253,6 @@ def cancelorder(request):
         total -= order.payment.coupon_discount
         wallet = Wallet.objects.get(user = request.user)
         wallet.balance += total
-        print(total)
-        print(total)
-        print(wallet.balance)
-        print(wallet.balance)
         wallet.save()
         Transaction.objects.create(user = request.user , amount = total , transaction_type = 'credit' , description = 'Refund for Cancelled order')
 

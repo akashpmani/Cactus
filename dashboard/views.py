@@ -147,8 +147,6 @@ def products(request):
 def addproduct(request):
     if not is_superuser(request):
         return redirect('store:home')
-  
-    # print(Products_Table.objects.filter(producttag__tag__tag_name='hello'))
     categories = Category.objects.filter(is_child=True)
     tags = Product_Tags.objects.all()
     product_tags_form = ProductTagForm()
@@ -159,10 +157,12 @@ def addproduct(request):
                'categories': categories, 'tags': tags, 'products': products, 'tagform': product_tags_form, 'size_choice': size_choice,}
     return render(request, 'dashboard/addproducts.html', context)
 
+
 @login_required(login_url='accounts:signin')
 def addnewproduct(request):
     if not is_superuser(request):
         return redirect('store:home')
+
     if request.method == 'POST':
         form = ProductsTableForm(request.POST, request.FILES)
         formtag = ProductTagForm(request.POST)
@@ -170,21 +170,31 @@ def addnewproduct(request):
             name = form.cleaned_data['name']
             slug = form.cleaned_data['slug']
             selected_options = formtag.cleaned_data.get('options', [])
-            if Products_Table.objects.filter(name=name).exists() or \
-                    Category.objects.filter(slug=slug).exists():
-                # Return an error message or handle the error as needed
+            if Products_Table.objects.filter(name=name).exists() or Category.objects.filter(slug=slug).exists():
+                messages.error(request, "Product name or slug already exists.")
                 return redirect('dashboard:addproduct')
             product = form.save()
             for tag_id in selected_options:
                 tag = Product_Tags.objects.get(id=tag_id)
                 product_tag = P_tags(product=product, tag=tag)
                 product_tag.save()
-
+            messages.success(request, "Product added successfully.")
             return redirect('dashboard:addproduct')
         else:
-            print(form.errors)
-            print(formtag.errors)
-    return redirect('dashboard:addproduct')
+            messages.error(request, "Invalid form data. Please check the entered details.")
+    else:
+        form = ProductsTableForm()
+        formtag = ProductTagForm()
+
+    categories = Category.objects.filter(is_child=True)
+    tags = Product_Tags.objects.all()
+    product_tags_form = ProductTagForm()
+    product_item_form = ProductItemForm()
+    products_table_form = ProductsTableForm()
+    size_choice = Product_item.SIZE_CHOICES
+    context = {'product_form': products_table_form, 'product_item': product_item_form,
+               'categories': categories, 'tags': tags, 'products': products, 'tagform': product_tags_form, 'size_choice': size_choice,}
+    return render(request, 'dashboard/addproducts.html', context)
 
 @login_required(login_url='accounts:signin')
 def addproductitems(request):
@@ -231,70 +241,75 @@ def orders(request):
     }
     
     return render(request, 'dashboard/orders.html',context)
-from accounts.models import Wallet,Transaction
 
+from accounts.models import Wallet,Transaction
+@login_required(login_url='accounts:signin')
 def change_order_status(request, id):
     if not is_superuser(request):
         return redirect('store:home')
-    order_ = Order.objects.get(order_number = id)
+    order_ = Order.objects.get(order_number=id)
     status = request.POST.get('status')
-    print(status)
     user = order_.user
-    print(user)
     if status == "Delivered":
         order_.deliverd_at = timezone.now()
-        user = order_.user
-        print(user)
-        total =  order_.order_total
-        applicable_spikes = total//10
+        total = order_.order_total
+        applicable_spikes = total // 10
         try:
-            wallet = Wallet.objects.get(user = user)
-        except:
-            wallet = Wallet.objects.create(user = user , balance = 100 )
-            Transaction.objects.create(user = user , amount = 100 , transaction_type = 'credit' , description = 'Login Bounus')
+            wallet = Wallet.objects.get(user=user)
+        except Wallet.DoesNotExist:
+            wallet = Wallet.objects.create(user=user, balance=100)
+            Transaction.objects.create(user=user, amount=100, transaction_type='credit', description='Login Bonus')
+
         wallet.balance += applicable_spikes
         wallet.save()
-        Transaction.objects.create(user = user , amount = applicable_spikes , transaction_type = 'credit' , description = 'Purchase bonus for the order ref no'+str(order_.order_number))
+        Transaction.objects.create(user=user, amount=applicable_spikes, transaction_type='credit',
+                                   description='Purchase bonus for the order ref no' + str(order_.order_number))
 
-        
-    elif status == "Returned" :
+    elif status == "Returned":
         order_.returned_at = timezone.now()
         try:
-            wallet = Wallet.objects.get(user = user)
-        except:
-            wallet = Wallet.objects.create(user = user , balance = 100 )
-            Transaction.objects.create(user = user , amount = 100 , transaction_type = 'credit' , description = 'Login Bounus')
-        total =  order_.order_total
-        total -= order_.payment.coupon_discount
+            wallet = Wallet.objects.get(user=user)
+        except Wallet.DoesNotExist:
+            wallet = Wallet.objects.create(user=user, balance=100)
+            Transaction.objects.create(user=user, amount=100, transaction_type='credit', description='Login Bonus')
 
-        trans = Transaction.objects.create(user = request.user , amount = discount , transaction_type = 'credit' ,
-                    description = 'Refund for cancelled order ref number'+str(order_.order_number))
+        total = order_.order_total
+        total -= order_.payment.coupon_discount
+        trans = Transaction.objects.create(user=request.user, amount=discount, transaction_type='credit',
+                                           description='Refund for cancelled order ref number' + str(order_.order_number))
         trans.save()
-        Transaction.objects.create(user = user , amount = total , transaction_type = 'credit' , description = 'Refund for returned order')
-        
-    elif status == "Cancelled" :
-        if order_.payment.payment_method =="cod":
+        Transaction.objects.create(user=user, amount=total, transaction_type='credit',
+                                   description='Refund for returned order')
+
+    elif status == "Cancelled":
+        if order_.payment.payment_method == "cod":
             spike = order_.payment.spike_use
             if spike:
                 discount = order_.payment.spike_discount
-                wallet = Wallet.objects.get(user = request.user)
+                wallet = Wallet.objects.get(user=request.user)
                 wallet.balance += discount
                 if discount > 0:
-                    trans = Transaction.objects.create(user = request.user , amount = discount , transaction_type = 'credit' ,
-                                description = 'Refund for cancelled order ref number'+str(order_.order_number))
-                trans.save()
-        if order_.payment.payment_method =="razorpay":
-            total =  order_.order_total
-            wallet = Wallet.objects.get(user = request.user)
+                    trans = Transaction.objects.create(user=request.user, amount=discount, transaction_type='credit',
+                                                       description='Refund for cancelled order ref number' + str(
+                                                           order_.order_number))
+                    trans.save()
+        if order_.payment.payment_method == "razorpay":
+            total = order_.order_total
+            wallet = Wallet.objects.get(user=request.user)
             wallet.balance += total
             wallet.save()
-            Transaction.objects.create(user = user , amount = total , transaction_type = 'credit' , description = 'Refund for Cancelled order')
-            
+            Transaction.objects.create(user=user, amount=total, transaction_type='credit',
+                                       description='Refund for Cancelled order')
+
     else:
         order_.deliverd_at = None
+
     if status:
         order_.status = status
     order_.save()
+
+    # Add success message for successful status change
+    messages.success(request, 'Order status updated successfully.')
 
     return redirect('dashboard:orders')
 
@@ -617,8 +632,23 @@ def users(request):
     if not is_superuser(request):
         return redirect('store:home')
     users = User_Accounts.objects.filter(is_superuser=False).order_by('id').reverse()
+    status = ''
+    page_number = 1
+    if request.method == 'POST':
+        page_number = request.POST.get('page')
+        status =   request.POST.get('status')
+        if status != '':
+            users = User_Accounts.objects.filter(is_superuser=False,account_status = status).order_by('id').reverse()
+        else:
+           users = User_Accounts.objects.filter(is_superuser=False).order_by('id').reverse() 
+    paginator = Paginator(users,10)
+    productFinal = paginator.get_page(page_number)
+    total_pages = range(1, paginator.num_pages + 1)
     context = {
-        'users': users,
+        'users': productFinal,
+        'total_pages' :total_pages,
+        'curr' :page_number,
+        'status' :status
     }
     return render(request,'dashboard/users.html',context)
 

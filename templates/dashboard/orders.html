@@ -120,6 +120,15 @@
         </nav>
     </aside>
     <main class="main-wrap">
+        {% if messages %}
+        <script>
+            window.onload = function () {
+                {% for message in messages %}
+                    alert("{{ message.message }}");
+                {% endfor %}
+            }
+        </script>
+    {% endif %}
         <header class="main-header navbar">
             <div class="col-search">
                 {% comment %} <form class="searchform">

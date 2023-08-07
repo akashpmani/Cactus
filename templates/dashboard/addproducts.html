@@ -119,8 +119,17 @@
             <br>
             <br>
         </nav>
-    </aside>
+    </aside>    
     <main class="main-wrap">
+        {% if messages %}
+            <script>
+                window.onload = function () {
+                    {% for message in messages %}
+                        alert("{{ message.message }}");
+                    {% endfor %}
+                }
+            </script>
+        {% endif %}
         <header class="main-header navbar">
             <div class="col-search">
                 {% comment %} <form class="searchform">
@@ -192,22 +201,22 @@
                             <h4>Basic</h4>
                         </div>
                         <div class="card-body">
-                            <form method="post" action="{% url 'dashboard:addnewproduct' %}" enctype="multipart/form-data">
+                            <form method="post" action="{% url 'dashboard:addnewproduct' %}" id="addproform" enctype="multipart/form-data" onsubmit="return validateForm()">
                                 {% csrf_token %}
                                 <div class="mb-4">
                                     <label for="product_name" class="form-label">Product title</label>
                                     <input type="text" placeholder="Type here" class="form-control" id="product_name" name="name">
                                 </div>
                                 <div class="mb-4">
-                                    <label for="product_name" class="form-label">Biological Name</label>
-                                    <input type="text" placeholder="Type here" class="form-control" id="product_name" name="bio_name">
+                                    <label for="product_bio_name" class="form-label">Biological Name</label>
+                                    <input type="text" placeholder="Type here" class="form-control" id="product_bio_name" name="bio_name">
                                 </div>
                                 <div class="mb-4">
                                     <label class="form-label">Full description</label>
                                     <textarea placeholder="Type here" class="form-control" rows="4" name="description"></textarea>
                                 </div>
                                 <div class="mb-4">
-                                    <label class="form-label">Care Insructions</label>
+                                    <label class="form-label">Care Instructions</label>
                                     <textarea placeholder="Type here" class="form-control" rows="4" name="care_instruction"></textarea>
                                 </div>
                                 <div class="row">
@@ -219,9 +228,8 @@
                                             </div>
                                         </div>
                                     </div>
-                                   
-                                  
                                 </div>
+                            
 
                             
                         </div>
@@ -293,9 +301,30 @@
                             
                         </div>
                     </div>
-                    <input type="submit" class="btn btn-primary" value="Submit">
+                    <input type="submit" class="btn btn-primary" >
                 </form>
-                            
+                <script>
+                    function validateForm() {
+                        var form = document.getElementById('addproform');
+                        var productName = document.getElementById('product_name').value;
+                        var bioName = document.getElementById('product_bio_name').value;
+                        var description = document.getElementById('product_description').value;
+                        var careInstruction = document.getElementById('product_care_instruction').value;
+                        var slug = document.getElementById('product_slug').value;
+                    
+                        // Check if the required fields are empty
+                        if (productName.trim() === '' || bioName.trim() === '' || description.trim() === '' || careInstruction.trim() === '' || slug.trim() === '') {
+                            alert("Please fill in all the required fields.");
+                            return false; // Prevent the form from being submitted
+                        }
+                    
+                        // You can add more custom validation rules if needed
+                    
+                        // Allow the form to be submitted
+                        return true;
+                    }
+                    </script>
+                    
                             </div> <!-- row.// -->
                         </div>
                     </div> <!-- card end// -->
