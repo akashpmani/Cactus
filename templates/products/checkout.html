@@ -56,7 +56,7 @@
         <!-- Page Content Goes Here -->
         <div class="container">
             <div class="row g-0 vh-lg-100">
-                <div class="col-lg-7 pt-5 pt-lg-10">
+                <div class="col-lg-6 pt-5 pt-lg-10">
                     <div class="pe-lg-5">
                         <!-- Logo-->
                         <a class="navbar-brand fw-bold fs-3 flex-shrink-0 mx-0 px-0" href="./index.html">
@@ -127,7 +127,7 @@
                         {% endif %}
                             
                             <h3 class="fs-5 mt-5  fw-bolder mb-4 border-bottom pb-4" id="createaddress">Create Shipping Address</h3>
-                           <form action="{% url 'store:payment_with_new_address' %}" method="post">
+                            <form action="{% url 'store:payment_with_new_address' %}" method="post" onsubmit="return validateForm()">
                             {% csrf_token %}
                             <div class="row">
                               <!-- First Name-->
@@ -162,7 +162,7 @@
                                 <div class="col-12">
                                   <div class="form-group">
                                     <label for="address" class="form-label">Address Line Two</label>
-                                    <input type="text" class="form-control" name="address_line_2" id="address" placeholder="123 Some Street Somewhere" value="" required="">
+                                    <input type="text" class="form-control" name="address_line_2" id="address2" placeholder="123 Some Street Somewhere" value="" required="">
                                   </div>
                                 </div>
                                 <div class="col-12">
@@ -171,7 +171,6 @@
                                     <input type="text" class="form-control" name="city" id="city" placeholder="123 Some Street Somewhere" value="" required="">
                                   </div>
                                 </div>
-                              
                                 <!-- Country-->
                                 <div class="col-md-6">
                                   <div class="form-group">
@@ -181,11 +180,9 @@
                                       {% for country in country %}
                                           <option value="{{ country.id }}">{{country.name}}</option>
                                       {% endfor %}
-                                      
                                     </select>
                                   </div>
                                 </div>
-                              
                                 <!-- State-->
                                 <div class="col-md-6">
                                   <div class="form-group">
@@ -212,15 +209,11 @@
                                   <label class="form-check-label" for="same-address">Make it Default</label>
                                 </div>
                               </div>
-                               
                               <div class="pt-5 mt-5 pb-5 border-top d-flex justify-content-md-end align-items-center">
                                 <button class="btn btn-dark w-100 w-md-auto" type="submit">Proceed to Payment</button>
-                                
                               </div> 
                             </div>
                             <!-- / Billing Address-->
-                                                  
-                          
                            </form>
                     </div>
                 </div>
@@ -293,6 +286,39 @@
     <!-- Theme JS -->
     <!-- Vendor JS -->
     <script src="./assets/js/vendor.bundle.js"></script>
+    <script>
+      function validateForm() {
+          // Get form input elements by their IDs
+          const firstNameBilling = document.getElementById('firstNameBilling').value.trim();
+          const lastNameBilling = document.getElementById('lastNameBilling').value.trim();
+          const phone = document.getElementById('Phone').value.trim();
+          const address = document.getElementById('address').value.trim();
+          const address2 = document.getElementById('address2').value.trim();
+          const city = document.getElementById('city').value.trim();
+          const country = document.getElementById('country').value.trim();
+          const state = document.getElementById('state').value.trim();
+          const zip = document.getElementById('zip').value.trim();
+          
+          // Perform form validation checks
+          if (firstNameBilling === '' || lastNameBilling === '' || phone === '' || address === '' || address2 === '' || city === '' || country === '' || state === '' || zip === '') {
+              alert('Please fill in all the required fields.');
+              return false; // Prevent the form from being submitted
+          }
+          if (!/^\d+$/.test(phone)) {
+            alert('Phone number should contain only numbers.');
+            return false;
+        }
+    
+        // Validate zip field: Check if it contains only numbers
+        if (!/^\d+$/.test(zip)) {
+            alert('Zip/Post Code should contain only numbers.');
+            return false;
+        }
+          // You can add more custom validation rules if needed
+      
+          return true; // Allow the form to be submitted
+      }
+      </script>
     
     <!-- Theme JS -->
     <script src="./assets/js/theme.bundle.js"></script>
