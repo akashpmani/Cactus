@@ -27,7 +27,7 @@
             <div class="card mx-auto card-login">
                 <div class="card-body">
                     <h4 class="card-title mb-4">Sign in</h4>
-                    <form action="{% url 'store:checkout_signup'%}" method="post">
+                    <form action="{% url 'store:checkout_signin'%}" method="post">
                         {% csrf_token %} <div class="mb-3">
                         <div class="mb-3">
                             <input class="form-control" placeholder="Username or email or Phone" type="text" name="login_cred">
@@ -46,7 +46,7 @@
                             <button type="submit" class="btn btn-primary w-100"> Login </button>
                         </div> <!-- form-group// -->
                     </form>
-                    <p class="text-center small text-muted mb-15">or sign up with</p>
+                    <p class="text-center small text-muted mb-15">or sign in with</p>
                     <div class="d-grid gap-3 mb-4">
                         <a href="{% url 'store:checkout_signinotp' %}" class="btn w-100 btn-light font-sm">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-phone" viewBox="0 0 16 16">

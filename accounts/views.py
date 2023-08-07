@@ -114,8 +114,8 @@ def signin(request):
                 for error in errors:
                     messages.error(request, f"{field_name}: {error}")
             return render(request, 'accounts/signin.html', {'form': loginform})
-    else:
-        loginform = Signin_Form()
+    
+    loginform = Signin_Form()
 
     return render(request, 'accounts/signin.html', {'form': loginform})
 

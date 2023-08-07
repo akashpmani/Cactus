@@ -645,6 +645,11 @@ def checkout_signin(request):
                 user = account_manager.authenticate(
                     request, email=login_cred, phone=login_cred, username=login_cred, password=password)
                 if user is not None:
+                    if user.account_status != 'active':
+                        messages.error(request, 'Your account is Blocked')
+                        loginform = Signin_Form()
+                        return render(request,"accounts/checkout_signin.html",{"form":loginform})
+                    
                     try:
                         cart = Cart.objects.get(cart_id= _cart_id(request))
                         is_cart_item_exist = CartItem.objects.filter(cart = cart).exists()
@@ -660,15 +665,15 @@ def checkout_signin(request):
                                 else:
                                     new_cart_item = CartItem(user=user, quantity=item.quantity, product=item.product)
                                     new_cart_item.save()
+                        auth.login(request, user)
+                        return redirect('store:cart')
                     except:
                         pass
-                    auth.login(request, user)
-                    return redirect('store:cart')
+                    
                 else:
                     messages.error(request, 'Invalid login credentials')
-                    return HttpResponse('Invalid login credentials')
-            else:
-                return HttpResponse('form not valid')
+                    
+
         loginform = Signin_Form()
         return render(request,"accounts/checkout_signin.html",{"form":loginform})
     
@@ -696,9 +701,7 @@ def checkout_signup(request):
                     pass
                 auth.login(request, user)
                 return redirect('store:cart')
-            else:
-                print(signupform.errors)
-                return HttpResponse("failed")
+
 
         form = CustomerRegisterForm()
         return render(request,"accounts/checkout_signup.html",{"form":form})
