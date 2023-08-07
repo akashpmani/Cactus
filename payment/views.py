@@ -162,65 +162,64 @@ def payment(request):
     return redirect('store:home')
   
 def order_complete(request):
-    if CartItem.objects.filter(user =request.user).exists():
-        order_number = request.POST.get('order_number')
-        transID = request.POST.get('payment_id')
-        try:
-            order = Order.objects.get(order_number=order_number, is_ordered= True)
-            order.status = 'Confirmed'
-            ordered_product = OrderProduct.objects.filter(order_id= order.id)
-            subtotal =0
-            for item in ordered_product:
-                subtotal += item.product_price*item.quantity
-            
-            payment = Payment.objects.get(payment_id=transID)
-            order.save()
-            discount = ( subtotal * .2 ) - order.order_total 
-            context = {
-                'order':order,
-                'ordered_product':ordered_product,
-                'transID':payment.payment_id,
-                'payment':payment,
-                'subtotal':subtotal,
-                'discount' : discount
-            }
-            return render(request, 'products/ordersuccessfull.html',context)      
-        except(Payment.DoesNotExist,Order.DoesNotExist):
-            return redirect('store:home')
-    return redirect('store:home')
+    
+    order_number = request.POST.get('order_number')
+    transID = request.POST.get('payment_id')
+    try:
+        order = Order.objects.get(order_number=order_number, is_ordered= True)
+        order.status = 'Confirmed'
+        ordered_product = OrderProduct.objects.filter(order_id= order.id)
+        subtotal =0
+        for item in ordered_product:
+            subtotal += item.product_price*item.quantity
+        
+        payment = Payment.objects.get(payment_id=transID)
+        order.save()
+        discount = ( subtotal * .2 ) - order.order_total 
+        context = {
+            'order':order,
+            'ordered_product':ordered_product,
+            'transID':payment.payment_id,
+            'payment':payment,
+            'subtotal':subtotal,
+            'discount' : discount
+        }
+        return render(request, 'products/ordersuccessfull.html',context)      
+    except(Payment.DoesNotExist,Order.DoesNotExist):
+        return redirect('store:home')
+  
 
 def order_success(request):
-    if CartItem.objects.filter(user =request.user).exists():
-        o_id = request.GET.get('order_number')
-        t_id = payment_id = request.GET.get('payment_id')
+    o_id = request.GET.get('order_number')
+    t_id = payment_id = request.GET.get('payment_id')
+    try:
+        order = Order.objects.get(order_number=o_id, is_ordered= True)
+        order.status = 'Confirmed'
+        ordered_product = OrderProduct.objects.filter(order_id= order.id)
+        subtotal =0
+        for item in ordered_product:
+            subtotal += item.product_price*item.quantity
+        payment = Payment.objects.get(payment_id=t_id)
+        order.save()
+        address = AddressBook.objects.get(id = order.address.id)
+        context = {
+            'order':order,
+            'ordered_product':ordered_product,
+            'transID':payment.payment_id,
+            'payment':payment,
+            'subtotal':subtotal,
+            'address' : address,
+        }
         try:
-            order = Order.objects.get(order_number=o_id, is_ordered= True)
-            order.status = 'Confirmed'
-            ordered_product = OrderProduct.objects.filter(order_id= order.id)
-            subtotal =0
-            for item in ordered_product:
-                subtotal += item.product_price*item.quantity
-            payment = Payment.objects.get(payment_id=t_id)
-            order.save()
-            address = AddressBook.objects.get(id = order.address.id)
-            context = {
-                'order':order,
-                'ordered_product':ordered_product,
-                'transID':payment.payment_id,
-                'payment':payment,
-                'subtotal':subtotal,
-                'address' : address,
-            }
-            try:
-                profile = Profile.objects.get(user = request.user)
-                context['profile'] = profile
-            except:
-                pass
-            
-            return render(request, 'products/ordersuccessfull.html',context) 
-        except(Payment.DoesNotExist,Order.DoesNotExist):
-            return redirect('store:home')
-    return redirect('store:home')
+            profile = Profile.objects.get(user = request.user)
+            context['profile'] = profile
+        except:
+            pass
+        
+        return render(request, 'products/ordersuccessfull.html',context) 
+    except(Payment.DoesNotExist,Order.DoesNotExist):
+        return redirect('store:home')
+
       
 def check_coupon(request):
     
