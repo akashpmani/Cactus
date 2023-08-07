@@ -771,52 +771,59 @@ def address_components(request):
         return context 
 def checkout(request):
     current_user = request.user
-    address = AddressBook.objects.filter(user = current_user)
-    context = {
-        'address' : address,
-    }
-    context.update(cart_items(request))
-    context.update(address_components(request))
-    return render(request, 'products/checkout.html',context)
+    if CartItem.objects.filter(user =current_user).exists():
+        address = AddressBook.objects.filter(user = current_user)
+        context = {
+            'address' : address,
+        }
+        context.update(cart_items(request))
+        context.update(address_components(request))
+        return render(request, 'products/checkout.html',context)
+    return redirect('store:home')
 
 def payment_with_existing_address(request):
-    if request.method == 'POST':
-        id = request.POST.get('add_id')
-        request.session['address_id'] = id 
+    if CartItem.objects.filter(user =request.user).exists():
+        if request.method == 'POST':
+            id = request.POST.get('add_id')
+            request.session['address_id'] = id 
 
-    return redirect('store:payment')
+        return redirect('store:payment')
+    return redirect('store:home')
 
 def payment_with_new_address(request):
-    
-    if request.method == 'POST':
-        
-        form = AddressBookForm(request.POST)
-        if form.is_valid():
-            address = form.save(commit=False)
-            address.user = request.user 
-            address.save()
-            request.session['address_id'] = address.id 
-        else:
-            print(form.errors)
-        return redirect('store:payment')
+    if CartItem.objects.filter(user =request.user).exists():
+        if request.method == 'POST':
+            
+            form = AddressBookForm(request.POST)
+            if form.is_valid():
+                address = form.save(commit=False)
+                address.user = request.user 
+                address.save()
+                request.session['address_id'] = address.id 
+            else:
+                print(form.errors)
+            return redirect('store:payment')
+    return redirect('store:home')
     
 
 from django.core.exceptions import ObjectDoesNotExist
 def payment(request):
-    address_id = request.session.get('address_id')
-    address = AddressBook.objects.get(id = address_id)
-    try:
-        wallet = Wallet.objects.get(user = request.user)
-    except ObjectDoesNotExist:
-        wallet = Wallet.objects.create(user=request.user, balance=100)
-        Transaction.objects.create(user=request.user,amount=100,transaction_type='credit',description='Signup bonus',)
-    
-    context = {
-        'address' : address,
-        'wallet' : wallet,
-    }
-    context.update(cart_items(request))
-    return render(request, 'products/checkout-payment.html',context)
+    if CartItem.objects.filter(user =request.user).exists():
+        address_id = request.session.get('address_id')
+        address = AddressBook.objects.get(id = address_id)
+        try:
+            wallet = Wallet.objects.get(user = request.user)
+        except ObjectDoesNotExist:
+            wallet = Wallet.objects.create(user=request.user, balance=100)
+            Transaction.objects.create(user=request.user,amount=100,transaction_type='credit',description='Signup bonus',)
+        
+        context = {
+            'address' : address,
+            'wallet' : wallet,
+        }
+        context.update(cart_items(request))
+        return render(request, 'products/checkout-payment.html',context)
+    return redirect('store:home')
 
 
 def add_wishlist(request,id):
